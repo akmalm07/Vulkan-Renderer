@@ -1,9 +1,6 @@
 #pragma once
 
-#include "pch.h"
-
-#include "vkUtil\include\queue_families.h"
-#include "vkInit\include\logging.h"
+#include "vkUtil\include\swapchain_frames.h"
 
 
 namespace vkInit
@@ -12,10 +9,9 @@ namespace vkInit
 
 	struct SwapChainSupportDetails
 	{
-		vk::SurfaceCapabilitiesKHR capabilities; //Determines how much images to swap through, image sizes, etc...
-		std::vector<vk::SurfaceFormatKHR> formats; //Determines the supported pixal formats on the screen, EX: RGBA
-		std::vector<vk::PresentModeKHR> presentModes; //Determines the algorithm for selecting images to presentgkv
-
+		vk::SurfaceCapabilitiesKHR capabilities;
+		std::vector<vk::SurfaceFormatKHR> formats;					
+		std::vector<vk::PresentModeKHR> presentModes;		
 	};
 
 
@@ -25,7 +21,7 @@ namespace vkInit
 		vk::SwapchainKHR swapChain;
 		vk::Format format;
 		vk::Extent2D extent;
-		std::vector <vkUtil::SwapChainFrame> frames;
+		std::vector <vkUtil::SwapChainFrame> frames;  
 	};
 
 

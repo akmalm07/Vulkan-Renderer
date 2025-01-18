@@ -9,6 +9,7 @@
 #include "vkUtil\include\command.h"
 #include "vkUtil\include\sync.h"
 #include "vkUtil\include\scene.h"
+#include "pch.h"
 
 
 
@@ -18,15 +19,15 @@ BaseEngine::BaseEngine()
 
 	debugMode = true;
 
-	ePosStride = vkVertex::PosStride::STRIDE_2D;
-	eColStride = vkVertex::ColorStride::RGB;
-	eNormStride = vkVertex::NormalStride::NONE;
-	eTexStride = vkVertex::TextureStride::NONE;
+	stride.pos = vkVert::PosStride::STRIDE_2D;
+	stride.col = vkVert::ColorStride::RGB;
+	stride.norm = vkVert::NormalStride::NONE;
+	stride.tex = vkVert::TextureStride::NONE;
 
-	this->pos = vkVertex::enumerate_pos_stride(ePosStride);
-	this->col = vkVertex::enumerate_color_stride(eColStride);
-	this->norm = vkVertex::enumerate_tex_stride(eTexStride);
-	this->tex = vkVertex::enumerate_normal_stride(eNormStride);
+	//this->pos = vkVertex::enumerate_pos_stride(ePosStride);
+	//this->col = vkVertex::enumerate_color_stride(eColStride);
+	//this->norm = vkVertex::enumerate_tex_stride(eTexStride);
+	//this->tex = vkVertex::enumerate_normal_stride(eNormStride);
 
 
 	if (debugMode) {
@@ -53,8 +54,7 @@ BaseEngine::BaseEngine()
 
 
 
-BaseEngine::BaseEngine(vkVertex::PosStride posStride, vkVertex::ColorStride colStride, vkVertex::NormalStride normStride,
-	vkVertex::TextureStride texStride, bool debug)
+BaseEngine::BaseEngine(vkVert::StrideBundle stride, bool debug)
 {
 
 
@@ -146,7 +146,7 @@ BaseEngine::BaseEngine(GLFWwindow* glfwWindow, vkVertex::PosStride posStride,
 
 void BaseEngine::build_glfw_window() {
 
-	//initialize glfw
+	
 	
 }
 

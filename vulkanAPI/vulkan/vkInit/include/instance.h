@@ -21,5 +21,5 @@ namespace vkInit {
 		\param applicationName the name of the application.
 		\returns the instance created.
 	*/
-	vk::Instance make_instance(bool debug, const char* applicationName);
+	vk::Instance make_instance(const char* applicationName, bool debug);
 }

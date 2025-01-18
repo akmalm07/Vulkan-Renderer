@@ -26,25 +26,24 @@
 #include <GLFW\glfw3.h>
 
 #include <iostream>
+#include <utility>
 #include <vector>
-#include <string>
 #include <optional>
 #include <fstream>
 #include <filesystem>
 #include <algorithm>
-#include <string>
-#include <memory>
 #include <type_traits>
 #include <variant>
 #include <memory>
 #include <functional>
+#include <set>
+#include <array>
 
 #include <cstdint>
 
-#include "ordered_array.h"
 
 #include <glm\glm.hpp>
 #include <glm\gtc\matrix_transform.hpp>
 #include <glm\gtc\type_ptr.hpp> 
 
-
+#include "config.h"

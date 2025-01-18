@@ -5,21 +5,15 @@ VKAPI_ATTR VkBool32 VKAPI_CALL vkInit::debugCallback(
 	VkDebugUtilsMessageTypeFlagsEXT messageType,
 	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 	void* pUserData
-) {
+) 
+{
 	std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
 
 	return VK_FALSE;
 }
 
-vk::DebugUtilsMessengerEXT vkInit::make_debug_messenger(vk::Instance& instance, vk::DispatchLoaderDynamic& dldi) {
-
-	/*
-	* DebugUtilsMessengerCreateInfoEXT( VULKAN_HPP_NAMESPACE::DebugUtilsMessengerCreateFlagsEXT flags_           = {},
-									VULKAN_HPP_NAMESPACE::DebugUtilsMessageSeverityFlagsEXT messageSeverity_ = {},
-									VULKAN_HPP_NAMESPACE::DebugUtilsMessageTypeFlagsEXT     messageType_     = {},
-									PFN_vkDebugUtilsMessengerCallbackEXT                    pfnUserCallback_ = {},
-									void * pUserData_ = {} )
-	*/
+vk::DebugUtilsMessengerEXT vkInit::make_debug_messenger(vk::Instance& instance, vk::DispatchLoaderDynamic& dldi) 
+{
 
 	vk::DebugUtilsMessengerCreateInfoEXT createInfo = vk::DebugUtilsMessengerCreateInfoEXT(
 		vk::DebugUtilsMessengerCreateFlagsEXT(),
@@ -36,19 +30,7 @@ std::vector<std::string> vkInit::log_transform_bits(vk::SurfaceTransformFlagsKHR
 {
 	std::vector<std::string> result;
 
-	/*
-		* typedef enum VkSurfaceTransformFlagBitsKHR {
-			VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR = 0x00000001,
-			VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR = 0x00000002,
-			VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR = 0x00000004,
-			VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR = 0x00000008,
-			VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_BIT_KHR = 0x00000010,
-			VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90_BIT_KHR = 0x00000020,
-			VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_180_BIT_KHR = 0x00000040,
-			VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270_BIT_KHR = 0x00000080,
-			VK_SURFACE_TRANSFORM_INHERIT_BIT_KHR = 0x00000100,
-		} VkSurfaceTransformFlagBitsKHR;
-	*/
+
 	if (bits & vk::SurfaceTransformFlagBitsKHR::eIdentity) {
 		result.push_back("identity");
 	}
@@ -84,14 +66,6 @@ std::vector<std::string> vkInit::log_alpha_composite_bits(vk::CompositeAlphaFlag
 {
 	std::vector<std::string> result;
 
-	/*
-		typedef enum VkCompositeAlphaFlagBitsKHR {
-			VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR = 0x00000001,
-			VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR = 0x00000002,
-			VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR = 0x00000004,
-			VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR = 0x00000008,
-		} VkCompositeAlphaFlagBitsKHR;
-	*/
 	if (bits & vk::CompositeAlphaFlagBitsKHR::eOpaque) {
 		result.push_back("opaque (alpha ignored)");
 	}
@@ -114,52 +88,9 @@ std::vector<std::string> vkInit::log_image_usage_bits(vk::ImageUsageFlags bits)
 {
 	std::vector<std::string> result;
 
-	/*
-		typedef enum VkImageUsageFlagBits {
-			VK_IMAGE_USAGE_TRANSFER_SRC_BIT = 0x00000001,
-			VK_IMAGE_USAGE_TRANSFER_DST_BIT = 0x00000002,
-			VK_IMAGE_USAGE_SAMPLED_BIT = 0x00000004,
-			VK_IMAGE_USAGE_STORAGE_BIT = 0x00000008,
-			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT = 0x00000010,
-			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT = 0x00000020,
-			VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT = 0x00000040,
-			VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT = 0x00000080,
-			#ifdef VK_ENABLE_BETA_EXTENSIONS
-				// Provided by VK_KHR_video_decode_queue
-				VK_IMAGE_USAGE_VIDEO_DECODE_DST_BIT_KHR = 0x00000400,
-			#endif
-			#ifdef VK_ENABLE_BETA_EXTENSIONS
-				// Provided by VK_KHR_video_decode_queue
-				VK_IMAGE_USAGE_VIDEO_DECODE_SRC_BIT_KHR = 0x00000800,
-			#endif
-			#ifdef VK_ENABLE_BETA_EXTENSIONS
-				// Provided by VK_KHR_video_decode_queue
-				VK_IMAGE_USAGE_VIDEO_DECODE_DPB_BIT_KHR = 0x00001000,
-			#endif
-			// Provided by VK_EXT_fragment_density_map
-			VK_IMAGE_USAGE_FRAGMENT_DENSITY_MAP_BIT_EXT = 0x00000200,
-			// Provided by VK_KHR_fragment_shading_rate
-			VK_IMAGE_USAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR = 0x00000100,
-			#ifdef VK_ENABLE_BETA_EXTENSIONS
-				// Provided by VK_KHR_video_encode_queue
-				VK_IMAGE_USAGE_VIDEO_ENCODE_DST_BIT_KHR = 0x00002000,
-			#endif
-			#ifdef VK_ENABLE_BETA_EXTENSIONS
-				// Provided by VK_KHR_video_encode_queue
-				VK_IMAGE_USAGE_VIDEO_ENCODE_SRC_BIT_KHR = 0x00004000,
-			#endif
-			#ifdef VK_ENABLE_BETA_EXTENSIONS
-				// Provided by VK_KHR_video_encode_queue
-				VK_IMAGE_USAGE_VIDEO_ENCODE_DPB_BIT_KHR = 0x00008000,
-			#endif
-			// Provided by VK_HUAWEI_invocation_mask
-			VK_IMAGE_USAGE_INVOCATION_MASK_BIT_HUAWEI = 0x00040000,
-			// Provided by VK_NV_shading_rate_image
-			VK_IMAGE_USAGE_SHADING_RATE_IMAGE_BIT_NV = VK_IMAGE_USAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR,
-	} VkImageUsageFlagBits;
-	*/
-	if (bits & vk::ImageUsageFlagBits::eTransferSrc) {
-		result.push_back("transfer src: image can be used as the source of a transfer command.");
+
+	if (bits & vk::ImageUsageFlagBits::eTransferSrc) { 
+		result.push_back("transfer src: image can be used as the source of a transfer command."); 
 	}
 	if (bits & vk::ImageUsageFlagBits::eTransferDst) {
 		result.push_back("transfer dst: image can be used as the destination of a transfer command.");
@@ -208,26 +139,16 @@ suitable for use as a fragment shading rate attachment or shading rate image");
 
 std::string vkInit::log_present_mode(vk::PresentModeKHR presentMode) 
 {
-	/*
-	* // Provided by VK_KHR_surface
-	typedef enum VkPresentModeKHR {
-		VK_PRESENT_MODE_IMMEDIATE_KHR = 0,
-		VK_PRESENT_MODE_MAILBOX_KHR = 1,
-		VK_PRESENT_MODE_FIFO_KHR = 2,
-		VK_PRESENT_MODE_FIFO_RELAXED_KHR = 3,
-		// Provided by VK_KHR_shared_presentable_image
-		VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR = 1000111000,
-		// Provided by VK_KHR_shared_presentable_image
-		VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR = 1000111001,
-	} VkPresentModeKHR;
-	*/
 
-	if (presentMode == vk::PresentModeKHR::eImmediate) {
+
+	if (presentMode == vk::PresentModeKHR::eImmediate) 
+	{
 		return "immediate: the presentation engine does not wait for a vertical blanking period \
 to update the current image, meaning this mode may result in visible tearing. No internal \
 queuing of presentation requests is needed, as the requests are applied immediately.";
 	}
-	if (presentMode == vk::PresentModeKHR::eMailbox) {
+	if (presentMode == vk::PresentModeKHR::eMailbox)
+	{
 		return "mailbox: the presentation engine waits for the next vertical blanking period \
 to update the current image. Tearing cannot be observed. An internal single-entry queue is \
 used to hold pending presentation requests. If the queue is full when a new presentation \
@@ -235,15 +156,17 @@ request is received, the new request replaces the existing entry, and any images
 with the prior entry become available for re-use by the application. One request is removed \
 from the queue and processed during each vertical blanking period in which the queue is non-empty.";
 	}
-	if (presentMode == vk::PresentModeKHR::eFifo) {
+	if (presentMode == vk::PresentModeKHR::eFifo) 
+	{
 		return "fifo: the presentation engine waits for the next vertical blanking \
 period to update the current image. Tearing cannot be observed. An internal queue is used to \
-hold pending presentation requests. New requests are appended to the end of the queue, and one \
+hold pending presentation requests.New requests are appended to the end of the queue, and one \
 request is removed from the beginning of the queue and processed during each vertical blanking \
 period in which the queue is non-empty. This is the only value of presentMode that is required \
 to be supported.";
 	}
-	if (presentMode == vk::PresentModeKHR::eFifoRelaxed) {
+	if (presentMode == vk::PresentModeKHR::eFifoRelaxed) 
+	{
 		return "relaxed fifo: the presentation engine generally waits for the next vertical \
 blanking period to update the current image. If a vertical blanking period has already passed \
 since the last update of the current image then the presentation engine does not wait for \
@@ -255,7 +178,8 @@ is used to hold pending presentation requests. New requests are appended to the 
 and one request is removed from the beginning of the queue and processed during or after each \
 vertical blanking period in which the queue is non-empty.";
 	}
-	if (presentMode == vk::PresentModeKHR::eSharedDemandRefresh) {
+	if (presentMode == vk::PresentModeKHR::eSharedDemandRefresh) 
+	{
 		return "shared demand refresh: the presentation engine and application have \
 concurrent access to a single image, which is referred to as a shared presentable image. \
 The presentation engine is only required to update the current image after a new presentation \
@@ -263,7 +187,8 @@ request is received. Therefore the application must make a presentation request 
 update is required. However, the presentation engine may update the current image at any point, \
 meaning this mode may result in visible tearing.";
 	}
-	if (presentMode == vk::PresentModeKHR::eSharedContinuousRefresh) {
+	if (presentMode == vk::PresentModeKHR::eSharedContinuousRefresh) 
+	{
 		return "shared continuous refresh: the presentation engine and application have \
 concurrent access to a single image, which is referred to as a shared presentable image. The \
 presentation engine periodically updates the current image on its regular refresh cycle. The \

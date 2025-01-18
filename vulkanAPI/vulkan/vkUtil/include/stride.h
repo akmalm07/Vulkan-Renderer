@@ -1,6 +1,5 @@
 #pragma once
-#include "pch.h"
-#include "std_types.h"
+#include "config.h"
 
 
 namespace vkVert {
@@ -33,7 +32,13 @@ namespace vkVert {
 		STRIDE_3D
 	};
 
-
+	struct StrideBundle
+	{
+		PosStride     pos;
+		ColorStride   col;
+		NormalStride  norm;
+		TextureStride tex;
+	};
 
 
 
@@ -42,15 +47,9 @@ namespace vkVert {
 	uint8_t enumerate_tex_stride(TextureStride stride);
 	uint8_t enumerate_normal_stride(NormalStride stride);
 
-}
 
 
-namespace vkType {
-
-	using namespace vkVertex;
-
-
-	template <GLMVec T>	
+	template <vkType::GLMVec T>	
 	PosStride enumify_pos_type()
 	{
 		if constexpr (std::is_same_v<T, glm::vec2>)   
@@ -72,7 +71,7 @@ namespace vkType {
 		}
 	}
 
-	template <GLMVec T>	
+	template <vkType::GLMVec T>	
 	ColorStride enumify_col_type()
 	{
 		if constexpr (std::is_same_v<T, glm::vec4>)
@@ -94,7 +93,7 @@ namespace vkType {
 		}
 	}
 
-	template <GLMVec T>	
+	template <vkType::GLMVec T>	
 	NormalStride enumify_norm_type()
 	{
 		if constexpr (std::is_same_v<T, glm::vec2>)
@@ -116,7 +115,7 @@ namespace vkType {
 		}
 	}
 
-	template <GLMVec T>	
+	template <vkType::GLMVec T>	
 	TextureStride enumify_tex_type()
 	{
 		if constexpr (std::is_same_v<T, glm::vec2>)
@@ -137,4 +136,8 @@ namespace vkType {
 			return TextureStride::NONE;
 		}
 	}
+
+	template <class T>
+	concept Enum = std::is_same_v<T, PosStride> || std::is_same_v<T, ColorStride> ||
+		std::is_same_v<T, NormalStride> || std::is_same_v<T, TextureStride>;
 }

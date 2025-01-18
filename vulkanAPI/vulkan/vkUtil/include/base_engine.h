@@ -2,7 +2,7 @@
 
 #include "pch.h"
 #include "vkUtil\include\vertex.h"
-#include "vkType\include\stride.h"
+#include "vkUtil\include\stride.h"
 
 #include "vkUtil\include\render_structs.h"
 #include "vkUtil\include\scene.h"
@@ -19,12 +19,9 @@ public:
 
 	BaseEngine();
 
-	BaseEngine(vkVert::PosStride posStride, vkVert::ColorStride colStride,
-		vkVert::NormalStride normStride, vkVert::TextureStride texStride, bool debug);
+	BaseEngine(vkVert::StrideBundle stride, bool debug);
 
-	BaseEngine(GLFWwindow* glfwWindow,
-		vkVertex::PosStride posStride, vkVertex::ColorStride colStride, vkVertex::NormalStride normStride,
-		vkVertex::TextureStride texStride, bool debug);
+	BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool debug);
 
 
 	void render();
@@ -50,7 +47,7 @@ public:
 
 	void draw_scene();
 
-	void intial_clean_up();
+	//void intial_clean_up();
 
 	virtual ~BaseEngine(); 
 
@@ -109,23 +106,19 @@ protected:
 	vk::CommandPool vkCommandPool;
 	vk::CommandBuffer vkMainCommandBuffer;
 
-	vkVertex::PosStride     ePosStride;
-	vkVertex::ColorStride   eColStride;
-	vkVertex::NormalStride  eNormStride;
-	vkVertex::TextureStride eTexStride;
+	vkVert::StrideBundle stride;
 
 
-	uint8_t pos;
-	uint8_t col;
-	uint8_t norm;
-	uint8_t tex;
+	//uint8_t pos;
+	//uint8_t col;
+	//uint8_t norm;
+	//uint8_t tex;
 
 
 	//Syncronization variubles
 	size_t maxFramesInFlight, frameNum;
 
 
-protected:
 	//glfw setup
 	void build_glfw_window();
 

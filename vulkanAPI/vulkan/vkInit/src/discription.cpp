@@ -1,156 +1,74 @@
 #include "vkInit\include\discription.h" 
 
-std::vector <vk::VertexInputAttributeDescription> vkDiscription::get_attribute_description(vkVertex::PosStride vertStride,
-	vkVertex::ColorStride colStride, vkVertex::NormalStride normStride,
-	vkVertex::TextureStride texStride, uint32_t binding, bool debug)
+
+namespace vkDiscription
 {
-	uint32_t location = 0;
-
-	if (vertStride == vkVertex::PosStride::NONE && debug)
+	std::vector <vk::VertexInputAttributeDescription> vkDiscription::get_attribute_descriptions(vkVert::StrideBundle stride, uint32_t binding, bool debug)
 	{
-		std::cout << "Error:: No position was sent to the attribute description\n";
-		return {};
-	}
-	
-	std::vector<vk::VertexInputAttributeDescription> attributes;
-	
-	attributes.reserve(4);
+		uint32_t location = 0;
 
-	{//empty scope
-	
-		vk::VertexInputAttributeDescription attribute = {};
-
-		attribute.binding = binding;
-
-		attribute.location = location;
-
-		switch (vertStride) 
+		if (stride.pos == vkVert::PosStride::NONE && debug)
 		{
-
-		case vkVertex::PosStride::STRIDE_2D: 
-			attribute.format = vk::Format::eR32G32Sfloat; 
-			break;
-
-		case vkVertex::PosStride::STRIDE_3D: 
-			attribute.format = vk::Format::eR32G32B32Sfloat; 
-			break;
+			std::cout << "Error:: No position was sent to the attribute description\n";
+			return {};
 		}
 
-		attribute.offset = 0;
+		std::vector<vk::VertexInputAttributeDescription> attributes;
 
-		attributes.push_back(std::move(attribute));
+		attributes.reserve(4);
 
-	}
+		attributes.push_back(std::move(get_attribute_description(stride.pos, 0, binding, location))); 
 
-	uint32_t offset = vkVertex::enumerate_pos_stride(vertStride);
-
-	if (colStride != vkVertex::ColorStride::NONE)
-	{
 		location++;
+		uint32_t offset = vkVert::enumerate_pos_stride(stride.pos);
 
-		vk::VertexInputAttributeDescription attribute = {};
-
-		attribute.binding = binding;
-
-		attribute.location = location;
-
-		switch (colStride)
+		if (stride.col != vkVert::ColorStride::NONE)
 		{
+			location++;
 
-		case vkVertex::ColorStride::RGB:
-			attribute.format = vk::Format::eR32G32B32Sfloat;
-			break;
+			attributes.push_back(std::move(get_attribute_description(stride.col, offset * sizeof(float), binding, location)));
 
-		case vkVertex::ColorStride::RGBA:
-			attribute.format = vk::Format::eR32G32B32A32Sfloat;
-			break;
+			offset += vkVert::enumerate_color_stride(stride.col); 
 		}
-		attribute.offset = offset * sizeof(float);
-	
-		attributes.push_back(std::move(attribute));
+
+
+		if (stride.norm != vkVert::NormalStride::NONE)
+		{
+			location++;
+
+			attributes.push_back(std::move(get_attribute_description(stride.norm, offset * sizeof(float), binding, location)));
+
+			offset += vkVert::enumerate_normal_stride(stride.norm);
+
+		}
+
+		if (stride.tex != vkVert::TextureStride::NONE)
+		{
+			location++;
+
+			attributes.push_back(std::move(get_attribute_description(stride.tex, offset * sizeof(float), binding, location))); 
+
+			offset += vkVert::enumerate_tex_stride(stride.tex);
+		}
+
+		return attributes;
 	}
 
-	
-		
 
-	if (normStride != vkVertex::NormalStride::NONE) 
+
+	vk::VertexInputBindingDescription vkDiscription::get_binding_description(uint32_t sizeOfEachVertex, uint32_t binding, bool perInstenceInput)
 	{
-		location++;
 
-		vk::VertexInputAttributeDescription attribute = {};
+		vk::VertexInputBindingDescription descriptionSet = {};
 
-		offset += vkVertex::enumerate_normal_stride(normStride);
+		descriptionSet.binding = binding;
 
-		attribute.binding = 0;
+		descriptionSet.stride = sizeOfEachVertex;
 
-		attribute.location = location;
+		descriptionSet.inputRate = (perInstenceInput ? vk::VertexInputRate::eInstance : vk::VertexInputRate::eVertex);
 
-		switch (normStride)
-		{
-
-		case vkVertex::NormalStride::STRIDE_2D:
-			attribute.format = vk::Format::eR32G32Sfloat;
-			break;
-		
-		case vkVertex::NormalStride::STRIDE_3D:
-			attribute.format = vk::Format::eR32G32B32Sfloat; 
-			break;
-		}
-
-
-		attribute.offset = offset * sizeof(float);
-
-		attributes.push_back(std::move(attribute));
+		return descriptionSet;
 
 	}
-
-
-	if (texStride != vkVertex::TextureStride::NONE)
-	{
-		location++;
-
-		vk::VertexInputAttributeDescription attribute = {};
-
-		offset += vkVertex::enumerate_tex_stride(texStride);
-
-		attribute.binding = 0;
-
-		attribute.location = location;
-
-		switch (texStride)
-		{
-
-		case vkVertex::TextureStride::STRIDE_2D:
-			attribute.format = vk::Format::eR32G32Sfloat;
-			break;
-
-		case vkVertex::TextureStride::STRIDE_3D:
-			attribute.format = vk::Format::eR32G32B32Sfloat;
-			break;
-		}
-
-
-		attribute.offset = offset * sizeof(float);
-	
-		attributes.push_back(std::move(attribute)); 
-	}
-	
-
-
-	return attributes;
-}
-
-vk::VertexInputBindingDescription vkDiscription::get_binding_description(uint32_t sizeOfEachVertex, uint32_t binding, bool perInstenceInput)
-{
-
-	vk::VertexInputBindingDescription descriptionSet = {};
-
-	descriptionSet.binding = binding;
-	
-	descriptionSet.stride = sizeOfEachVertex;
-	
-	descriptionSet.inputRate = (perInstenceInput ? vk::VertexInputRate::eInstance : vk::VertexInputRate::eVertex );
-
-	return descriptionSet;
 
 }

@@ -130,8 +130,8 @@ namespace vkUtil {
 	{
 	public:
 
-		AABButton(float cordX, float cordY, float sizeX, float sizeY, Action action, std::function<bool(Args...)>& func, std::tuple<Args...> initial)
-			: AABButtonB(cordX, cordY, sizeX, sizeY, action), _func(func), _args(std::move(initial))
+		AABButton(float cordX, float cordY, float sizeX, float sizeY, Action action, Mouse mouse, std::function<bool(Args...)>& func, std::tuple<Args...> initial)
+			: AABButtonB(cordX, cordY, sizeX, sizeY, action, mouse), _func(func), _args(std::move(initial))
 		{}
 
 		bool execute() const override
