@@ -1,6 +1,8 @@
 #pragma once
 
-#include "pch.h"
+#include "config.h"
+#include "vkUtil\include\keys.h"
+
 #include "vkUtil\include\keys.h"
 #include "vkUtil\include\window_input.h"
 
@@ -10,81 +12,78 @@ namespace vkUtil {
 
 	class Window
 	{
-	private:
-		struct WindowButton;
-		struct KeyComb;
-
 	public:
 		Window();
 
-		Window(GLint windowWidth, GLint windowHeight, const std::string& namem, bool isOrtho);
+		Window(GLint windowWidth, GLint windowHeight, const std::string& name, bool isOrtho);
 
-		bool CreateWindow();
+		bool CreateWindow(const std::string& name, int width, int height); 
 
-		//	void TransferLoop(std::function<void(GLFWwindow *)> newLoopHandler);  
+		template<class ... Args>
+		void AddKeyComb(Keys key, Action action, std::function<bool(Args...)> function, std::tuple<Args...> args);
+		template<class ... Args>
+		void AddKeyComb(Keys key, Action action, Mods mod, std::function<bool(Args...)> function, std::tuple<Args...> args);
 
-		//	void RunTempLoop();
-		template<class R, class ... Args>
-		void AddKeyComb(Keys key, std::function<R(Args...)> function);
-		void DelKeyComb(const std::string& keyNumber);
+		void DelKeyComb(Keys key, Mods mod); 
+		void DelKeyComb(Keys key); 
+		
+		//template<class ... Args>
+		//void AddMouseClick(Mouse mouse, std::function<bool(Args...)> function);
+		//void DelMouseClick(Mouse mouse);
 
-		template<class R, class ... Args>
-		void AddMouseClick(Mouse mouse, std::function<R(Args...)> function);
-		void DelMouseClick(Mouse mouse);
+		template<class ... Args>
+		void AddAABButton(float cordX, float cordY, float width, float height, Action action, Mouse button,
+			std::function<bool(Args...)> function, std::string_view str, std::tuple<Args...> args);
+		
+		void DelAABButton(std::string_view name);
 
-		template<class R, class ... Args>
-		void AddAABButton(unsigned int posX, unsigned int posY, float width, float height,
-			std::function<R(Args...)> function, const std::string& name);
-		void DelAABButton(const std::string_view name);
+
+		void SetOrtho(float left, float right, float top, float bottom);
 
 		void MakeWindowContextCurrent();
 
 		void SetCursorLocked();
 		void SetCursorNormal();
 
-		inline GLint GetBufferWidth() const { return bufferWidth; }
+		inline GLint GetBufferWidth() const { return _bufferWidth; }
+		inline GLint GetBufferHeight() const { return _bufferHeight; }
 
-		inline GLint GetBufferHeight() const { return bufferHeight; }
+		inline GLFWwindow* GetWindow() const { return _mainWindow; }
 
-		inline GLFWwindow* GetWindow() const { return mainWindow; }
-
-		inline GLint GetWidth() const { return width; }
-
-		inline GLint GetHeight() const { return height; }
+		inline GLint GetWidth() const { return _width; }
+		inline GLint GetHeight() const { return _height; }
 
 
-		inline float GetLeftOrtho() const;
-		inline float GetBottomOrtho() const;
-		inline float GetTopOrtho() const;
-		inline float GetRightOrtho() const;
+		float GetLeftOrtho() const;
+		float GetBottomOrtho() const;
+		float GetTopOrtho() const;
+		float GetRightOrtho() const;
 
 
 		bool IsMouseButtonPressed(Mouse mouse) const;
 
 		bool IsFirstClick() const;
 
-		std::string GetName() const { return name; }
+		std::string GetName() const { return _name; }
 
-		double GetMouseBeforeX() const { return mouseBeforeX; }
-		double GetMouseBeforeY() const { return mouseBeforeY; }
+		double GetMouseCurrentX() const { return _mouseCurrentX; }
+		double GetMouseCurrentY() const { return _mouseCurrentY; }
 
-		double GetMouseAfterX() const { return mouseAfterX; }
-		double GetMouseAfterY() const { return mouseAfterY; }
+		double GetMouseChangeX() const { return _mouseChangeX; }
+		double GetMouseChangeY() const { return _mouseChangeY; }
 
-		inline bool GetShouldClose() const { return glfwWindowShouldClose(mainWindow); };
+		inline bool GetShouldClose() const { return glfwWindowShouldClose(_mainWindow); };
 
 		void SetShouldClose(bool trueOrFalse);
 
 
-		std::array<bool, 1024> GetKeys() { return keys; }
+		std::array<bool, 1024> GetKeys() { return _keys; }
 
-		void SwapBuffers() const { glfwSwapBuffers(mainWindow); }
+		void SwapBuffers() const { glfwSwapBuffers(_mainWindow); }
 
 		void ClearWindow();
 
-		void HandleKeys(int key, int code, int action, int mode);
-		void HandleMouseCursor(double posX, double posY);
-		void HandleMouseButtons(int mouseButton, int action, int mods);
+		void pollEvents() const { glfwPollEvents(); }
 
 		~Window();
 
@@ -94,60 +93,64 @@ namespace vkUtil {
 
 		static constexpr size_t KEY_CONST = 1024;
 
-		static uint32_t numOfWindows; 
+		static uint32_t g_numOfWindows; 
 
-		GLFWwindow* mainWindow = nullptr;
+		GLFWwindow* _mainWindow = nullptr;
 
-		int width = 0, height = 0;
-		int bufferWidth = 0, bufferHeight = 0;
+		int _width = 0, _height = 0;
+		int _bufferWidth = 0, _bufferHeight = 0;
 		
-		std::optional<float> leftOrtho, rightOrtho, topOrtho, bottomOrtho;
+		std::optional<float> _leftOrtho, _rightOrtho, _topOrtho, _bottomOrtho;
 
 
 		//Mouse Vars
-		bool isFirstClick = false;
+		bool _isFirstClick = false;
 
-		double mouseBeforeX = 0.0;
-		double mouseBeforeY = 0.0;
+		double _mouseChangeX = 0.0;
+		double _mouseChangeY = 0.0;
 
-		double mouseCurrentX = 0.0;
-		double mouseCurrentY = 0.0;
+		double _mouseCurrentX = 0.0;
+		double _mouseCurrentY = 0.0;
 		
-		double mouseAfterX = 0.0;
-		double mouseAfterY = 0.0;
+		//double _mouseAfterX = 0.0;
+		//double _mouseAfterY = 0.0;
 		
-		bool mouseFirstMoved = false;
+		bool _mouseFirstMoved = true;
 
-		bool isMouseButtonPressed = false;
+		bool _isMouseButtonPressed = false;
 
 
-		std::array<bool, KEY_CONST> keys{false}; 
+		std::array<bool, KEY_CONST> _keys{false}; 
 
  
-		std::string name = "";
+		std::string _name = "";
 
-		std::ordered_array <std::unordered_map <std::pair<Keys, Mods>, KeyCombB>, Action, 3> keyCombs;
+		std::array<std::unordered_map <std::pair<Keys, Mods>, KeyCombB>, SIZET(Action::Count)> _keyCombs; 
 
-		std::unordered_map <std::string, AABButtonB> AABButtons;
+		std::array <std::unordered_map <std::string_view, AABButtonB>, SIZET(Action::Count)> _AABButtons;
 
-		std::pair<MouseButtonB, MouseButtonB> mouseButtons; 
-
-
-		KeyComb* FindKeyComb(const std::string& keyNumber);
+		//std::array<MouseButtonB, SIZET(Mouse::Count)> _mouseButtons; 
 
 
-		Mods FindTheModeValue(unsigned int mode);
+		//KeyComb* FindKeyComb(const std::string& keyNumber);
 
-		void setMouseBeforeX(double posX);
-		void setMouseBeforeY(double posY);
 
-		void setMouseAfterX(double posX);
-		void setMouseAfterY(double posY);
-		WindowButton& FindWindowButtonName(const std::string& name);
+		//Mods FindTheModeValue(unsigned int mode);
+
+		//void setMouseBeforeX(double posX);
+		//void setMouseBeforeY(double posY);
+
+		//void setMouseAfterX(double posX);
+		//void setMouseAfterY(double posY);
+		//WindowButton& FindWindowButtonName(const std::string& name);
 
 		void setKey(unsigned int key, bool val);
 
 		//const std::string TranslateCoordinatesToNotation(uint32_t rank, uint32_t file);
+
+		void HandleKeys(int key, int code, int action, int mode);
+		void HandleMouseCursor(double posX, double posY);
+		void HandleMouseButtons(int mouseButton, int action, int mods);
 
 		void CreateCallbacks();
 		static void m_HandleKeys(GLFWwindow* window, int key, int code, int action, int mode);
@@ -162,5 +165,26 @@ namespace vkUtil {
 
 
 
-}
+	template<class ... Args>
+	void Window::AddKeyComb(Keys key, Action action, std::function<bool(Args...)> function, std::tuple<Args...> args)
+	{
+		_keyCombs[SIZET(action)].emplace(std::make_pair(key, mod), key, action);
+	}
+
+	template<class ... Args>
+	void Window::AddKeyComb(Keys key, Action action, Mods mod, std::function<bool(Args...)> function, std::tuple<Args...> args) 
+	{
+		_keyCombs[SIZET(action)].emplace(std::make_pair(key, Mods::None), key, action, function, std::forward<Args>(args)...);
+	}
+
+
+	template<class ... Args>
+	void Window::AddAABButton(float cordX, float cordY, float width, float height, Action action, Mouse button,
+		std::function<bool(Args...)> function, std::string_view str, std::tuple<Args...> args)
+	{
+		_AABButton[SIZET(action)].emplace(str, cordX, cordY, width, height, action, mouse, function, std::forward<Args>(args)...);
+
+	}
+
+}// Namespace vkUtil
 

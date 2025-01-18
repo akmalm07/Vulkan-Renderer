@@ -8,13 +8,17 @@ namespace vkUtil {
 		None = 0,
 		Shift = GLFW_MOD_SHIFT,
 		Control = GLFW_MOD_CONTROL,
-		Alt = GLFW_MOD_ALT
+		Alt = GLFW_MOD_ALT,
+		Super = GLFW_MOD_SUPER,
+		CapsLock = GLFW_MOD_CAPS_LOCK,
+		NumLock = GLFW_MOD_NUM_LOCK, 
+		count = 7
 	};
 
 	enum class Keys
 	{
 		None = GLFW_KEY_UNKNOWN,
-		Space = GLFW_KEY_SPACE, 
+		Space = GLFW_KEY_SPACE,
 		Apost = GLFW_KEY_APOSTROPHE, 
 		Comma = GLFW_KEY_COMMA, 
 		Minus = GLFW_KEY_MINUS, 
@@ -62,14 +66,16 @@ namespace vkUtil {
 		Rbracket = GLFW_KEY_RIGHT_BRACKET,
 		Lbracket = GLFW_KEY_LEFT_BRACKET,
 		GravAcc = GLFW_KEY_GRAVE_ACCENT,
+		Count = 47
 	};
 
 
 	enum class Mouse
 	{
 		None = GLFW_KEY_UNKNOWN,
-		Left = GLFW_MOUSE_BUTTON_1,
-		Right = GLFW_MOUSE_BUTTON_2,
+		Left = GLFW_MOUSE_BUTTON_LEFT,
+		Right = GLFW_MOUSE_BUTTON_RIGHT,
+		Count = 2
 	};
 
 	enum class Action
@@ -77,7 +83,8 @@ namespace vkUtil {
 		None = GLFW_KEY_UNKNOWN,
 		Release = GLFW_RELEASE, 
 		Press = GLFW_PRESS,
-		Repeat = GLFW_REPEAT
+		Repeat = GLFW_REPEAT,
+		Count = 3
 	};
 
 

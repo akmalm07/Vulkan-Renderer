@@ -26,7 +26,6 @@
 #include <GLFW\glfw3.h>
 
 #include <iostream>
-#include <utility>
 #include <vector>
 #include <string>
 #include <optional>
@@ -42,15 +41,10 @@
 
 #include <cstdint>
 
-#include "vkUtil\include\ordered_array.h"
+#include "ordered_array.h"
 
 #include <glm\glm.hpp>
 #include <glm\gtc\matrix_transform.hpp>
 #include <glm\gtc\type_ptr.hpp> 
 
 
-#define UINT32_CAST(x) static_cast<uint32_t>(x)
-
-#define ASSERT(cond, msg) if (!(cond)) { std::cerr << msg << std::endl; } 
-
-#define INDEX_TYPE uint16_t 
