@@ -1,6 +1,31 @@
 #pragma once
 
+#include <vulkan\vulkan.hpp>
+
+#include <GLFW\glfw3.h>																				
+
+
+#include <iostream>
 #include <string>
+#include <unordered_map>
+#include <vector>
+#include <memory>
+
+
+
+//USER DEFITIONS
+using pos = std::nullptr_t;
+
+using col = std::nullptr_t;
+
+using norm = std::nullptr_t;
+
+using tex = std::nullptr_t;
+
+
+
+
+
 
 #define UINT32(x) static_cast<uint32_t>(x)
 
@@ -9,6 +34,8 @@
 #define ASSERT(cond, msg) if (!(cond)) { std::cerr << msg << std::endl; } 
 
 #define INDEX_TYPE uint16_t 
+
+using Index = INDEX_TYPE; 
 
 
 namespace vkType
@@ -33,6 +60,10 @@ namespace vkType
 
 
 
+	template <class T>
+	concept Struct = std::is_class_v<T> && requires { typename T::Position; typename T::Color; typename T::Normal; typename T::Texture; };
+
+
 
 	template<IndexType T>
 	vk::IndexType convert_type_to_vk_index_enum()
@@ -54,4 +85,8 @@ namespace vkType
 
 
 	using Index = INDEX_TYPE;
+
+	template<class T>
+	concept BufferType = std::same_as<T, float> || std::same_as<T, Index>;
+
 } // namespace vkType

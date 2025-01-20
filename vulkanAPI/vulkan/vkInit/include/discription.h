@@ -1,6 +1,4 @@
 #pragma once
-
-
 #include "pch.h"
 
 #include "vkUtil\include\stride.h"
@@ -11,10 +9,7 @@ namespace vkDiscription {
 
 	struct DiscriptorBundle
 	{
-		vkVert::PosStride vertStride; 
-		vkVert::ColorStride colStride; 
-		vkVert::NormalStride normStride; 
-		vkVert::TextureStride texStride;
+		vkVert::StrideBundle stride; 
 		bool isPerInstanceRate;
 	};
 
@@ -40,7 +35,7 @@ vk::VertexInputAttributeDescription vkDiscription::get_attribute_description(T s
 
 	disc.location = location;
 
-	if constexpr (std::same_as_v<T, vkVert::ColorStride>)
+	if constexpr (std::same_as<T, vkVert::ColorStride>)  
 	{
 		switch (stride)
 		{
@@ -59,11 +54,11 @@ vk::VertexInputAttributeDescription vkDiscription::get_attribute_description(T s
 	{
 		switch (stride)
 		{
-		case vkVert::T::STRIDE_2D:
+		case T::STRIDE_2D:
 			disc.format = vk::Format::eR32G32Sfloat;
 			break;
 
-		case vkVert::T::STRIDE_3D:
+		case T::STRIDE_3D:
 			disc.format = vk::Format::eR32G32B32Sfloat;
 			break;
 		}

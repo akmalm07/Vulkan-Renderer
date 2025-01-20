@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "vkInit\include\pipeline.h"
 #include "vkUtil\include\shader.h"
 
@@ -49,14 +51,13 @@ vkInit::GraphicsPipelineOutBundle vkInit::create_pipeline(GraphicsPipelineInBund
 
     for (size_t i = 0; i < discriptorSet.size(); i++)
     {
-        uint32_t totalOffset = vkVertex::enumerate_pos_stride(discriptorSet[i].vertStride)  + 
-                               vkVertex::enumerate_color_stride(discriptorSet[i].colStride) +
-                               vkVertex::enumerate_tex_stride(discriptorSet[i].texStride)   + 
-                               vkVertex::enumerate_normal_stride(discriptorSet[i].normStride);
+        uint32_t totalOffset = vkVert::enumerate_pos_stride(discriptorSet[i].stride.pos)  + 
+                               vkVert::enumerate_color_stride(discriptorSet[i].stride.col) + 
+                               vkVert::enumerate_tex_stride(discriptorSet[i].stride.tex)   + 
+                               vkVert::enumerate_normal_stride(discriptorSet[i].stride.norm);
 
 
-        bindingAttributes = vkDiscription::get_attribute_description(discriptorSet[i].vertStride, discriptorSet[i].colStride, 
-                                                                     discriptorSet[i].normStride, discriptorSet[i].texStride, i, debug);
+        bindingAttributes = vkDiscription::get_attribute_descriptions(discriptorSet[i].stride, i, debug); 
 
         bindingDescription = vkDiscription::get_binding_description(totalOffset * sizeof(float), i, discriptorSet[i].isPerInstanceRate);
 

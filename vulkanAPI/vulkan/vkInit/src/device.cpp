@@ -1,8 +1,9 @@
+#include "pch.h"
+
 #include "vkInit\include\device.h"
 #include "vkInit\include\logging.h"
 #include "vkUtil\include\queue_families.h" 
 
-#include "pch.h"
 
 
 

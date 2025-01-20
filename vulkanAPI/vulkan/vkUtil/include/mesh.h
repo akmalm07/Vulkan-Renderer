@@ -1,224 +1,73 @@
 #pragma once
 
 #include "config.h"
-#include "stride.h"
-#include "vertex.h"
-#include "index.h"
-#include "std_types.h"
+#include "vkUtil\include\stride.h"
+#include "vkUtil\include\vertex.h"
 
 
 
-template <GLMVec POS, GLMVec COL, GLMVec NORM, GLMVec TEX>
-class Mesh
+class MeshT
 {
 public:
 
-	Mesh() = default;
+	MeshT();
 
-	Mesh(const std::vector<Vertex<POS, COL, NORM, TEX>>& vertices, const std::vector<vkType::Index>& indices) 
-	{ 
-		verticesCount = 0;
-		indicesCount = 0;
-		initalize(vertices, indices);
-	}
+	MeshT(std::vector<vkType::Vert>& vertices, std::vector<vkType::Index>& indices);
 
-	Mesh(const Mesh& other)
-	{
-		verticesCount = other.get_vertices_count();
-		indicesCount = other.get_indices_count();
-		m_vertices = other.get_vertices(); 
-		m_indices = other.get_indices();
+	MeshT(const MeshT& other);
 
-	}
+	MeshT& operator=(const MeshT& other);
 
-	Mesh& operator=(const Mesh& other) 
-	{
-		if (this != &other) 
-		{ 
-			verticesCount = other.get_vertices_count(); 
-			indicesCount = other.get_indices_count(); 
-			m_vertices = other.get_vertices();  
-			m_indices = other.get_indices(); 
-		}
-		return *this;
-	}
+	MeshT(MeshT&& other);
 
-	Mesh(Mesh&& other)
-	{
-		verticesCount = std::move(other.get_vertices_count());
-		indicesCount = std::move(other.get_indices_count());
-		m_vertices = std::move(other.get_vertices());
-		m_indices = std::move(other.get_indices());
+	MeshT& operator=(MeshT&& other);
 
-	}
+	//MeshT(POS pos, COL col, NORM norm, TEX tex) = default;
 
-	Mesh& operator=(Mesh&& other)
-	{
-		if (this != &other)
-		{
-			verticesCount = std::move(other.get_vertices_count()); 
-			indicesCount = std::move(other.get_indices_count()); 
-			m_vertices = std::move(other.get_vertices()); 
-			m_indices = std::move(other.get_indices());  
-		}
-		return *this;
-	}
-
-	//Mesh(POS pos, COL col, NORM norm, TEX tex) = default;
-
-	void initialize(const std::vector<Vertex<POS, COL, NORM, TEX>>& vertices)
-	{
-		m_vertices = vertices;
-		m_indices.clear();
-	}
+	void initialize(std::vector<vkType::Vert>& vertices);
 
 
-	size_t get_vertices_count() const
-	{
-		return verticesCount; 
-	}
+	void initialize(std::vector<vkType::Vert>& vertices, std::vector<vkType::Index>& indices);
+
+	size_t get_vert_count() const;
+
+	size_t get_ind_count() const;
+
+	size_t vert_size() const;
+
+	size_t ind_size() const;
 
 
-	size_t get_indices_count() const
-	{
-		return indicesCount;
-	}
+	void insert(std::vector<vkType::Vert>& vertices, std::vector<vkType::Index>& indices);
 
 
-	size_t vertices_size() const
-	{
-		return m_vertices.size();
-	}
-
-
-	size_t indices_size() const 
-	{
-		return m_indices.size();
-	}
-
-
-
-
-	void initialize(const std::vector<Vertex<POS, COL, NORM, TEX>>& vertices, const std::vector<vkType::Index>& indices)
-	{
-		m_vertices = std::move(vertices);  
-		m_indices = std::move(indices); 
-		verticesCount = m_vertices[0].total_size() * m_vertices.size();
-		indicesCount = m_indices.size();
-	}
-
-	void emplace_back(const Vertex<POS, COL, NORM, TEX>& vertex, const vkType::Index& index) 
-	{
-		m_vertices.emplace_back(vertex);
-		m_indices.emplace_back(index); 
-		verticesCount += m_vertices[0].total_size() * m_vertices.size();
-		indicesCount += m_indices.size();
-	}
-	
-
-	void emplace_back(const Vertex<POS, COL, NORM, TEX>& vertex)
-	{
-		m_vertices.emplace_back(vertex);
-		verticesCount += m_vertices[0].total_size() * m_vertices.size();
-	}
-
+	void insert(std::vector<vkType::Vert>& vertices);
 
 	
-	void push_back(const Vertex<POS, COL, NORM, TEX>& vertex, const vkType::Index& index) 
-	{
-		m_vertices.push_back(vertex);
-		m_indices.push_back(index); 
-		verticesCount += m_vertices[0].total_size() * m_vertices.size();
-		indicesCount += m_indices.size();
-	}
+	void push_back(const vkType::Vert& vertex, const vkType::Index& index);
 	
 
-	void push_back(const Vertex<POS, COL, NORM, TEX>& vertex)
-	{
-		m_vertices.push_back(vertex);	 
-		verticesCount += m_vertices[0].total_size() * m_vertices.size();
-	}
+	void push_back(const vkType::Vert& vertex);
 
 
-	std::vector <Vertex<POS, COL, NORM, TEX>> get_vertices() const
-	{
-		return m_vertices;
-	}
+	std::vector <vkType::Vert> get_vertices() const;
 
-	std::vector <vkType::Index> get_indices() const
-	{
-		return m_indices;
-	}
+	std::vector <vkType::Index> get_indices() const;
+
+	void clear();
 
 
-	std::vector <float> get_vertices_raw() const
-	{
-		std::vector<float> verticesRaw; 
-		verticesRaw.reserve(verticesCount);
-
-		for (const auto& vertex : m_vertices)
-		{
-			const float* data = glm::value_ptr(vertex.position);
-			verticesRaw.insert(verticesRaw.end(), data, data + vertex.pos_size());
-
-			data = glm::value_ptr(vertex.color);
-			verticesRaw.insert(verticesRaw.end(), data, data + vertex.col_size());
-
-			if constexpr (!std::is_same_v<NORM, std::nullptr_t>)
-			{
-				data = glm::value_ptr(vertex.normal);
-				verticesRaw.insert(verticesRaw.end(), data, data + vertex.norm_size());
-			}
-
-			if constexpr (!std::is_same_v<TEX, std::nullptr_t>)
-			{
-				data = glm::value_ptr(vertex.texture);
-				verticesRaw.insert(verticesRaw.end(), data, data + vertex.tex_size());
-			}
-		}
-
-		return verticesRaw; 
-	}
-
-
-
-	void clear()
-	{
-		m_vertices.clear();
-
-		m_indices.clear();
-	}
-
-
-	~Mesh()
-	{
-		clear();
-	}
-
+	~MeshT();
 
 private:
 	
-	size_t verticesCount;
-	size_t indicesCount;
+	size_t _verticesCount;
+	size_t _indicesCount;
 
-	std::vector<Vertex<POS, COL, NORM, TEX>> m_vertices;
-	std::vector <vkType::Index> m_indices;
+	std::vector<vkType::Vert> _vertices;
+	std::vector <vkType::Index> _indices;
 };
 
 
 
-template <GLMVec POS, GLMVec COL>
-using Mesh2D = Mesh<POS, COL, std::nullptr_t, std::nullptr_t>; 
-
-
-
-template <Struct Parameter>  
-using SMesh = Mesh <typename Parameter::Position, typename Parameter::Color, 
-					typename Parameter::Normal, typename Parameter::Texture>;
-
-
-namespace vkType {
-
-	using mesh = Mesh<pos, col, norm, tex>;
-
-}
+using Mesh = MeshT;

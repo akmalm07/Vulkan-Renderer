@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "stride.h"
 
 namespace vkVert

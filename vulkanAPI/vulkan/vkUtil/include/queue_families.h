@@ -10,8 +10,6 @@ namespace vkUtil {
 		std::optional <uint32_t> presentFamily;
 
 		bool is_complete();
-
-
 	};
 
 	

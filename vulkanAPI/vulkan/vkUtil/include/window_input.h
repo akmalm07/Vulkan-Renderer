@@ -1,5 +1,7 @@
 #pragma once
 
+#include "pch.h"
+
 #include "keys.h"
 
 
@@ -63,6 +65,8 @@ namespace vkUtil {
 
 
 		AABButtonB();
+
+		AABButtonB(float cordX, float cordY, float width, float height, Action action, Mouse button, std::string_view name);
 
 		AABButtonB(float cordX, float cordY, float width, float height, Action action, Mouse button);
 

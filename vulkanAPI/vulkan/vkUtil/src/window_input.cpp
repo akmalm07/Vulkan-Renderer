@@ -1,17 +1,15 @@
-#include "window_input.h"
-
 #include "pch.h"
+
+#include "window_input.h"
 
 
 
 namespace vkUtil {
-	UserInput::UserInput() = default;
-
 
 	UserInput::~UserInput() = default;
 
 
-	MouseButtonB::MouseButtonB() : UserInput(),
+	MouseButtonB::MouseButtonB() :
 		_button(Mouse::None), _action(Action::None), _pressed(false)
 	{}
 

@@ -1,14 +1,14 @@
 #pragma once
 
-#include "pch.h"
 #include "vkUtil\include\vertex.h"
 #include "vkUtil\include\stride.h"
 
 #include "vkUtil\include\render_structs.h"
-#include "vkUtil\include\scene.h"
+#include "vkUtil\include\swapchain_frames.h"
+#include "config.h"
 
 
-
+#include "vkUtil\include\window.h"
 
 
 
@@ -19,15 +19,13 @@ public:
 
 	BaseEngine();
 
-	BaseEngine(vkVert::StrideBundle stride, bool debug);
+	BaseEngine(vkVert::StrideBundle stride, int width, int height, bool debug);
 
 	BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool debug);
 
-
 	void render();
 
-	virtual void draw(vk::CommandBuffer& commandBuffer) = 0;
-
+	virtual void draw(vk::CommandBuffer& commandBuffer) const = 0;
 
 
 	vk::Device get_logical_device() const;
@@ -37,76 +35,69 @@ public:
 	template<class T>
 	void send_as_push_const(T& data, vk::CommandBuffer cmdBuffer, vk::ShaderStageFlagBits shader, uint32_t offset)
 	{
-		cmdBuffer.pushConstants(vkPipelineLayout, shader, offset, sizeof(data), &data); 
+		cmdBuffer.pushConstants(_vkPipelineLayout, shader, offset, sizeof(data), &data); 
 	}
 
-	//void load_meshes(std::vector<SMesh<T>>& meshes);
-
-
-	//void load_meshes(std::vector<Mesh<T, U, V, W>>& meshes);
-
 	void draw_scene();
-
-	//void intial_clean_up();
 
 	virtual ~BaseEngine(); 
 
 protected: 
 
 	//whether to print debug messages in functions
-	bool debugMode = true;
+	bool _debugMode = true;
 
 	//glfw window parameters
-	int windowWidth = 640;
-	int windowHeight = 480;
-	GLFWwindow* window = nullptr;
+	int _windowWidth = 640;
+	int _windowHeight = 480;
+	vkUtil::Window _window;  
 
 	//vulkan instance
-	vk::Instance instance = nullptr;
+	vk::Instance _instance = nullptr;
 	//debug callback
-	vk::DebugUtilsMessengerEXT debugMessenger = nullptr;
+	vk::DebugUtilsMessengerEXT _debugMessenger = nullptr;
 	//dynamic instance dispatcher
-	vk::DispatchLoaderDynamic dldi;
-	vk::PhysicalDevice vkPhysicalDevice = nullptr;
+	vk::DispatchLoaderDynamic _dldi;
+	vk::PhysicalDevice _vkPhysicalDevice = nullptr;
 
 	//vulkan logical device
-	vk::Device vkLogicalDevice = nullptr;
+	vk::Device _vkLogicalDevice = nullptr;
 
 	//vulkan queue to store graphics queue
-	vk::Queue vkGraphicsQueue = nullptr;
+	vk::Queue _vkGraphicsQueue = nullptr;
 
 	//Queue to present stuff o the screen
-	vk::Queue vkPresentQueue = nullptr;
+	vk::Queue _vkPresentQueue = nullptr;
 
 	//vulkan surface for connecting and cooperationg with the window
-	vk::SurfaceKHR vkPresentSurface = nullptr;
+	vk::SurfaceKHR _vkPresentSurface = nullptr;
 
 	//vulkan swapchain
-	vk::SwapchainKHR vkSwapchain = nullptr;
+	vk::SwapchainKHR _vkSwapchain = nullptr;
 
 	//vulkan swapchain images
-	std::vector<vkUtil::SwapChainFrame> vkSwapchainFrames;
+	std::vector<vkUtil::SwapChainFrame> _vkSwapchainFrames;
 
 	//vulkanswapchain extent
-	vk::Extent2D vkSwapchainExtent;
+	vk::Extent2D _vkSwapchainExtent;
 
 	//vulkan swapchain format
-	vk::Format vkSwapchainFormat;
+	vk::Format _vkSwapchainFormat;
 
 
 	//vulkan pipeline values
 
-	vk::Pipeline vkPipeline;
+	vk::Pipeline _vkPipeline;
 
-	vk::PipelineLayout vkPipelineLayout;
+	vk::PipelineLayout _vkPipelineLayout;
 
-	vk::RenderPass vkRenderpass;
+	vk::RenderPass _vkRenderpass;
 
 	//Command variubles
-	vk::CommandPool vkCommandPool;
-	vk::CommandBuffer vkMainCommandBuffer;
+	vk::CommandPool _vkCommandPool;
+	vk::CommandBuffer _vkMainCommandBuffer;
 
-	vkVert::StrideBundle stride;
+	vkVert::StrideBundle _stride;
 
 
 	//uint8_t pos;
@@ -116,11 +107,13 @@ protected:
 
 
 	//Syncronization variubles
-	size_t maxFramesInFlight, frameNum;
+	size_t _maxFramesInFlight, _frameNum;
 
 
 	//glfw setup
 	void build_glfw_window();
+
+	void build_glfw_window(int width, int height);
 
 	//instance setup
 	void make_instance();
@@ -145,9 +138,4 @@ protected:
 	void make_frame_sync_objects();
 
 	void record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t imageIndex);
-
-
-
 };
-
-

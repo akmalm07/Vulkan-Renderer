@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "sync.h"
 
 vk::Semaphore vkInit::make_semaphore(vk::Device& logicalDevice, bool debug)

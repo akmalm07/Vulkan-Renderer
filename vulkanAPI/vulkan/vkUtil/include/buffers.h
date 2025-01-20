@@ -1,23 +1,23 @@
 #pragma once
 
-#include "pch.h"
+#include "config.h"
 
 
 namespace vkUtil {
 
-	class Buffer //Father of Index and Vertex Buffer Classes
+	class Buffer
 	{
 	public:
 
 		vk::Buffer buffer;
 		vk::DeviceMemory bufferMemory;
-	protected:
 	};
+
 
 
 	struct BufferInput
 	{
-
+	public:
 		vk::Device logicalDevice;
 		vk::PhysicalDevice device;
 		size_t size;

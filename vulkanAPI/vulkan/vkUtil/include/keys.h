@@ -1,4 +1,5 @@
-#include "pch.h"
+#pragma once
+#include "config.h"
 
 
 namespace vkUtil {
@@ -93,4 +94,17 @@ namespace vkUtil {
 	{
 		return static_cast<int>(type);
 	}
+}
+
+namespace std 
+{
+	template <typename T1, typename T2>
+	struct hash<std::pair<T1, T2>> {
+		size_t operator()(const std::pair<T1, T2>& p) const {
+			size_t hash1 = hash<T1>{}(p.first);  	
+			size_t hash2 = hash<T2>{}(p.second); 
+
+			return hash1 ^ (hash2 << 1);  // Shift the second hash and XOR with the first hash
+		}
+	};
 }

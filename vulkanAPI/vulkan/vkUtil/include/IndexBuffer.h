@@ -2,42 +2,36 @@
 
 #include "config.h"
 
-#include "buffers.h"
+#include "vkUtil\include\base_buffer.h"
 
-#include "mesh.h"
+#include "vkUtil\include\mesh.h"
 
-#include "index.h"
-
-#include "memory.h"
+#include "vkUtil\include\memory.h"
 
 
 
 
-class IndexBuffer : public vkUtil::Buffer 
+class IndexBufferT : private BufferFather
 {
-public:
-	IndexBuffer();
+public: 
 
-	IndexBuffer(vkMesh::BufferInitInput& bufferInfo);
+	IndexBufferT();
+	
+	IndexBufferT(const vkMesh::BufferInitInput& bufferInfo);
 	
 	void initalize(std::vector<vkType::Index>& data, bool debug);
 
-	vk::Buffer get_index_buffer() const;
-
-	void bind_index_buffer(vk::CommandBuffer& cmdBuffer, size_t offsets) const;
+	void bind_buffer(vk::CommandBuffer& cmdBuffer, size_t offsets) const;
 
 	size_t index_count() const;
 
-	void clean_index_buffer();
-
-	~IndexBuffer();
+	~IndexBufferT();
 
 
 private:
 
-	vk::Device device;
-	vk::PhysicalDevice physicalDevice;
-
 	size_t indexCount;
 };
 
+
+using IndexBuffer = IndexBufferT; 

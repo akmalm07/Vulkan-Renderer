@@ -1,15 +1,14 @@
-
 #pragma once
 
 
 #include "config.h"
 
-#include "buffers.h" 
+#include "vkUtil\include\buffers.h" 
 
 
 
-namespace vkUtil {
-
+namespace vkUtil 
+{
 
 
 	vk::Buffer create_buffer(BufferInput& input, bool debug);

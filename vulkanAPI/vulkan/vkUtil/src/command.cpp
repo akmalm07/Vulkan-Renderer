@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "vkUtil\include\command.h" 
 
 vk::CommandPool vkInit::make_command_pool(vk::Device& logicalDevice, vk::PhysicalDevice& device, vk::SurfaceKHR& surface, bool debug)

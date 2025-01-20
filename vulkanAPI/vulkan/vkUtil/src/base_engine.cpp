@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "vkUtil\include\base_engine.h"
 #include "vkInit\include\instance.h"
 #include "vkInit\include\logging.h"
@@ -7,9 +9,9 @@
 #include "vkInit\include\discription.h"
 #include "vkUtil\include\framebuffer.h"
 #include "vkUtil\include\command.h"
+#include "vkUtil\include\window.h"
 #include "vkUtil\include\sync.h"
 #include "vkUtil\include\scene.h"
-#include "pch.h"
 
 
 
@@ -17,12 +19,12 @@ BaseEngine::BaseEngine()
 {
 
 
-	debugMode = true;
+	_debugMode = true;
 
-	stride.pos = vkVert::PosStride::STRIDE_2D;
-	stride.col = vkVert::ColorStride::RGB;
-	stride.norm = vkVert::NormalStride::NONE;
-	stride.tex = vkVert::TextureStride::NONE;
+	_stride.pos = vkVert::PosStride::STRIDE_2D;
+	_stride.col = vkVert::ColorStride::RGB;
+	_stride.norm = vkVert::NormalStride::NONE;
+	_stride.tex = vkVert::TextureStride::NONE;
 
 	//this->pos = vkVertex::enumerate_pos_stride(ePosStride);
 	//this->col = vkVertex::enumerate_color_stride(eColStride);
@@ -30,7 +32,7 @@ BaseEngine::BaseEngine()
 	//this->tex = vkVertex::enumerate_normal_stride(eNormStride);
 
 
-	if (debugMode) {
+	if (_debugMode) {
 		std::cout << "Making a graphics BaseEngine\n";
 	}
 
@@ -54,30 +56,30 @@ BaseEngine::BaseEngine()
 
 
 
-BaseEngine::BaseEngine(vkVert::StrideBundle stride, bool debug)
+BaseEngine::BaseEngine(vkVert::StrideBundle stride, int width, int height, bool debug)
 {
 
 
-	debugMode = debug;
+	_debugMode = debug;
 
-	this->ePosStride = posStride;
-	this->eColStride = colStride;
-	this->eNormStride = normStride;
-	this->eTexStride = texStride;
+	_stride.pos = stride.pos;
+	_stride.col = stride.col;
+	_stride.norm = stride.norm;
+	_stride.tex = stride.tex;
 
-	this->pos = vkVertex::enumerate_pos_stride(posStride);
-	this->col = vkVertex::enumerate_color_stride(colStride);
-	this->norm = vkVertex::enumerate_tex_stride(texStride);
-	this->tex = vkVertex::enumerate_normal_stride(normStride);
+	//this->pos = vkVertex::enumerate_pos_stride(posStride);
+	//this->col = vkVertex::enumerate_color_stride(colStride);
+	//this->norm = vkVertex::enumerate_tex_stride(texStride);
+	//this->tex = vkVertex::enumerate_normal_stride(normStride);
 
 
-	if (debugMode) {
+	if (_debugMode) {
 		std::cout << "Making a graphics BaseEngine\n";
 	}
 
-	build_glfw_window();
+	build_glfw_window(width, height);  
 
-	make_instance();
+	make_instance(); 
 
 	make_debug_messenger();
 
@@ -96,31 +98,28 @@ BaseEngine::BaseEngine(vkVert::StrideBundle stride, bool debug)
 
 
 
-BaseEngine::BaseEngine(GLFWwindow* glfwWindow, vkVertex::PosStride posStride,
-	vkVertex::ColorStride colStride, vkVertex::NormalStride normStride, vkVertex::TextureStride texStride, bool debug)
+BaseEngine::BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool debug) 
 {
 
+	_debugMode = debug;
+
+	_stride.pos = stride.pos;
+	_stride.col = stride.col;
+	_stride.norm = stride.norm;
+	_stride.tex = stride.tex;
+
+	//this->pos = vkVertex::enumerate_pos_stride(posStride);
+	//this->col = vkVertex::enumerate_color_stride(colStride);
+	//this->norm = vkVertex::enumerate_tex_stride(texStride);
+	//this->tex = vkVertex::enumerate_normal_stride(normStride);
+
+	_window.SetWindow(glfwWindow); 
 
 
-	this->ePosStride = posStride;
-	this->eColStride = colStride;
-	this->eNormStride = normStride;
-	this->eTexStride = texStride;
-
-	this->pos = vkVertex::enumerate_pos_stride(posStride);
-	this->col = vkVertex::enumerate_color_stride(colStride);
-	this->norm = vkVertex::enumerate_tex_stride(texStride);
-	this->tex = vkVertex::enumerate_normal_stride(normStride);
-
-	window = glfwWindow;
-
-	glfwGetWindowSize(glfwWindow, &windowWidth, &windowHeight);
+	_debugMode = debug; 
 
 
-	debugMode = debug;
-
-
-	if (debugMode) {
+	if (_debugMode) {
 		std::cout << "Making a graphics BaseEngine\n";
 	}
 
@@ -144,45 +143,50 @@ BaseEngine::BaseEngine(GLFWwindow* glfwWindow, vkVertex::PosStride posStride,
 
 
 
-void BaseEngine::build_glfw_window() {
+void BaseEngine::build_glfw_window() 
+{ 
+	_window.CreateWindow("Vulkan", 800, 600);
+}
 
-	
-	
+
+void BaseEngine::build_glfw_window(int width, int height) 
+{ 
+	_window.CreateWindow("Vulkan", width, height);
 }
 
 
 
 void BaseEngine::make_instance() {
 
-	instance = vkInit::make_instance(debugMode, "ID Tech 12");
-	dldi = vk::DispatchLoaderDynamic(instance, vkGetInstanceProcAddr);
+	_instance = vkInit::make_instance("VK_INIT", _debugMode);
+	_dldi = vk::DispatchLoaderDynamic(_instance, vkGetInstanceProcAddr);
 
 	VkSurfaceKHR vkPresentSurface_cStyle;
 
-	if (glfwCreateWindowSurface(instance, window, nullptr, &vkPresentSurface_cStyle) != VK_SUCCESS)
+	if (glfwCreateWindowSurface(_instance, _window.GetWindow(), nullptr, &vkPresentSurface_cStyle) != VK_SUCCESS)
 	{
-		if (debugMode)
+		if (_debugMode)
 		{
-			std::cerr << "Failed to abstract window surface with GLFW! \n";
+			std::cerr << "Failed to abstract _window surface with GLFW! \n";
 		}
 	}
-	else if (debugMode)
+	else if (_debugMode)
 	{
-		std::cerr << "Successfully abstracted window surface with GLFW! \n";
+		std::cerr << "Successfully abstracted _window surface with GLFW! \n";
 	}
 
-	vkPresentSurface = vkPresentSurface_cStyle;
+	_vkPresentSurface = vkPresentSurface_cStyle;
 }
 
 
 
 void BaseEngine::make_debug_messenger() {
 
-	if (!debugMode) {
+	if (!_debugMode) {
 		return;
 	}
 
-	debugMessenger = vkInit::make_debug_messenger(instance, dldi);
+	_debugMessenger = vkInit::make_debug_messenger(_instance, _dldi);
 }
 
 
@@ -190,14 +194,14 @@ void BaseEngine::make_debug_messenger() {
 
 void BaseEngine::make_physical_device()
 {
-	vkPhysicalDevice = vkInit::choose_physical_device(instance, debugMode);
+	_vkPhysicalDevice = vkInit::choose_physical_device(_instance, _debugMode);
 
-	vkLogicalDevice = vkInit::create_logical_device(vkPhysicalDevice, vkPresentSurface, debugMode);
+	_vkLogicalDevice = vkInit::create_logical_device(_vkPhysicalDevice, _vkPresentSurface, _debugMode);
 
-	std::vector<vk::Queue> queueList = vkUtil::get_queues(vkPhysicalDevice, vkLogicalDevice, vkPresentSurface, debugMode);
+	std::vector<vk::Queue> queueList = vkUtil::get_queues(_vkPhysicalDevice, _vkLogicalDevice, _vkPresentSurface, _debugMode);
 
-	vkGraphicsQueue = queueList[0];
-	vkPresentQueue = queueList[1];
+	_vkGraphicsQueue = queueList[0];
+	_vkPresentQueue = queueList[1];
 
 }
 
@@ -206,19 +210,19 @@ void BaseEngine::make_physical_device()
 
 void BaseEngine::make_swapchain()
 {
-	vkInit::SwapChainBundle bundle = vkInit::create_swapchain(vkLogicalDevice, vkPhysicalDevice, vkPresentSurface, windowWidth, windowHeight, debugMode);
+	vkInit::SwapChainBundle bundle = vkInit::create_swapchain(_vkLogicalDevice, _vkPhysicalDevice, _vkPresentSurface, _window.GetWidth(), _window.GetHeight(), _debugMode);
 
-	vkSwapchain = bundle.swapChain;
+	_vkSwapchain = bundle.swapChain;
 
-	vkSwapchainFormat = bundle.format;
+	_vkSwapchainFormat = bundle.format;
 
-	vkSwapchainFrames = bundle.frames;
+	_vkSwapchainFrames = bundle.frames;
 
-	vkSwapchainExtent = bundle.extent;
+	_vkSwapchainExtent = bundle.extent;
 
-	maxFramesInFlight = vkSwapchainFrames.size();
+	_maxFramesInFlight = _vkSwapchainFrames.size();
 
-	frameNum = 0;
+	_frameNum = 0;
 
 }
 
@@ -228,26 +232,25 @@ void BaseEngine::make_swapchain()
 void BaseEngine::remake_swapchain()
 {
 
-	windowWidth = 0;
-	windowHeight = 0;
+	_window.SetBufferWidth(0); 
+	_window.SetBufferHeight(0); 
 
-	while (windowWidth == 0 || windowHeight == 0)
+	while (_window.GetBufferWidth() == 0 || _window.GetBufferHeight() == 0)
 	{
-		glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
-		glfwWaitEvents();
+		_window.waitEvents(); 
 	}
 
 
-	vkLogicalDevice.waitIdle();
+	_vkLogicalDevice.waitIdle();
 
 	destroy_swapchain();
 	make_swapchain();
 	make_framebuffer();
 	make_frame_sync_objects();
 
-	vkInit::CommandBufferInput commandBuffInput = { vkLogicalDevice, vkCommandPool, vkSwapchainFrames };
+	vkInit::CommandBufferInput commandBuffInput = { _vkLogicalDevice, _vkCommandPool, _vkSwapchainFrames };
 
-	vkInit::make_frame_command_buffers(commandBuffInput, debugMode);
+	vkInit::make_frame_command_buffers(commandBuffInput, _debugMode);
 
 
 }
@@ -258,23 +261,23 @@ void BaseEngine::remake_swapchain()
 void BaseEngine::destroy_swapchain()
 {
 
-	for (auto& frame : vkSwapchainFrames)
+	for (auto& frame : _vkSwapchainFrames)
 	{
-		vkLogicalDevice.destroyImageView(frame.imageView);
-		vkLogicalDevice.destroyFramebuffer(frame.framebuffer);
+		_vkLogicalDevice.destroyImageView(frame.imageView);
+		_vkLogicalDevice.destroyFramebuffer(frame.framebuffer);
 
-		vkLogicalDevice.destroySemaphore(frame.vkSemaphoreImageAvaiable);
-		vkLogicalDevice.destroySemaphore(frame.vkSemaphoreRenderFinished);
-		vkLogicalDevice.destroyFence(frame.vkFenceInFlight);
+		_vkLogicalDevice.destroySemaphore(frame.vkSemaphoreImageAvaiable);
+		_vkLogicalDevice.destroySemaphore(frame.vkSemaphoreRenderFinished);
+		_vkLogicalDevice.destroyFence(frame.vkFenceInFlight);
 
-		vkLogicalDevice.freeCommandBuffers(vkCommandPool, frame.commandBuffer);//freeing the command buffer (unnessesary)
+		_vkLogicalDevice.freeCommandBuffers(_vkCommandPool, frame.commandBuffer);//freeing the command buffer (unnessesary)
 	}
 
-	vkLogicalDevice.destroySwapchainKHR(vkSwapchain);
+	_vkLogicalDevice.destroySwapchainKHR(_vkSwapchain);
 
-	maxFramesInFlight = 0;
+	_maxFramesInFlight = 0;
 
-	frameNum = 0;
+	_frameNum = 0;
 
 }
 
@@ -290,28 +293,28 @@ void BaseEngine::make_pipeline()
 
 	spesifications.vertShaderPath = "Shaders\\vertex.spv";
 	spesifications.fragShaderPath = "Shaders\\fragment.spv";
-	spesifications.LogicalDevice = vkLogicalDevice;
-	spesifications.swapchainExtent = vkSwapchainExtent;
-	spesifications.swapchainFormat = vkSwapchainFormat;
+	spesifications.LogicalDevice =   _vkLogicalDevice;
+	spesifications.swapchainExtent = _vkSwapchainExtent;
+	spesifications.swapchainFormat = _vkSwapchainFormat;
 
 	vkDiscription::DiscriptorBundle discription = {
-		ePosStride,
-		eColStride,
-		eNormStride,
-		eTexStride,
+			_stride.pos,
+			_stride.col,
+			_stride.norm,
+			_stride.tex,
 		false
 	};
 
-	std::vector< vkDiscription::DiscriptorBundle> vecOfDescriptions;
+	std::vector<vkDiscription::DiscriptorBundle> vecOfDescriptions;
 	vecOfDescriptions.emplace_back(discription);
 
-	vkInit::GraphicsPipelineOutBundle output = vkInit::create_pipeline(spesifications, vecOfDescriptions, debugMode);
+	vkInit::GraphicsPipelineOutBundle output = vkInit::create_pipeline(spesifications, vecOfDescriptions, _debugMode);
 
 
-	vkPipeline = output.pipeline;
+	_vkPipeline = output.pipeline;
 
-	vkPipelineLayout = output.pipelineLayout;
-	vkRenderpass = output.renderpass;
+	_vkPipelineLayout = output.pipelineLayout;
+	_vkRenderpass = output.renderpass;
 
 }
 
@@ -321,15 +324,15 @@ void BaseEngine::make_pipeline()
 void BaseEngine::create_command_pool_and_command_buffers()
 {
 
-	vkCommandPool = vkInit::make_command_pool(vkLogicalDevice, vkPhysicalDevice, vkPresentSurface, debugMode);
+	_vkCommandPool = vkInit::make_command_pool(_vkLogicalDevice, _vkPhysicalDevice, _vkPresentSurface, _debugMode);
 
 
-	vkInit::CommandBufferInput commandBuffInput = { vkLogicalDevice, vkCommandPool, vkSwapchainFrames };
+	vkInit::CommandBufferInput commandBuffInput = { _vkLogicalDevice, _vkCommandPool, _vkSwapchainFrames };
 
-	vkInit::make_command_buffer(commandBuffInput, debugMode);
+	vkInit::make_command_buffer(commandBuffInput, _debugMode);
 
 
-	vkInit::make_frame_command_buffers(commandBuffInput, debugMode);
+	vkInit::make_frame_command_buffers(commandBuffInput, _debugMode);
 
 	make_frame_sync_objects();
 
@@ -356,15 +359,15 @@ void BaseEngine::record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t
 
 	vk::RenderPassBeginInfo renderPassBeginInfo = {};
 
-	renderPassBeginInfo.framebuffer = vkSwapchainFrames[imageIndex].framebuffer;
+	renderPassBeginInfo.framebuffer = _vkSwapchainFrames[imageIndex].framebuffer;
 
-	renderPassBeginInfo.renderPass = vkRenderpass;
+	renderPassBeginInfo.renderPass = _vkRenderpass;
 
 	renderPassBeginInfo.renderArea.offset.x = 0;
 
 	renderPassBeginInfo.renderArea.offset.y = 0;
 
-	renderPassBeginInfo.renderArea.extent = vkSwapchainExtent;
+	renderPassBeginInfo.renderArea.extent = _vkSwapchainExtent;
 
 	vk::ClearValue clearColor = { std::array<float, 4>{1.0f, 1.0f, 1.0f, 1.0f} };
 
@@ -374,12 +377,12 @@ void BaseEngine::record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t
 
 	commandBuffer.beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
 
-	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, vkPipeline);
+	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, _vkPipeline);
 
-	vk::Viewport vkViewport = vk::Viewport(0.0f, 0.0f, static_cast<float>(windowWidth), static_cast<float>(windowHeight), 0.0f, 1.0f);
+	vk::Viewport vkViewport = vk::Viewport(0.0f, 0.0f, static_cast<float>(_window.GetBufferWidth()), static_cast<float>(_window.GetBufferHeight()), 0.0f, 1.0f);
 	commandBuffer.setViewport(0, vkViewport);
 
-	vk::Rect2D vkScissor = vk::Rect2D({ 0, 0 }, { static_cast<uint32_t>(windowWidth), static_cast<uint32_t>(windowHeight) });
+	vk::Rect2D vkScissor = vk::Rect2D({ 0, 0 }, { static_cast<uint32_t>(_window.GetBufferWidth()), static_cast<uint32_t>(_window.GetBufferHeight()) }); 
 	commandBuffer.setScissor(0, vkScissor);
 
 	draw(commandBuffer);
@@ -404,39 +407,43 @@ void BaseEngine::record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t
 void BaseEngine::render()
 {
 
-	vkLogicalDevice.waitForFences(1, &vkSwapchainFrames[frameNum].vkFenceInFlight, VK_TRUE, UINT64_MAX);
+	_vkLogicalDevice.waitForFences(1, &_vkSwapchainFrames[_frameNum].vkFenceInFlight, VK_TRUE, UINT64_MAX);
 
 
 	uint32_t imageIndex{};
 
 
-	try {
-		vk::ResultValue acquire = vkLogicalDevice.acquireNextImageKHR
+	try 
+	{
+		vk::ResultValue acquire = _vkLogicalDevice.acquireNextImageKHR
 		(
-			vkSwapchain,
+			_vkSwapchain,
 			UINT64_MAX,
-			vkSwapchainFrames[frameNum].vkSemaphoreImageAvaiable,
+			_vkSwapchainFrames[_frameNum].vkSemaphoreImageAvaiable,
 			nullptr
 		);
 
 		imageIndex = acquire.value;
 	}
-	catch (vk::OutOfDateKHRError& err) {
+	catch (vk::OutOfDateKHRError& err) 
+	{
 		std::cout << "swapchain OUT OF DATE " << err.what() << "\n";
 		return;
 	}
-	catch (vk::IncompatibleDisplayKHRError& err) {
+	catch (vk::IncompatibleDisplayKHRError& err) 
+	{
 		std::cout << "Remakeing swapchain: " << err.what() << "\n";
 		remake_swapchain();
 		return;
 	}
-	catch (vk::SystemError& err) {
+	catch (vk::SystemError& err) 
+	{
 		std::cout << "Failed to acquire swapchain image: " << err.what() << std::endl;
 	}
 
 
 
-	vk::CommandBuffer commandBuffer = vkSwapchainFrames[frameNum].commandBuffer;
+	vk::CommandBuffer commandBuffer = _vkSwapchainFrames[_frameNum].commandBuffer;
 
 	commandBuffer.reset();
 
@@ -446,7 +453,7 @@ void BaseEngine::render()
 	vk::SubmitInfo submitInfo = {};
 
 
-	vk::Semaphore waitSemaphores[] = { vkSwapchainFrames[frameNum].vkSemaphoreImageAvaiable };
+	vk::Semaphore waitSemaphores[] = { _vkSwapchainFrames[_frameNum].vkSemaphoreImageAvaiable };
 
 	vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
 
@@ -460,22 +467,24 @@ void BaseEngine::render()
 
 	submitInfo.pCommandBuffers = &commandBuffer;
 
-	vk::Semaphore signalSemaphores[] = { vkSwapchainFrames[frameNum].vkSemaphoreRenderFinished };
+	vk::Semaphore signalSemaphores[] = { _vkSwapchainFrames[_frameNum].vkSemaphoreRenderFinished };
 
 	submitInfo.signalSemaphoreCount = 1;
 
 	submitInfo.pSignalSemaphores = signalSemaphores;
 
 
-	vkLogicalDevice.resetFences(1, &vkSwapchainFrames[frameNum].vkFenceInFlight);//closing the fence behind it
+	_vkLogicalDevice.resetFences(1, &_vkSwapchainFrames[_frameNum].vkFenceInFlight);//closing the fence behind it
 
 
-	try {
-		vkGraphicsQueue.submit(submitInfo, vkSwapchainFrames[frameNum].vkFenceInFlight);
+	try 
+	{
+		_vkGraphicsQueue.submit(submitInfo, _vkSwapchainFrames[_frameNum].vkFenceInFlight); 
 	}
-	catch (vk::SystemError err) {
+	catch (vk::SystemError& err) {
 
-		if (debugMode) {
+		if (_debugMode) 
+		{
 			std::cout << "failed to submit draw command buffer!" << std::endl;
 		}
 	}
@@ -486,7 +495,7 @@ void BaseEngine::render()
 
 	presentInfo.pWaitSemaphores = signalSemaphores;
 
-	vk::SwapchainKHR swapChains[] = { vkSwapchain };
+	vk::SwapchainKHR swapChains[] = { _vkSwapchain };
 
 	presentInfo.swapchainCount = 1;
 
@@ -500,7 +509,7 @@ void BaseEngine::render()
 
 	try
 	{
-		present = vkPresentQueue.presentKHR(presentInfo);
+		present = _vkPresentQueue.presentKHR(presentInfo);
 	}
 	catch (vk::OutOfDateKHRError& err)
 	{
@@ -519,79 +528,55 @@ void BaseEngine::render()
 	}
 
 
-	frameNum = (frameNum + 1) % maxFramesInFlight;
+	_frameNum = (_frameNum + 1) % _maxFramesInFlight;
 
 }
-
-
 
 
 void BaseEngine::make_framebuffer()
 {
 	vkInit::framebufferInput input;
-	input.logicalDevice = vkLogicalDevice;
-	input.renderPass = vkRenderpass;
-	input.swapchainExtent = vkSwapchainExtent;
+	input.logicalDevice = _vkLogicalDevice;
+	input.renderPass = _vkRenderpass;
+	input.swapchainExtent = _vkSwapchainExtent;
 
-	for (size_t i = 0; i < vkSwapchainFrames.size(); i++)
+	for (size_t i = 0; i < _vkSwapchainFrames.size(); i++)
 	{
-		vkSwapchainFrames[i].framebuffer = vkInit::make_framebuffer(input, vkSwapchainFrames[i].imageView, debugMode);
+		_vkSwapchainFrames[i].framebuffer = vkInit::make_framebuffer(input, _vkSwapchainFrames[i].imageView, _debugMode);
 	}
 
 }
-
 
 
 void BaseEngine::make_frame_sync_objects()
 {
-	for (auto& frame : vkSwapchainFrames)
+	for (auto& frame : _vkSwapchainFrames)
 	{
-		frame.vkSemaphoreImageAvaiable = vkInit::make_semaphore(vkLogicalDevice, debugMode);
-		frame.vkSemaphoreRenderFinished = vkInit::make_semaphore(vkLogicalDevice, debugMode);
-		frame.vkFenceInFlight = vkInit::make_fence(vkLogicalDevice, debugMode);
+		frame.vkSemaphoreImageAvaiable = vkInit::make_semaphore(_vkLogicalDevice, _debugMode);
+		frame.vkSemaphoreRenderFinished = vkInit::make_semaphore(_vkLogicalDevice, _debugMode);
+		frame.vkFenceInFlight = vkInit::make_fence(_vkLogicalDevice, _debugMode);
 
 	}
 }
 
 
-
-
-
 vk::Device BaseEngine::get_logical_device() const
 {
-	return vkLogicalDevice;
+	return _vkLogicalDevice;
 }
-
-
-
 
 
 vk::PhysicalDevice BaseEngine::get_physical_device() const
 {
-	return vkPhysicalDevice;
+	return _vkPhysicalDevice;
 }
-
-
-
-
-void BaseEngine::draw_scene()
-{
-
-}
-
-void BaseEngine::intial_clean_up()
-{
-	vkLogicalDevice.waitIdle();
-}
-
-
 
 
 
 BaseEngine::~BaseEngine()
 {
 
-	if (debugMode)
+	if (_debugMode)
 	{
 		std::cout << "Goodbye see you!\n";
 	}
@@ -600,35 +585,35 @@ BaseEngine::~BaseEngine()
 	destroy_swapchain();
 
 
-	vkLogicalDevice.destroyCommandPool(vkCommandPool);
+	_vkLogicalDevice.destroyCommandPool(_vkCommandPool);
 
 
-	vkLogicalDevice.destroyPipeline(vkPipeline);
+	_vkLogicalDevice.destroyPipeline(_vkPipeline);
 
-	vkLogicalDevice.destroyPipelineLayout(vkPipelineLayout);
+	_vkLogicalDevice.destroyPipelineLayout(_vkPipelineLayout);
 
-	vkLogicalDevice.destroyRenderPass(vkRenderpass);
-
-
+	_vkLogicalDevice.destroyRenderPass(_vkRenderpass);
 
 
-	instance.destroySurfaceKHR(vkPresentSurface);
 
-	if (debugMode)
+
+	_instance.destroySurfaceKHR(_vkPresentSurface);
+
+	if (_debugMode)
 	{
-		instance.destroyDebugUtilsMessengerEXT(debugMessenger, nullptr, dldi);
+		_instance.destroyDebugUtilsMessengerEXT(_debugMessenger, nullptr, _dldi);
 	}
 	/*
 	* from vulkan_funcs.hpp:
 	*
-	* void Instance::destroy( Optional<const VULKAN_HPP_NAMESPACE::AllocationCallbacks> allocator = nullptr,
+	* void _instance::destroy( Optional<const VULKAN_HPP_NAMESPACE::AllocationCallbacks> allocator = nullptr,
 											Dispatch const & d = ::vk::getDispatchLoaderStatic())
 	*/
 
 
-	vkLogicalDevice.destroy();
+	_vkLogicalDevice.destroy();
 
-	instance.destroy();
+	_instance.destroy();
 
 	//terminate glfw
 	glfwTerminate();

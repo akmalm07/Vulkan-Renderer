@@ -26,6 +26,14 @@ namespace vkUtil {
 
 		void DelKeyComb(Keys key, Mods mod); 
 		void DelKeyComb(Keys key); 
+
+		void SetBufferWidth(int width) { _bufferWidth = width; }
+
+		void SetBufferHeight(int height) { _bufferHeight = height; } 
+
+		void SetWidth(int width) { _width = width; }
+		
+		void SetHeight(int height) { _height = height; }
 		
 		//template<class ... Args>
 		//void AddMouseClick(Mouse mouse, std::function<bool(Args...)> function);
@@ -49,6 +57,8 @@ namespace vkUtil {
 		inline GLint GetBufferHeight() const { return _bufferHeight; }
 
 		inline GLFWwindow* GetWindow() const { return _mainWindow; }
+		
+		bool SetWindow(GLFWwindow* window);
 
 		inline GLint GetWidth() const { return _width; }
 		inline GLint GetHeight() const { return _height; }
@@ -84,6 +94,7 @@ namespace vkUtil {
 		void ClearWindow();
 
 		void pollEvents() const { glfwPollEvents(); }
+		void waitEvents() const { glfwWaitEvents(); } 
 
 		~Window();
 
@@ -162,29 +173,29 @@ namespace vkUtil {
 
 	};
 
+}// Namespace vkUtil
 
 
 
 	template<class ... Args>
-	void Window::AddKeyComb(Keys key, Action action, std::function<bool(Args...)> function, std::tuple<Args...> args)
+	void vkUtil::Window::AddKeyComb(Keys key, Action action, std::function<bool(Args...)> function, std::tuple<Args...> args)
 	{
-		_keyCombs[SIZET(action)].emplace(std::make_pair(key, mod), key, action);
+		_keyCombs[SIZET(action)].emplace(std::make_pair(key, Mods::None), key, action);
 	}
 
 	template<class ... Args>
-	void Window::AddKeyComb(Keys key, Action action, Mods mod, std::function<bool(Args...)> function, std::tuple<Args...> args) 
+	void vkUtil::Window::AddKeyComb(Keys key, Action action, Mods mod, std::function<bool(Args...)> function, std::tuple<Args...> args)
 	{
 		_keyCombs[SIZET(action)].emplace(std::make_pair(key, Mods::None), key, action, function, std::forward<Args>(args)...);
 	}
 
 
 	template<class ... Args>
-	void Window::AddAABButton(float cordX, float cordY, float width, float height, Action action, Mouse button,
-		std::function<bool(Args...)> function, std::string_view str, std::tuple<Args...> args)
+	void vkUtil::Window::AddAABButton(float cordX, float cordY, float width, float height, Action action, Mouse button, 
+		std::function<bool(Args...)> function, std::string_view str, std::tuple<Args...> args) 
 	{
-		_AABButton[SIZET(action)].emplace(str, cordX, cordY, width, height, action, mouse, function, std::forward<Args>(args)...);
+		_AABButtons[SIZET(action)].emplace(str, cordX, cordY, width, height, action, button, function, std::forward<Args>(args)...); 
 
 	}
 
-}// Namespace vkUtil
 

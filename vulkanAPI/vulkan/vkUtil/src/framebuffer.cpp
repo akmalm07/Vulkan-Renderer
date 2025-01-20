@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "framebuffer.h"
 
 vk::Framebuffer vkInit::make_framebuffer(framebufferInput& input,vk::ImageView& imageView, bool debug)
@@ -16,7 +18,7 @@ vk::Framebuffer vkInit::make_framebuffer(framebufferInput& input,vk::ImageView& 
 
 	framebufferInfo.renderPass = input.renderPass;
 		
-	framebufferInfo.attachmentCount = cast_uint32(attachments.size());
+	framebufferInfo.attachmentCount = UINT32(attachments.size());
 
 	framebufferInfo.pAttachments = attachments.data();
 		

@@ -1,7 +1,11 @@
 #include "pch.h"
-#include "window.h"
 
-#include "GLFW\glfw3.h"
+#include "vkUtil\include\window_input.h"
+
+#include "vkUtil\include\keys.h"
+
+#include "vkUtil\include\window.h"
+
 
 namespace vkUtil {
 
@@ -9,7 +13,6 @@ namespace vkUtil {
 
 	Window::Window()
 	{
-		g_numOfWindows++;
 
 		_name = "Untitled Window";
 
@@ -30,8 +33,7 @@ namespace vkUtil {
 
 	Window::Window(GLint windowWidth, GLint windowHeight, const std::string& name, bool isOrtho)
 	{
-		g_numOfWindows++;
-
+		
 		_name = name;
 
 		_mainWindow = nullptr;
@@ -70,7 +72,7 @@ namespace vkUtil {
 
 	bool Window::CreateWindow(const std::string& name, int width, int height)
 	{
-		if (g_numOfWindows == 1)
+		if (g_numOfWindows == 0)
 		{
 			if (glfwInit() == GLFW_FALSE)
 			{
@@ -102,7 +104,7 @@ namespace vkUtil {
 			throw std::runtime_error("GLFW window creation failed!");
 		}
 
-
+		g_numOfWindows++;
 
 		glfwGetFramebufferSize(_mainWindow, &_bufferWidth, &_bufferHeight);
 		
@@ -126,6 +128,7 @@ namespace vkUtil {
 	{
 		return glfwSetWindowShouldClose(_mainWindow, (trueOrFalse ? GLFW_TRUE : GLFW_FALSE));
 	}
+
 
 	float Window::GetLeftOrtho() const 
 	{ 
@@ -156,6 +159,39 @@ namespace vkUtil {
 	void Window::SetCursorNormal()
 	{
 		glfwSetInputMode(_mainWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+
+
+	bool Window::SetWindow(GLFWwindow* window) 
+	{ 
+		if (!window)
+		{
+			fprintf(stderr, "\nThe Window provided was nullptr!\n");
+			return false;
+		}
+		_mainWindow = std::move(window); 
+
+
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); 
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); 
+
+
+		glfwGetFramebufferSize(_mainWindow, &_bufferWidth, &_bufferHeight); 
+
+		glfwGetWindowSize(_mainWindow, &_width, &_height); 
+
+		glfwSetCursorPos(_mainWindow, _width / 2, _height / 2); 
+
+		glfwMakeContextCurrent(_mainWindow); 
+		  
+		CreateCallbacks(); 
+
+		//glfwSetInputMode(_mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+		glfwSetWindowUserPointer(_mainWindow, this); 
+
+		return true;
+
 	}
 
 
@@ -335,11 +371,11 @@ namespace vkUtil {
 			{
 				if (key == i)
 				{
-					for (const auto& [ky, val] : act)
+					for (const auto& [ky, val] : act) 
 					{
-						if (val.isPressed(ky.first, Action::Press, ky.second))
+						if (val.isPressed(ky.first, Action::Press, ky.second)) 
 						{
-							val.execute();
+							val.execute(); 
 						}
 					}
 
@@ -368,6 +404,7 @@ namespace vkUtil {
 		case GLFW_PRESS: {
 			auto act = _AABButtons[SIZET(Action::Press)];
 			Mouse mouse = (mouseButton == GLFW_MOUSE_BUTTON_LEFT ? Mouse::Left : Mouse::Right);
+
 
 			for (const auto& [key, val] : act)
 			{

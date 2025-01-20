@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "vkInit\include\logging.h"
 
 VKAPI_ATTR VkBool32 VKAPI_CALL vkInit::debugCallback(
