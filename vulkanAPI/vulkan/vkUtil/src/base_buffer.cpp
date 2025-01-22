@@ -12,7 +12,7 @@ BufferFather::BufferFather() : device(nullptr), physicalDevice(nullptr), buffer(
 }
 
 
-BufferFather::BufferFather(const vkMesh::BufferInitInput& input)
+BufferFather::BufferFather(const vkUtil::BufferInitInput& input)
 	: device(input.logicalDevice), physicalDevice(input.physicalDevice)
 {
 }

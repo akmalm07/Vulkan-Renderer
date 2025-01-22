@@ -13,7 +13,7 @@ class BufferFather //Father of Index and Vertex Buffer Classes
 public:
 	BufferFather();
 
-	explicit BufferFather(const vkMesh::BufferInitInput& input);
+	explicit BufferFather(const vkUtil::BufferInitInput& input);
 
 	void clean_buffer();
 

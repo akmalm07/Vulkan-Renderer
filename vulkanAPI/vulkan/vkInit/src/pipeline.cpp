@@ -59,7 +59,7 @@ vkInit::GraphicsPipelineOutBundle vkInit::create_pipeline(GraphicsPipelineInBund
 
         bindingAttributes = vkDiscription::get_attribute_descriptions(discriptorSet[i].stride, i, debug); 
 
-        bindingDescription = vkDiscription::get_binding_description(totalOffset * sizeof(float), i, discriptorSet[i].isPerInstanceRate);
+        bindingDescription = vkDiscription::get_binding_description(totalOffset * sizeof(Vertex), i, discriptorSet[i].isPerInstanceRate);
 
         numOfAttrib = numOfAttrib + bindingAttributes.size();
 

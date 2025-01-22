@@ -6,15 +6,12 @@
 
 namespace vkUtil {
 
-	UserInput::~UserInput() = default;
-
-
 	MouseButtonB::MouseButtonB() :
 		_button(Mouse::None), _action(Action::None), _pressed(false)
 	{}
 
 	MouseButtonB::MouseButtonB(Mouse name, Action action) :
-		_button(name), _action(action), _pressed(false)
+		_button(name), _action(action), _pressed(false), _result(false)
 	{}
 
 	bool MouseButtonB::getPressed() const	
@@ -35,8 +32,12 @@ namespace vkUtil {
 	AABButtonB::AABButtonB() = default;
 
 	AABButtonB::AABButtonB(float cordX, float cordY, float width, float height, Action action, Mouse button, std::string_view name)
-		:_x(cordX), _y(cordY), _width(width), _height(height), _action(action), _button(button), _name(name)
+		:_x(cordX), _y(cordY), _width(width), _height(height), _action(action), _button(button), _name(name), _result(false)
 	{}
+
+	AABButtonB::AABButtonB(float cordX, float cordY, float width, float height, Action action, Mouse button)
+	{
+	}
 
 	bool AABButtonB::isClicked(float x, float y, Action action, Mouse button) const
 	{
@@ -50,17 +51,17 @@ namespace vkUtil {
 
 
 	KeyCombB::KeyCombB() :
-		_charater(Keys::None), _trigger(Action::None), _mode(std::nullopt)
+		_charater(Keys::None), _trigger(Action::None), _mode(std::nullopt), _result(false)
 	{}
 
 
 	KeyCombB::KeyCombB(Keys number, Action action) :
-		_charater(number), _trigger(action), _mode(std::nullopt)
+		_charater(number), _trigger(action), _mode(std::nullopt), _result(false)
 	{
 	}
 
 	KeyCombB::KeyCombB(Keys number, Action action, Mods mode) :
-		_charater(number), _trigger(action), _mode(mode)
+		_charater(number), _trigger(action), _mode(mode), _result(false)
 
 	{}
 

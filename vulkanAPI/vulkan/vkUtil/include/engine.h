@@ -29,9 +29,9 @@ public:
 
 	Engine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool debug);
 
-	void load_meshes(std::vector<Mesh>& meshes) const;
+	void load_meshes(std::vector<MeshT>& meshes) const;
 
-	void load_scene(std::unique_ptr<Scene>& scene);
+	//void load_scene(std::unique_ptr<Scene>& scene);
 
 	void draw_scene()
 	{
@@ -50,7 +50,7 @@ public:
 
 private:
 
-	std::unique_ptr <Scene> _scene; 
+	//std::unique_ptr <Scene> _scene; 
 
 	mutable std::unique_ptr<VertexBuffer> _vertexBuffer;    
 	mutable std::unique_ptr<IndexBuffer> _indexBuffer;

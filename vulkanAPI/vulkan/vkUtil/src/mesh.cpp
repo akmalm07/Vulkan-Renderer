@@ -6,8 +6,12 @@
 
 MeshT::MeshT() = default;
 
-MeshT::MeshT(std::vector<vkType::Vert>& vertices, std::vector<vkType::Index>& indices) :
+MeshT::MeshT(std::list<vkType::Vert>& vertices, std::list<vkType::Index>& indices) :
 	_verticesCount(vertices.size()), _indicesCount(indices.size()), _vertices(std::move(vertices)), _indices(std::move(indices))
+{}
+
+MeshT::MeshT(std::list<vkType::Vert>& vertices) : 
+	_verticesCount(vertices.size()), _indicesCount(0), _vertices(std::move(vertices))
 {}
 
 MeshT::MeshT(const MeshT& other)
@@ -18,6 +22,14 @@ MeshT::MeshT(const MeshT& other)
 	_indices = other.get_indices();
 
 }
+
+MeshT::MeshT(std::initializer_list<vkType::Vert> verts) : 
+	_vertices(verts), _verticesCount(verts.size()) 
+{}
+
+MeshT::MeshT(std::initializer_list<vkType::Vert> verts, std::initializer_list<vkType::Index> inds) 
+	: _vertices(verts), _verticesCount(verts.size()), _indices(inds), _indicesCount(inds.size()) 
+{}
 
 
 MeshT& MeshT::operator=(const MeshT& other)
@@ -55,7 +67,7 @@ MeshT& MeshT::operator=(MeshT&& other)
 
 //MeshT(POS pos, COL col, NORM norm, TEX tex) = default;
 
-void MeshT::initialize(std::vector<vkType::Vert>& vertices)
+void MeshT::initialize(std::list<vkType::Vert>& vertices)
 {
 	_vertices = std::move(vertices);
 	_verticesCount = _vertices.size();
@@ -63,7 +75,7 @@ void MeshT::initialize(std::vector<vkType::Vert>& vertices)
 }
 
 
-void MeshT::initialize(std::vector<vkType::Vert>& vertices, std::vector<vkType::Index>& indices)
+void MeshT::initialize(std::list<vkType::Vert>& vertices, std::list<vkType::Index>& indices)
 {
 	_vertices = std::move(vertices);
 	_indices = std::move(indices);
@@ -78,15 +90,28 @@ size_t MeshT::get_vert_count() const { return _verticesCount; }
 size_t MeshT::get_ind_count() const { return _indicesCount; }
 
 
-size_t MeshT::vert_size() const { return _vertices.size() * sizeof(_vertices[0]); }
+size_t MeshT::vert_size() const 
+{
+	if (_vertices.empty())
+	{
+		return 0;
+	}
+	return _verticesCount * _vertices.front().size(); 
+}
 
 
-size_t MeshT::ind_size() const { return _indices.size() * sizeof(_indices[0]); }
+size_t MeshT::ind_size() const 
+{
+	if (_indices.empty())
+	{
+		return 0;
+	}
+	return _indicesCount * sizeof(_indices.front());
+}
 
 
 
-
-void MeshT::insert(std::vector<vkType::Vert>& vertices, std::vector<vkType::Index>& indices)
+void MeshT::insert(std::list<vkType::Vert>& vertices, std::list<vkType::Index>& indices)
 {
 	_vertices.insert(_vertices.end(), std::make_move_iterator(vertices.begin()), std::make_move_iterator(vertices.end()));
 	_indices.insert(_indices.end(), std::make_move_iterator(indices.begin()), std::make_move_iterator(indices.end()));
@@ -94,7 +119,7 @@ void MeshT::insert(std::vector<vkType::Vert>& vertices, std::vector<vkType::Inde
 	_indicesCount += indices.size();
 }
 
-void MeshT::insert(std::vector<vkType::Vert>& vertices)
+void MeshT::insert(std::list<vkType::Vert>& vertices)
 {
 	_vertices.insert(_vertices.end(), std::make_move_iterator(vertices.begin()), std::make_move_iterator(vertices.end())); 
 	_verticesCount = _vertices.size();
@@ -103,8 +128,8 @@ void MeshT::insert(std::vector<vkType::Vert>& vertices)
 
 void MeshT::push_back(const vkType::Vert& vertex, const vkType::Index& index)
 {
-	_vertices.push_back(vertex);
-	_indices.push_back(index);
+	_vertices.push_back(std::move(vertex));
+	_indices.push_back(std::move(index));
 	_verticesCount++;
 	_indicesCount++;
 }
@@ -112,19 +137,48 @@ void MeshT::push_back(const vkType::Vert& vertex, const vkType::Index& index)
 
 void MeshT::push_back(const vkType::Vert& vertex)
 {
-	_vertices.push_back(vertex);
+	_vertices.push_back(std::move(vertex));
 	_verticesCount++;
 }
 
 
-std::vector <vkType::Vert> MeshT::get_vertices() const
+void MeshT::push_front(const vkType::Vert& vertex, const vkType::Index& index)
+{
+	_vertices.push_front(std::move(vertex));
+	_indices.push_front(std::move(index));
+	_verticesCount++;
+	_indicesCount++;
+}
+
+
+void MeshT::push_front(const vkType::Vert& vertex)
+{
+	_vertices.push_front(std::move(vertex));
+	_verticesCount++;
+}
+
+
+std::list <vkType::Vert> MeshT::get_vertices() const
 {
 	return _vertices;
 }
 
-std::vector <vkType::Index> MeshT::get_indices() const
+std::list <vkType::Index> MeshT::get_indices() const
 {
 	return _indices;
+}
+
+
+std::list <Vertex> MeshT::get_vertices_raw() const
+{
+	std::list<Vertex> raw;
+	for (const auto& vertex : _vertices)
+	{
+		const auto& vert = vertex.get_raw();
+		raw.insert(raw.end(), std::make_move_iterator(vert.begin()), std::make_move_iterator(vert.end()));
+	}
+
+	return raw;
 }
 
 

@@ -32,7 +32,7 @@ public:
 
 	vk::PhysicalDevice get_physical_device() const;
 
-	template<class T>
+	template<vkType::ValidObj T>
 	void send_as_push_const(T& data, vk::CommandBuffer cmdBuffer, vk::ShaderStageFlagBits shader, uint32_t offset)
 	{
 		cmdBuffer.pushConstants(_vkPipelineLayout, shader, offset, sizeof(data), &data); 
@@ -48,8 +48,6 @@ protected:
 	bool _debugMode = true;
 
 	//glfw window parameters
-	int _windowWidth = 640;
-	int _windowHeight = 480;
 	vkUtil::Window _window;  
 
 	//vulkan instance

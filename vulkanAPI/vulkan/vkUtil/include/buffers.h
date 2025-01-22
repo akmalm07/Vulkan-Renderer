@@ -25,15 +25,10 @@ namespace vkUtil {
 
 	};
 
-}
-
-
-namespace vkMesh {
 
 	struct BufferInitInput
 	{
 		vk::Device logicalDevice;
 		vk::PhysicalDevice physicalDevice;
 	};
-
 }

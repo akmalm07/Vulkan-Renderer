@@ -19,7 +19,7 @@ Engine::Engine(vkVert::StrideBundle stride, int width, int height, bool debug) :
 {}
 
 
-void Engine::load_meshes(std::vector<Mesh>& meshes) const
+void Engine::load_meshes(std::vector<MeshT>& meshes) const
 {
 	size_t indicesSize = 0, verticesSize = 0;
 
@@ -29,15 +29,15 @@ void Engine::load_meshes(std::vector<Mesh>& meshes) const
 		indicesSize += mesh.ind_size();
 	}
 
-	std::vector<float> vertices;
+	std::vector<Vertex> vertices;
 	vertices.reserve(verticesSize);
 
 	std::vector<vkType::Index> indices;
 	indices.reserve(indicesSize);
 
-	for (const auto& mesh : meshes)
+	for (auto& mesh : meshes)
 	{
-		vertices.insert(vertices.end(), mesh.get_vertices().begin(), mesh.get_vertices().end());
+		vertices.insert(vertices.end(), std::make_move_iterator(mesh.get_vertices_raw().begin()), std::make_move_iterator(mesh.get_vertices_raw().end()));
 
 		/*		for (const auto& vert : vertices)
 				{
@@ -47,10 +47,10 @@ void Engine::load_meshes(std::vector<Mesh>& meshes) const
 				std::cout << "SIZE: " << vertices.size() << "\n";
 				*/
 
-		indices.insert(indices.end(), mesh.get_indices().begin(), mesh.get_indices().end());
+		indices.insert(indices.end(), std::make_move_iterator(mesh.get_indices().begin()), std::make_move_iterator(mesh.get_indices().end()));
 	}
 
-	vkMesh::BufferInitInput bufferInfo = {};
+	vkUtil::BufferInitInput bufferInfo = {};
 
 	bufferInfo.logicalDevice = _vkLogicalDevice;
 
@@ -69,46 +69,46 @@ void Engine::load_meshes(std::vector<Mesh>& meshes) const
 
 
 
-
-void Engine::load_scene(std::unique_ptr<Scene>& scene)
-{
-	if (scene)
-	{
-		_scene = std::move(scene);
-	}
-}
+//
+//void Engine::load_scene(std::unique_ptr<Scene>& scene)
+//{
+//	if (scene)
+//	{
+//		_scene = std::move(scene);
+//	}
+//}
 
 
 void Engine::draw(vk::CommandBuffer& commandBuffer) const
 {
-	if (_scene)
-	{
-		for (const auto& position : _scene->get_triangles())
-		{
-			glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
-			vkUtil::ObjectData objectData;
-			objectData.model = model;
-		}
-	}
+	//if (_scene)
+	//{
+	//	for (const auto& position : _scene->get_triangles())
+	//	{
+	//		glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
+	//		vkUtil::ObjectData objectData;
+	//		objectData.model = model;
+	//	}
+	//}
 
-	/*	if (_vertexBuffer)
+		if (_vertexBuffer)
 		{
 			std::vector<vk::DeviceSize> vertOffset = { 0 };
-			_vertexBuffer->bind_vertex_buffer(commandBuffer, vertOffset);
+			_vertexBuffer->bind_buffer(commandBuffer, vertOffset);
 		}
 
 		if (_indexBuffer)
 		{
-			_indexBuffer->bind_index_buffer(commandBuffer, 0);
+			_indexBuffer->bind_buffer(commandBuffer, 0);
 
-			uint32_t indexCount = cast_uint32(_indexBuffer->index_count());
+			uint32_t indexCount = UINT32(_indexBuffer->index_count());
 			commandBuffer.drawIndexed(indexCount, 1, 0, 0, 0);
 		}
 		else
 		{
-			uint32_t vertCount = cast_uint32(_vertexBuffer->vertex_count());
+			uint32_t vertCount = UINT32(_vertexBuffer->vertex_count()); 
 			commandBuffer.draw(vertCount, 1, 0, 0);
-		}*/
+		}
 
 
 }

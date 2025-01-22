@@ -17,7 +17,7 @@ public:
 
 	IndexBufferT();
 	
-	IndexBufferT(const vkMesh::BufferInitInput& bufferInfo);
+	IndexBufferT(const vkUtil::BufferInitInput& bufferInfo);
 	
 	void initalize(std::vector<vkType::Index>& data, bool debug);
 

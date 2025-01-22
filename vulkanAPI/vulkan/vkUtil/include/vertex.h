@@ -1,191 +1,334 @@
 #pragma once
 
 #include "config.h"
-
-
-
-
+#include "vkUtil\include\vertex_base.h"
 
 template <vkType::GLMVec POS, vkType::GLMVec COL, vkType::GLMVec NORM, vkType::GLMVec TEX>
-struct VertexT
+struct VertexT;
+	
+
+template <vkType::GLM_VEC_TYPE POS, vkType::GLM_VEC_TYPE COL, vkType::GLM_VEC_TYPE NORM, vkType::GLM_VEC_TYPE TEX>
+struct VertexT<POS, COL, NORM, TEX> : public PositionFunc<POS>, public ColorFunc<COL>, public NormalFunc<NORM>, public TextureFunc<TEX>
 {
-	POS position;
-	COL color;
-	NORM normal;
-	TEX texture;
+public:
+
+	using Pos = PositionFunc<POS>;
+	using Col = ColorFunc<COL>;
+	using Norm = NormalFunc<NORM>;
+	using Tex = TextureFunc<TEX>; 
+
+	using Pos::c_pos_size;
+	using Pos::_position;
+
+	using Col::c_col_size;
+	using Col::_color;
+
+	using Norm::c_norm_size;
+	using Norm::_normal;
+
+	using Tex::c_tex_size;
+	using Tex::_texture;
+
+
 
 	VertexT() = default;
 
-	VertexT(const auto& p, const auto& c, const auto& n, const auto& t)
-		: position(p), color(c), normal(n), texture(t) {}
+	VertexT(const POS& p, const COL& c, const NORM& n, const TEX& t)
+		: Pos(p), Col(c), Norm(n), Tex(t) {}
 
 
 	void initalize(const POS& p, const COL& c, const NORM& n, const TEX& t)
 	{
-		position = p;
-		color = c;
-		normal = n;
-		texture = t;
+		_position = p;
+		_color = c;
+		_normal = n;
+		_texture = t;
 	}
 
 
-	//size_t pos_size() const 
-	//{
-	//	return sizeof(POS) / sizeof(float);
-	//}
 
-	//size_t col_size()const
-	//{
-	//	return sizeof(COL) / sizeof(float);
-	//}
+	std::list<Vertex> get_raw() const
+	{
+		std::list<Vertex> raw;
+		auto pos = Pos::get_pos(); 
+		auto col = Col::get_col();
+		auto norm= Norm::get_norm();
+		auto tex=  Tex::get_tex(); 
 
-	//size_t norm_size()const
-	//{
-	//	return sizeof(NORM) / sizeof(float);
-	//}
+		raw.insert(raw.end(), std::make_move_iterator(pos.begin()), std::make_move_iterator(pos.end()));
+		raw.insert(raw.end(), std::make_move_iterator(col.begin()), std::make_move_iterator(col.end()));
+		raw.insert(raw.end(), std::make_move_iterator(norm.begin()), std::make_move_iterator(norm.end()));
+		raw.insert(raw.end(), std::make_move_iterator(tex.begin()), std::make_move_iterator(tex.end()));
+		return raw;
+	}
 
-	//size_t tex_size()const
-	//{
-	//	return sizeof(TEX) / sizeof(float);
-	//}
+	size_t size() const
+	{
+		return c_pos_size + c_col_size + c_norm_size + c_tex_size;
+	}
 
+	VertexT& operator=(const VertexT& other)
+	{
+		if (this != &other) {
+			_position = other._position;
+			_color = other._color;
+			_normal = other._normal;
+			_texture = other._texture;
+		}
+		return *this;
+	}
 
-	//size_t total_size()
-	//{
-	//	return pos_size() + col_size() + norm_size() + tex_size();
-	//}
+	VertexT& operator=(VertexT&& other)
+	{
+		if (this != &other) {
+			_position = std::move(other._position);
+			_color = std::move(other._color);
+			_normal = other._normal;
+			_texture = std::move(other._texture);
+		}
+		return *this;
+	}
+
+	VertexT(const VertexT& other) = default;
+
+	VertexT(VertexT&& other) = default;
 
 };
 
-template <vkType::GLMVec POS, vkType::GLMVec COL>
-struct VertexT <POS, COL, std::nullptr_t, std::nullptr_t>
+template <vkType::GLM_VEC_TYPE POS, vkType::GLM_VEC_TYPE COL>
+struct VertexT <POS, COL, std::nullptr_t, std::nullptr_t> : public PositionFunc<POS>, public ColorFunc<COL>
 {
-	POS position;
-	COL color;
+public:
+
+	using Pos = PositionFunc<POS>;
+	using Col = ColorFunc<COL>;
+
+
+	using Pos::c_pos_size;
+	using Pos::_position;
+
+	using Col::c_col_size;
+	using Col::_color;
+
 
 	VertexT() = default;
 
-	VertexT(const auto& p, const auto& c) 
-		: position(p), color(c) {}
-
+	VertexT(const POS& p, const COL& c)
+		: Pos(p), Col(c) {} 
 
 	void initalize(const POS& p, const COL& c)
 	{
-		position = p; 
-		color = c;
+		_position = p; 
+		_color = c;
 	}
 
-	//size_t pos_size() const
-	//{
-	//	return sizeof(POS) / sizeof(float);
-	//}
-
-	//size_t col_size() const
-	//{
-	//	return sizeof(COL) / sizeof(float); 
-	//}
+	size_t size() const
+	{
+		return c_pos_size + c_col_size;
+	}
 
 
-	//size_t total_size()const
-	//{
-	//	return pos_size() + col_size();
-	//}
+	std::list<Vertex> get_raw() const
+	{
+		std::list<Vertex> raw;
+		auto pos = Pos::get_pos();   
+		auto col = Col::get_col();  
+
+		raw.insert(raw.end(), std::make_move_iterator(pos.begin()), std::make_move_iterator(pos.end())); 
+		raw.insert(raw.end(), std::make_move_iterator(col.begin()), std::make_move_iterator(col.end())); 
+		return raw;
+	}
+
+
+	VertexT& operator=(const VertexT& other)
+	{
+		if (this != &other) {
+			_position = other._position;
+			_color = other._color;
+		}
+		return *this;
+	}
+
+	VertexT& operator=(VertexT&& other)
+	{
+		if (this != &other) {
+			_position = std::move(other._position);
+			_color = std::move(other._color);
+		}
+		return *this;
+	}
+
+	VertexT(const VertexT& other) = default;
+
+
+	VertexT(VertexT&& other) = default;
+
 
 };
 
 
-template <vkType::GLMVec POS, vkType::GLMVec COL, vkType::GLMVec NORM>
-struct VertexT <POS, COL, NORM, std::nullptr_t>
+template <vkType::GLM_VEC_TYPE POS, vkType::GLM_VEC_TYPE COL, vkType::GLM_VEC_TYPE NORM>
+struct VertexT <POS, COL, NORM, std::nullptr_t> : public PositionFunc<POS>, public ColorFunc<COL>, public NormalFunc<NORM>
 {
-	POS position;
-	COL color;
-	NORM normal;
+public:
+
+
+	using Pos = PositionFunc<POS>;
+	using Col = ColorFunc<COL>;
+	using Norm = NormalFunc<NORM>;
+
+	using Pos::c_pos_size;
+	using Pos::_position;
+
+	using Col::c_col_size;
+	using Col::_color;
+
+	using Norm::c_norm_size;
+	using Norm::_normal;
+
 
 	VertexT() = default;
 
-	VertexT(const auto & p, const auto & c, const auto & n)
-		: position(p), color(c), normal(n) {}
-
+	VertexT(const POS& p, const COL& c, const NORM& n) 
+		: Pos(p), Col(c), Norm(n) {}
 
 	void initalize(const POS& p, const COL& c, const NORM& n)
 	{
-		position = p;
-		color = c;
-		normal = n;
+		_position = p;
+		_color = c;
+		_normal = n;
 	}
 
-	//size_t pos_size()const
-	//{
-	//	return sizeof(POS) / sizeof(float);
-	//}
+	size_t size() const
+	{
+		return c_pos_size + c_col_size + c_norm_size;
+	}
 
-	//size_t col_size()const
-	//{
-	//	return sizeof(COL) / sizeof(float);
-	//}
 
-	//size_t norm_size() const
-	//{
-	//		
-	//	return sizeof(NORM) / sizeof(float);
-	//}
+	std::list<Vertex> get_raw()  const
+	{
+		std::list<Vertex> raw;
+		auto pos =  Pos::get_pos();   
+		auto col =  Col::get_col();    
+		auto norm = Norm::get_norm();   
 
-	//size_t total_size()
-	//{
-	//	return pos_size() + col_size() + norm_size(); 
-	//}
+		raw.insert(raw.end(), std::make_move_iterator(pos.begin()), std::make_move_iterator(pos.end())); 
+		raw.insert(raw.end(), std::make_move_iterator(col.begin()), std::make_move_iterator(col.end())); 
+		raw.insert(raw.end(), std::make_move_iterator(norm.begin()), std::make_move_iterator(norm.end())); 
+		return raw;
+	}
 
+
+	VertexT& operator=(const VertexT& other)
+	{
+		if (this != &other) {
+			_position = other._position;
+			_color = other._color;
+			_normal = other._normal;
+		}
+		return *this;
+	}
+
+	VertexT& operator=(VertexT&& other)
+	{
+		if (this != &other) {
+			_position = std::move(other._position);
+			_color = std::move(other._color);
+			_normal = other._normal;
+		}
+		return *this;
+	}
+
+
+	VertexT(const VertexT& other) = default;
+
+
+	VertexT(VertexT&& other) = default;
 }; 
 
 
-template <vkType::GLMVec POS, vkType::GLMVec COL, vkType::GLMVec TEX>
-struct VertexT <POS, COL, std::nullptr_t, TEX>
+template <vkType::GLM_VEC_TYPE POS, vkType::GLM_VEC_TYPE COL, vkType::GLM_VEC_TYPE TEX>
+struct VertexT <POS, COL, std::nullptr_t, TEX> : public PositionFunc<POS>, public ColorFunc<COL>, public TextureFunc<TEX>
 {
-	POS position;
-	COL color;
-	TEX texture;
+public:
+
+
+	using Pos = PositionFunc<POS>;
+	using Col = ColorFunc<COL>;
+	using Tex = TextureFunc<TEX>; 
+
+	using Pos::c_pos_size;
+	using Pos::_position;
+
+	using Col::c_col_size;
+	using Col::_color;
+
+	using Tex::c_tex_size;
+	using Tex::_texture;
 
 	VertexT() = default;
-
-	VertexT(const auto& p, const auto& c, const auto& t)
-		: position(p), color(c), texture(t) {}
+	 
+	VertexT(const POS& p, const COL& c, const TEX& t) 
+		: Pos(p), Col(c), Tex(t) {}
 
 
 	void initalize(const POS& p, const COL& c, const TEX& t)
 	{
-		position = p;
-		color = c;
-		texture = t;
+		_position = p;
+		_color = c;
+		_texture = t;
 	}
 
-	// Implement conversion logic here
-	operator unsigned short() const {
-		// Implement conversion logic here
-		static_assert(false, "Conversion not implemented");
+	size_t size() const
+	{
+		return c_pos_size + c_col_size + c_tex_size;
 	}
+
+
+	std::list<Vertex> get_raw() const
+	{
+		std::list<Vertex> raw;
+		auto pos = Pos::get_pos();      
+		auto col = Col::get_col();      
+		auto tex = Tex::get_tex();    
+
+		raw.insert(raw.end(), std::make_move_iterator(pos.begin()), std::make_move_iterator(pos.end()));  
+		raw.insert(raw.end(), std::make_move_iterator(col.begin()), std::make_move_iterator(col.end())); 
+		raw.insert(raw.end(), std::make_move_iterator(tex.begin()), std::make_move_iterator(tex.end()));  
+		return raw;
+	}
+
+	VertexT& operator=(const VertexT& other)
+	{
+		if (this != &other) {
+			_position = other._position;
+			_color = other._color;
+			_texture = other._texture;
+		}
+		return *this;
+	}
+
+	VertexT& operator=(VertexT&& other)
+	{
+		if (this != &other) {
+			_position = std::move(other._position); 
+			_color = std::move(other._color); 
+			_texture = std::move(other._texture);
+		}
+		return *this;
+	}
+
+
+	VertexT(const VertexT& other) = default;
+
+
+	VertexT(VertexT&& other) = default;
+	
+	//operator unsigned short() const
+	//{
+	//	static_assert(false, "Conversion not implemented");
+	//}
 };
-
-	//size_t pos_size()const
-	//{
-	//	return sizeof(POS) / sizeof(float);
-	//}
-
-	//size_t col_size()const
-	//{
-	//	return sizeof(COL) / sizeof(float);
-	//}
-
-	//size_t tex_size()const
-	//{
-	//	return sizeof(TEX) / sizeof(float);
-	//}
-
-
-	//size_t total_size()
-	//{
-	//	return pos_size() + col_size() + tex_size(); 
-	//}
-
 
 
 

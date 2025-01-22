@@ -39,6 +39,7 @@
 #include <memory>
 #include <set>
 #include <array>
+#include <list>
 
 #include <cstdint>
 

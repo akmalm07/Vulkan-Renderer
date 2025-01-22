@@ -7,7 +7,7 @@
 IndexBufferT::IndexBufferT() : BufferFather() 
 {}
 
-IndexBufferT::IndexBufferT(const vkMesh::BufferInitInput& bufferInfo)
+IndexBufferT::IndexBufferT(const vkUtil::BufferInitInput& bufferInfo)
 	: BufferFather(bufferInfo), indexCount(0)
 {}
 

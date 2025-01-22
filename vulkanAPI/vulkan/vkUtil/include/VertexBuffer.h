@@ -18,39 +18,22 @@ class VertexBufferT : private BufferFather
 {	
 public:
 	
-	 VertexBufferT() : BufferFather()
-	{}
+	VertexBufferT();
+
+	VertexBufferT(const vkUtil::BufferInitInput& input);
 
 
-	VertexBufferT(const vkMesh::BufferInitInput& input) : 
-		BufferFather(input), vertexCount(0)
-	{
-	}
+	void initalize(std::vector<float>& data, bool debug);
 
 
-
-	void initalize(std::vector<float>& data, bool debug)
-	{
-		createBuffer<float>(data, bufferMemory, vk::BufferUsageFlagBits::eVertexBuffer, vertexCount, debug); 
-	}
+	size_t vertex_count() const;
 
 
-	size_t vertex_count() const
-	{
-		return vertexCount;
-	}
+	void bind_buffer(vk::CommandBuffer& cmdBuffer, std::vector<vk::DeviceSize>& offsets) const;
 
 
 
-	void bind_buffer(vk::CommandBuffer& cmdBuffer, std::vector<vk::DeviceSize>& offsets) const
-	{
-		std::vector<vk::Buffer> buffers = { buffer };
-		cmdBuffer.bindVertexBuffers(0, buffers, offsets);
-	}
-
-
-
-	~VertexBufferT() = default;
+	~VertexBufferT();
 	 
 
 private:

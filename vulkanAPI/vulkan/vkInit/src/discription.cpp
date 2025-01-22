@@ -28,7 +28,7 @@ namespace vkDiscription
 		{
 			location++;
 
-			attributes.push_back(std::move(get_attribute_description(stride.col, offset * sizeof(float), binding, location)));
+			attributes.push_back(std::move(get_attribute_description(stride.col, offset * sizeof(Vertex), binding, location)));
 
 			offset += vkVert::enumerate_color_stride(stride.col); 
 		}
@@ -38,7 +38,7 @@ namespace vkDiscription
 		{
 			location++;
 
-			attributes.push_back(std::move(get_attribute_description(stride.norm, offset * sizeof(float), binding, location)));
+			attributes.push_back(std::move(get_attribute_description(stride.norm, offset * sizeof(Vertex), binding, location)));
 
 			offset += vkVert::enumerate_normal_stride(stride.norm);
 
@@ -48,7 +48,7 @@ namespace vkDiscription
 		{
 			location++;
 
-			attributes.push_back(std::move(get_attribute_description(stride.tex, offset * sizeof(float), binding, location))); 
+			attributes.push_back(std::move(get_attribute_description(stride.tex, offset * sizeof(Vertex), binding, location))); 
 
 			offset += vkVert::enumerate_tex_stride(stride.tex);
 		}

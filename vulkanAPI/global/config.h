@@ -4,19 +4,23 @@
 
 #include <GLFW\glfw3.h>																				
 
+#include <glm\glm.hpp>
 
 #include <iostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
 #include <memory>
+#include <list>
+#include <cstddef>
+#include <iterator>
 
 
 
 //USER DEFITIONS
-using pos = std::nullptr_t;
+using pos = glm::vec2;
 
-using col = std::nullptr_t;
+using col = glm::vec3;
 
 using norm = std::nullptr_t;
 
@@ -35,28 +39,48 @@ using tex = std::nullptr_t;
 
 #define INDEX_TYPE uint16_t 
 
-using Index = INDEX_TYPE; 
+#define VERTEX_TYPE float 
+
+using Index = INDEX_TYPE;  
+using Vertex = VERTEX_TYPE;  
 
 
 namespace vkType
 {
+	class Drawable
+	{};
+
+	template <class T>
+	concept ValidObj = std::is_class_v<T> &&  std::is_base_of_v<Drawable, T>; 
+
+
+	template <class T>
+	concept GLM_TYPE = std::same_as<T, glm::vec2> || std::same_as<T, glm::vec3> ||
+		std::same_as<T, glm::vec4>;
+
+	template <class T>
+	concept GLM_VEC_TYPE = GLM_TYPE<T> && requires(T t) { typename T::value_type; }; 
+
 	template <class T>
 	concept GLMVec = std::same_as<T, glm::vec2> || std::same_as<T, glm::vec3> ||
 		std::same_as<T, glm::vec4> || std::same_as<T, std::nullptr_t>;
 
-
 	template<class T>
 	concept IndexType = std::is_same_v<T, uint32_t> || std::is_same_v<T, uint16_t>;
+	
+
+	template<class T>
+	concept Arithmatic = std::is_arithmetic_v<T>; 
 
 
-	template <GLMVec POS, GLMVec COL, GLMVec NORM, GLMVec TEX>
-	struct Vertex
-	{
-		using Position = POS;
-		using Color = COL;
-		using Normal = NORM;
-		using Texture = TEX;
-	};
+	//template <GLMVec POS, GLMVec COL, GLMVec NORM, GLMVec TEX>
+	//struct Vertex
+	//{
+	//	using Position = POS;
+	//	using Color = COL;
+	//	using Normal = NORM;
+	//	using Texture = TEX;
+	//};
 
 
 

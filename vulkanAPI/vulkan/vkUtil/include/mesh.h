@@ -12,7 +12,11 @@ public:
 
 	MeshT();
 
-	MeshT(std::vector<vkType::Vert>& vertices, std::vector<vkType::Index>& indices);
+	MeshT(std::list<vkType::Vert>& vertices, std::list<vkType::Index>& indices);
+	MeshT(std::list<vkType::Vert>& vertices);
+
+	MeshT(std::initializer_list<vkType::Vert> verts);
+	MeshT(std::initializer_list<vkType::Vert> verts, std::initializer_list<vkType::Index> inds);
 
 	MeshT(const MeshT& other);
 
@@ -24,10 +28,9 @@ public:
 
 	//MeshT(POS pos, COL col, NORM norm, TEX tex) = default;
 
-	void initialize(std::vector<vkType::Vert>& vertices);
+	void initialize(std::list<vkType::Vert>& vertices);
 
-
-	void initialize(std::vector<vkType::Vert>& vertices, std::vector<vkType::Index>& indices);
+	void initialize(std::list<vkType::Vert>& vertices, std::list<vkType::Index>& indices);
 
 	size_t get_vert_count() const;
 
@@ -38,21 +41,26 @@ public:
 	size_t ind_size() const;
 
 
-	void insert(std::vector<vkType::Vert>& vertices, std::vector<vkType::Index>& indices);
+	void push_front(const vkType::Vert& vertex, const vkType::Index& index);
 
+	void push_front(const vkType::Vert& vertex);
 
-	void insert(std::vector<vkType::Vert>& vertices);
+	void insert(std::list<vkType::Vert>& vertices, std::list<vkType::Index>& indices);
 
-	
+	void insert(std::list<vkType::Vert>& vertices);
+
 	void push_back(const vkType::Vert& vertex, const vkType::Index& index);
 	
 
 	void push_back(const vkType::Vert& vertex);
 
 
-	std::vector <vkType::Vert> get_vertices() const;
+	std::list <vkType::Vert> get_vertices() const;
 
-	std::vector <vkType::Index> get_indices() const;
+	std::list <vkType::Index> get_indices() const;
+
+
+	std::list <Vertex> get_vertices_raw() const;
 
 	void clear();
 
@@ -64,10 +72,15 @@ private:
 	size_t _verticesCount;
 	size_t _indicesCount;
 
-	std::vector<vkType::Vert> _vertices;
-	std::vector <vkType::Index> _indices;
+	std::list<vkType::Vert> _vertices;
+	std::list<vkType::Index> _indices;
 };
 
 
+namespace vkType
+{
+	using Mesh = MeshT;
+}
 
-using Mesh = MeshT;
+
+

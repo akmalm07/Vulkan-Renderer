@@ -7,5 +7,7 @@
 int main()
 {
 	printf("Jello World");  
+
+	GameRenderer::Run();
 	return 0;
 }

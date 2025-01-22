@@ -136,17 +136,11 @@ namespace vkUtil {
  
 		std::string _name = "";
 
-		std::array<std::unordered_map <std::pair<Keys, Mods>, KeyCombB>, SIZET(Action::Count)> _keyCombs; 
+		std::array<std::unordered_map <std::pair<Keys, Mods>, std::unique_ptr<KeyCombB>>, SIZET(Action::Count)> _keyCombs;
 
-		std::array <std::unordered_map <std::string_view, AABButtonB>, SIZET(Action::Count)> _AABButtons;
+		std::array <std::unordered_map <std::string_view, std::unique_ptr<AABButtonB>>, SIZET(Action::Count)> _AABButtons;
 
 		//std::array<MouseButtonB, SIZET(Mouse::Count)> _mouseButtons; 
-
-
-		//KeyComb* FindKeyComb(const std::string& keyNumber);
-
-
-		//Mods FindTheModeValue(unsigned int mode);
 
 		//void setMouseBeforeX(double posX);
 		//void setMouseBeforeY(double posY);
@@ -186,7 +180,7 @@ namespace vkUtil {
 	template<class ... Args>
 	void vkUtil::Window::AddKeyComb(Keys key, Action action, Mods mod, std::function<bool(Args...)> function, std::tuple<Args...> args)
 	{
-		_keyCombs[SIZET(action)].emplace(std::make_pair(key, Mods::None), key, action, function, std::forward<Args>(args)...);
+		_keyCombs[SIZET(action)].emplace(std::make_pair(key, Mods::None), std::unique_ptr<KeyComb<Args...>>(key, action, function, std::forward<Args>(args)...));
 	}
 
 
@@ -194,7 +188,7 @@ namespace vkUtil {
 	void vkUtil::Window::AddAABButton(float cordX, float cordY, float width, float height, Action action, Mouse button, 
 		std::function<bool(Args...)> function, std::string_view str, std::tuple<Args...> args) 
 	{
-		_AABButtons[SIZET(action)].emplace(str, cordX, cordY, width, height, action, button, function, std::forward<Args>(args)...); 
+		_AABButtons[SIZET(action)].emplace(str, std::unique_ptr<AABButton<Args...>>(cordX, cordY, width, height, action, button, function, std::forward<Args>(args)...));
 
 	}
 

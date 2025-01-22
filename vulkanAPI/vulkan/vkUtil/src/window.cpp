@@ -325,7 +325,7 @@ namespace vkUtil {
 		{
 		case GLFW_PRESS:
 		{
-			auto act = _keyCombs[SIZET(Action::Press)];
+			auto& act = _keyCombs[SIZET(Action::Press)];
 
 			for (int i = 0; i < KEY_CONST; i++)
 			{
@@ -333,9 +333,9 @@ namespace vkUtil {
 				{
 					for (const auto& [ky, val] : act)
 					{
-						if (val.isPressed(ky.first, Action::Press, ky.second))
+						if (val->isPressed(ky.first, Action::Press, ky.second))
 						{
-							val.execute();
+							val->execute();
 						}
 					}
 
@@ -345,7 +345,7 @@ namespace vkUtil {
 		}
 		case GLFW_RELEASE:
 		{
-			auto act = _keyCombs[SIZET(Action::Release)];
+			auto& act = _keyCombs[SIZET(Action::Release)];
 
 			for (int i = 0; i < KEY_CONST; i++)
 			{
@@ -353,9 +353,9 @@ namespace vkUtil {
 				{
 					for (const auto& [ky, val] : act)
 					{
-						if (val.isPressed(ky.first, Action::Release, ky.second))
+						if (val->isPressed(ky.first, Action::Release, ky.second)) 
 						{
-							val.execute();
+							val->execute();
 						}
 					}
 
@@ -365,7 +365,7 @@ namespace vkUtil {
 		}
 		case GLFW_REPEAT:
 		{
-			auto act = _keyCombs[SIZET(Action::Repeat)];
+			auto& act = _keyCombs[SIZET(Action::Repeat)];
 
 			for (int i = 0; i < KEY_CONST; i++)
 			{
@@ -373,9 +373,9 @@ namespace vkUtil {
 				{
 					for (const auto& [ky, val] : act) 
 					{
-						if (val.isPressed(ky.first, Action::Press, ky.second)) 
+						if (val->isPressed(ky.first, Action::Press, ky.second)) 
 						{
-							val.execute(); 
+							val->execute(); 
 						}
 					}
 
@@ -402,55 +402,55 @@ namespace vkUtil {
 		switch (action)
 		{
 		case GLFW_PRESS: {
-			auto act = _AABButtons[SIZET(Action::Press)];
+			auto& act = _AABButtons[SIZET(Action::Press)];
 			Mouse mouse = (mouseButton == GLFW_MOUSE_BUTTON_LEFT ? Mouse::Left : Mouse::Right);
 
 
 			for (const auto& [key, val] : act)
 			{
-				if (val.isClicked(_mouseCurrentX, _mouseCurrentY, Action::Press, mouse))
+				if (val->isClicked(_mouseCurrentX, _mouseCurrentY, Action::Press, mouse))
 				{
-					val.execute();
+					val->execute();
 				}
 			}
 
-			//_mouseButtons[SIZET(mouse)].setPressed(true);
+			//_mouseButtons[SIZET(mouse)]->setPressed(true);
 			break;
 		}//case of press
 
 		case GLFW_RELEASE:
 		{
 
-			auto act = _AABButtons[SIZET(Action::Release)];
+			auto& act = _AABButtons[SIZET(Action::Release)];
 			Mouse mouse = (mouseButton == GLFW_MOUSE_BUTTON_LEFT ? Mouse::Left : Mouse::Right);
 
 
 			for (const auto& [key, val] : act)
 			{
-				if (val.isClicked(_mouseCurrentX, _mouseCurrentY, Action::Release, mouse))
+				if (val->isClicked(_mouseCurrentX, _mouseCurrentY, Action::Release, mouse))
 				{
-					val.execute();
+					val->execute();
 				}
 			}
-			//_mouseButtons[SIZET(mouse)].setPressed(false); 
+			//_mouseButtons[SIZET(mouse)]->setPressed(false); 
 			break;
 		}//case of release
 
 		case GLFW_REPEAT:
 		{
 
-			auto act = _AABButtons[SIZET(Action::Repeat)];
+			auto& act = _AABButtons[SIZET(Action::Repeat)];
 			Mouse mouse = (mouseButton == GLFW_MOUSE_BUTTON_LEFT ? Mouse::Left : Mouse::Right);
 
 
 			for (const auto& [key, val] : act)
 			{
-				if (val.isClicked(_mouseCurrentX, _mouseCurrentY, Action::Repeat, mouse))
+				if (val->isClicked(_mouseCurrentX, _mouseCurrentY, Action::Repeat, mouse))
 				{
-					val.execute();
+					val->execute();
 				}
 			}
-			//_mouseButtons[SIZET(mouse)].setPressed(false); 
+			//_mouseButtons[SIZET(mouse)]->setPressed(false); 
 			break;
 		}//case of release
 		}//switch statement

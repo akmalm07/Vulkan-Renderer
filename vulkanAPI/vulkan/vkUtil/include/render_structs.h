@@ -6,7 +6,7 @@
 
 namespace vkUtil {
 
-	struct ObjectData
+	struct ObjectData : public vkType::Drawable
 	{
 		glm::mat4 model; 
 	};

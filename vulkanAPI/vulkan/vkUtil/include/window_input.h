@@ -8,18 +8,6 @@
 namespace vkUtil {
 
 
-	//Base classes for user input
-	struct UserInput
-	{
-	public:
-		virtual bool execute() const = 0;
-
-		virtual ~UserInput();
-
-	protected:
-		bool result;
-	};
-
 	template<class ... Args>
 	struct MouseButton;	// forward declaration
 
@@ -30,7 +18,7 @@ namespace vkUtil {
 	struct KeyComb;
 
 
-	struct MouseButtonB : UserInput
+	struct MouseButtonB
 	{
 	public:
 
@@ -50,16 +38,18 @@ namespace vkUtil {
 
 		void setPressed(bool value);
 
-		virtual ~MouseButtonB() override;
+		virtual ~MouseButtonB();
 	protected:
 		bool _pressed;
 		Mouse _button;
 		Action _action;
+		bool _result;
+
 	};
 
 
 
-	struct AABButtonB : UserInput
+	struct AABButtonB
 	{
 	public:
 
@@ -80,7 +70,7 @@ namespace vkUtil {
 			dynamic_cast<AABButton<Args...>*>(this)->changeParameter(std::forward<Args>(args)...);
 		}
 
-		virtual ~AABButtonB() override;
+		virtual ~AABButtonB();
 
 	protected:
 		float _x;
@@ -90,10 +80,12 @@ namespace vkUtil {
 		Action _action;
 		Mouse _button;
 		std::string_view _name;
+		bool _result;
+
 	};
 
 
-	struct KeyCombB : UserInput
+	struct KeyCombB
 	{
 	public:
 
@@ -113,13 +105,13 @@ namespace vkUtil {
 			dynamic_cast<KeyComb<Args...>*>(this)->changeParameter(std::forward<Args>(args)...); //dynamic cast to the derived class 
 		}
 
-		virtual ~KeyCombB() override;
+		virtual ~KeyCombB();
 	protected:
 		Keys _charater;
-
 		std::optional<Mods> _mode; //optional because it is not always needed
-
 		Action _trigger;
+		bool _result;
+
 	};
 
 
@@ -140,7 +132,8 @@ namespace vkUtil {
 
 		bool execute() const override
 		{
-			return std::apply(_func, _args);
+			_result = std::apply(_func, _args);
+			return _result;
 		}
 
 		void changeParameter(Args&&... args)
@@ -186,7 +179,8 @@ namespace vkUtil {
 
 		bool execute() const override
 		{
-			return std::apply(_func, _args);
+			_result = std::apply(_func, _args);
+			return _result;
 		}
 
 		bool operator()() const	
@@ -223,16 +217,18 @@ namespace vkUtil {
 			_args = std::make_tuple(std::forward<Args>(args)...);
 		}
 
+		bool execute() const override
+		{
+			_result = std::apply(_func, _args);
+			return _result;
+		}
+
+
 		bool operator()() const
 		{
 			return execute();
 		}
 
-
-		bool execute() const override
-		{
-			return std::apply(_func, _args);
-		}
 
 	private:
 		std::function <bool(Args...)> _func;

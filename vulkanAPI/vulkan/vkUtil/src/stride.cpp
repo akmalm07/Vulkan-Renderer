@@ -8,7 +8,25 @@ namespace vkVert
 
 
 
-	uint8_t enumerate_pos_stride(ColorStride stride)
+	uint8_t enumerate_pos_stride(PosStride stride)
+	{
+		switch (stride)
+		{
+		case PosStride::NONE:
+			return 0;
+
+		case PosStride::STRIDE_2D:
+			return 2;
+
+		case PosStride::STRIDE_3D:
+			return 3;
+		default:
+			return 0;
+		}
+	}
+
+
+	uint8_t enumerate_color_stride(ColorStride stride) 
 	{
 		switch (stride)
 		{
@@ -16,14 +34,15 @@ namespace vkVert
 			return 0;
 
 		case ColorStride::RGB:
-			return 3;
+			return 2;
 
 		case ColorStride::RGBA:
-			return 4;
+			return 3;
 		default:
 			return 0;
 		}
 	}
+
 
 
 	uint8_t enumerate_tex_stride(TextureStride texStride)
