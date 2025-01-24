@@ -6,11 +6,12 @@
 
 namespace vkUtil {
 
-	struct ObjectData : public vkType::Drawable
+	struct ObjectData : public vkType::Drawable, public vkType::PushConst 
 	{
-		glm::mat4 model; 
+		glm::mat3 model; 
 	};
 
+	std::vector<vkType::Drawable*> renderedObjects = { new ObjectData{} };
 }
 
 

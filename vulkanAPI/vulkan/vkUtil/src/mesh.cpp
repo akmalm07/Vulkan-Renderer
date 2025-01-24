@@ -14,6 +14,27 @@ MeshT::MeshT(std::list<vkType::Vert>& vertices) :
 	_verticesCount(vertices.size()), _indicesCount(0), _vertices(std::move(vertices))
 {}
 
+
+MeshT::MeshT(vkType::Vert vertex)
+{
+	_vertices.push_back(vertex);
+	_verticesCount = 1;
+	_indicesCount = 0;
+
+}
+
+
+MeshT::MeshT(vkType::Vert vertex, vkType::Index index)
+{
+	_vertices.push_back(vertex);  
+	_indices.push_back(index); 
+	_verticesCount = 1;  
+	_indicesCount = 1; 
+
+}
+
+
+
 MeshT::MeshT(const MeshT& other)
 {
 	_verticesCount = other.get_vert_count();
@@ -169,7 +190,7 @@ std::list <vkType::Index> MeshT::get_indices() const
 }
 
 
-std::list <Vertex> MeshT::get_vertices_raw() const
+std::list <Vertex> MeshT::get_vertices_raw() const	
 {
 	std::list<Vertex> raw;
 	for (const auto& vertex : _vertices)

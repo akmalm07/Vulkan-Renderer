@@ -46,6 +46,18 @@ public:
 	}
 
 
+	VertexT(const std::initializer_list<Vertex>& p, const std::initializer_list<Vertex>& c, const std::initializer_list<Vertex>& n, const std::initializer_list<Vertex>& t)
+		: Pos(p), Col(c), Norm(n), Tex(t) {}
+
+	void initalize(const std::initializer_list<Vertex>& p, const std::initializer_list<Vertex>& c, const std::initializer_list<Vertex>& n, const std::initializer_list<Vertex>& t)
+
+	{
+		std::copy(p.begin(), p.end(), glm::value_ptr(_position));
+		std::copy(c.begin(), c.end(), glm::value_ptr(_color));
+		std::copy(n.begin(), n.end(), glm::value_ptr(_normal));
+		std::copy(t.begin(), t.end(), glm::value_ptr(_texture));
+	}
+
 
 	std::list<Vertex> get_raw() const
 	{
@@ -120,6 +132,17 @@ public:
 	{
 		_position = p; 
 		_color = c;
+	}
+	
+
+	VertexT(const std::initializer_list<Vertex>& p, const std::initializer_list<Vertex>& c)
+		: Pos(p), Col(c) {} 
+
+	void initalize(const std::initializer_list<Vertex>& p, const std::initializer_list<Vertex>& c)
+
+	{
+		std::copy(p.begin(), p.end(), glm::value_ptr(_position)); 
+		std::copy(c.begin(), c.end(), glm::value_ptr(_color));  
 	}
 
 	size_t size() const
@@ -205,6 +228,19 @@ public:
 	}
 
 
+	VertexT(const std::initializer_list<Vertex>& p, const std::initializer_list<Vertex>& c, const std::initializer_list<Vertex>& n)
+		: Pos(p), Col(c), Norm(n) {}
+
+	void initalize(const std::initializer_list<Vertex>& p, const std::initializer_list<Vertex>& c, const std::initializer_list<Vertex>& n)
+
+	{
+		std::copy(p.begin(), p.end(), glm::value_ptr(_position));
+		std::copy(c.begin(), c.end(), glm::value_ptr(_color));
+		std::copy(n.begin(), n.end(), glm::value_ptr(_normal));
+	}
+
+
+
 	std::list<Vertex> get_raw()  const
 	{
 		std::list<Vertex> raw;
@@ -277,6 +313,18 @@ public:
 		_position = p;
 		_color = c;
 		_texture = t;
+	}
+
+
+	VertexT(const std::initializer_list<Vertex>& p, const std::initializer_list<Vertex>& c, const std::initializer_list<Vertex>& t)
+		: Pos(p), Col(c), Tex(t) {} 
+
+	void initalize(const std::initializer_list<Vertex>& p, const std::initializer_list<Vertex>& c, const std::initializer_list<Vertex>& t)
+
+	{
+		std::copy(p.begin(), p.end(), glm::value_ptr(_position));
+		std::copy(c.begin(), c.end(), glm::value_ptr(_color));
+		std::copy(t.begin(), t.end(), glm::value_ptr(_texture));
 	}
 
 	size_t size() const

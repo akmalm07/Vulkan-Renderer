@@ -4,60 +4,38 @@
 
 #include "vkUtil\include\mesh.h"
 
-//
-//template <vkType::GLMVec POS, vkType::GLMVec COL, vkType::GLMVec NORM, vkType::GLMVec TEX>
-//class SceneT
-//{
-//public:
-//
-//	SceneT() = default;
-//
-//
-//	SceneT(SceneT&& other) noexcept
-//		: triangles(std::move(other.triangles))
-//	{
-//		other.triangles.clear();
-//
-//	}
-//
-//	SceneT& operator=(SceneT&& other) noexcept
-//	{
-//		if (this != &other)
-//		{
-//			triangles = std::move(other.triangles);
-//
-//			other.triangles.clear();
-//		}
-//		return *this;
-//	}
-//
-//
-//	void initalize()
-//	{
-//		for (float x = -1.0f; x < 1.0f; x += 0.2f)
-//		{
-//
-//			for (float y = -1.0f; y < 1.0f; y += 0.2f)
-//			{
-//				triangles.push_back(glm::vec3(x, y, 0.0f));
-//			}
-//		}
-//	}
-//	
-//	/*std::vector<MeshT>*/ std::vector <glm::vec3> get_triangles()
-//	{
-//		return triangles;
-//	}
-//	
-//	~SceneT() = default;
-//
-//
-//private:
-//
-//	std::vector<MeshT> triangles;
-//};
-//
-//
-//
-//using Scene = SceneT<pos, col, norm, tex>;
-//
+
+class SceneT
+{
+public:
+
+	SceneT();
+
+
+	SceneT(SceneT&& other) noexcept;
+
+	SceneT& operator=(SceneT&& other) noexcept;
+
+	
+	std::vector <MeshT> get_triangles();
+	
+
+	std::vector <pos> get_triangles_pos();
+
+
+	~SceneT();
+
+
+private:
+
+	std::vector<MeshT> triangles;
+
+	void initalize();
+};
+
+
+
+namespace vkType
+{
+	using Scene = SceneT;
+}

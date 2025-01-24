@@ -7,6 +7,7 @@
 #include "vkUtil\include\VertexBuffer.h"
 #include "vkUtil\include\IndexBuffer.h"
 #include "vkUtil\include\scene.h"
+#include "vkUtil\include\shader.h"
 
 
 
@@ -31,16 +32,14 @@ public:
 
 	void load_meshes(std::vector<MeshT>& meshes) const;
 
-	//void load_scene(std::unique_ptr<Scene>& scene);
+	void load_scene(std::unique_ptr<SceneT>& scene);
 
-	void draw_scene()
-	{
-		
-	}
-
+	void draw_scene(vk::CommandBuffer& cmdBuffer) const	;
 
 	void draw(vk::CommandBuffer& commandBuffer) const override;
 
+	template<vkType::ValidObj T>
+	void send_as_push_const(T& data, vk::CommandBuffer cmdBuffer, vkUtil::ShaderStage shader, uint32_t offset) const;
 
 	~Engine() override
 	{
@@ -50,10 +49,11 @@ public:
 
 private:
 
-	//std::unique_ptr <Scene> _scene; 
+	std::unique_ptr <SceneT> _scene; 
 
-	mutable std::unique_ptr<VertexBuffer> _vertexBuffer;    
-	mutable std::unique_ptr<IndexBuffer> _indexBuffer;
+	mutable std::unique_ptr<VertexBufferT> _vertexBuffer;    
+	mutable std::unique_ptr<IndexBufferT> _indexBuffer;
+
 
 
 };
@@ -65,3 +65,9 @@ private:
 //
 //	using engine = Engine<pos, col, norm, tex>; 
 //}
+
+template<vkType::ValidObj T>
+inline void Engine::send_as_push_const(T& data, vk::CommandBuffer cmdBuffer, vkUtil::ShaderStage shader, uint32_t offset) const
+{
+	cmdBuffer.pushConstants(_vkPipelineLayout, vkUtil::enum_to_vk(shader), offset, sizeof(data), &data); 
+}

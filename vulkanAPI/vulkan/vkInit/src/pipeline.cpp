@@ -2,396 +2,439 @@
 
 #include "vkInit\include\pipeline.h"
 #include "vkUtil\include\shader.h"
+#include "vkUtil\include\json_reader.h"
+#include "vkUtil\include\render_structs.h"
+
+std::vector<vkInit::PushConstentsOutJSON> vkInit::read_json_push_constants(const std::filesystem::path& path)
+{
+
+	JsonReader reader(path);
+
+	read_;
+
+}
 
 vk::PushConstantRange vkInit::create_push_constant(size_t offset, size_t size, vk::ShaderStageFlagBits shader, bool debug)
 {
-    vk::PushConstantRange pushConstantInfo = {};
+	vk::PushConstantRange pushConstantInfo = {};
 
-    pushConstantInfo.offset = offset;
+	pushConstantInfo.offset = offset;
 
-    pushConstantInfo.size = size;
+	pushConstantInfo.size = size;
 
-    pushConstantInfo.stageFlags = shader;
+	pushConstantInfo.stageFlags = shader;
 
-    return pushConstantInfo;
+	return pushConstantInfo;
 
 }
 
 vkInit::GraphicsPipelineOutBundle vkInit::create_pipeline(GraphicsPipelineInBundle& spesifications, 
-    std::vector<vkDiscription::DiscriptorBundle>& discriptorSet, bool debug)
+	std::vector<vkDiscription::DiscriptorBundle>& discriptorSet, std::filesystem::path jsonpath, bool debug)
 {
 
-    if (debug)
-    {
-        std::cout << "Creating pipeline... \n";
-    }
+	if (debug)
+	{
+		std::cout << "Creating pipeline... \n";
+	}
 
 
-    vk::GraphicsPipelineCreateInfo pipelineCreateInfo = {};
+	vk::GraphicsPipelineCreateInfo pipelineCreateInfo = {};
 
-    pipelineCreateInfo.flags = vk::PipelineCreateFlags();
-
-
+	pipelineCreateInfo.flags = vk::PipelineCreateFlags();
 
 
-    std::vector <vk::PipelineShaderStageCreateInfo> shaderStages;
 
-    //vertex input 
 
-    vk::PipelineVertexInputStateCreateInfo vertexInputInfo = {};
+	std::vector <vk::PipelineShaderStageCreateInfo> shaderStages;
+
+	//vertex input 
+
+	vk::PipelineVertexInputStateCreateInfo vertexInputInfo = {};
 
    
-    std::vector<vk::VertexInputAttributeDescription> bindingAttributes = {};
+	std::vector<vk::VertexInputAttributeDescription> bindingAttributes = {};
 
-    vk::VertexInputBindingDescription bindingDescription = {};
+	vk::VertexInputBindingDescription bindingDescription = {};
 
 
-    uint32_t numOfDescriptors = 0;
-    uint32_t numOfAttrib = 0;
+	uint32_t numOfDescriptors = 0;
+	uint32_t numOfAttrib = 0;
 
-    for (size_t i = 0; i < discriptorSet.size(); i++)
-    {
-        uint32_t totalOffset = vkVert::enumerate_pos_stride(discriptorSet[i].stride.pos)  + 
-                               vkVert::enumerate_color_stride(discriptorSet[i].stride.col) + 
-                               vkVert::enumerate_tex_stride(discriptorSet[i].stride.tex)   + 
-                               vkVert::enumerate_normal_stride(discriptorSet[i].stride.norm);
+	for (size_t i = 0; i < discriptorSet.size(); i++)
+	{
+		uint32_t totalOffset = vkVert::enumerate_pos_stride(discriptorSet[i].stride.pos)  + 
+							   vkVert::enumerate_color_stride(discriptorSet[i].stride.col) + 
+							   vkVert::enumerate_tex_stride(discriptorSet[i].stride.tex)   + 
+							   vkVert::enumerate_normal_stride(discriptorSet[i].stride.norm);
 
 
-        bindingAttributes = vkDiscription::get_attribute_descriptions(discriptorSet[i].stride, i, debug); 
+		bindingAttributes = vkDiscription::get_attribute_descriptions(discriptorSet[i].stride, i, debug); 
 
-        bindingDescription = vkDiscription::get_binding_description(totalOffset * sizeof(Vertex), i, discriptorSet[i].isPerInstanceRate);
+		bindingDescription = vkDiscription::get_binding_description(totalOffset * sizeof(Vertex), i, discriptorSet[i].isPerInstanceRate);
 
-        numOfAttrib = numOfAttrib + bindingAttributes.size();
+		numOfAttrib = numOfAttrib + bindingAttributes.size();
 
 
-        numOfDescriptors++;
-    }
-    vertexInputInfo.vertexAttributeDescriptionCount = numOfAttrib;
+		numOfDescriptors++;
+	}
+	vertexInputInfo.vertexAttributeDescriptionCount = numOfAttrib;
 
-    vertexInputInfo.pVertexAttributeDescriptions = bindingAttributes.data();
+	vertexInputInfo.pVertexAttributeDescriptions = bindingAttributes.data();
 
 
-    vertexInputInfo.vertexBindingDescriptionCount = numOfDescriptors;
+	vertexInputInfo.vertexBindingDescriptionCount = numOfDescriptors;
 
-    vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+	vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
 
 
-    vertexInputInfo.flags = vk::PipelineVertexInputStateCreateFlags();
+	vertexInputInfo.flags = vk::PipelineVertexInputStateCreateFlags();
 
-    pipelineCreateInfo.pVertexInputState = &vertexInputInfo;
+	pipelineCreateInfo.pVertexInputState = &vertexInputInfo;
 
 
-    vk::PipelineInputAssemblyStateCreateInfo inputAssemblyInfo = {};
+	vk::PipelineInputAssemblyStateCreateInfo inputAssemblyInfo = {};
 
-    inputAssemblyInfo.flags = vk::PipelineInputAssemblyStateCreateFlags();
+	inputAssemblyInfo.flags = vk::PipelineInputAssemblyStateCreateFlags();
 
-    inputAssemblyInfo.topology = vk::PrimitiveTopology::eTriangleList;
+	inputAssemblyInfo.topology = vk::PrimitiveTopology::eTriangleList;
 
-    pipelineCreateInfo.pInputAssemblyState = &inputAssemblyInfo;
+	pipelineCreateInfo.pInputAssemblyState = &inputAssemblyInfo;
 
-    //vertex shader
+	//vertex shader
 
-    vk::PipelineShaderStageCreateInfo vertShaderInfo = {};
+	vk::PipelineShaderStageCreateInfo vertShaderInfo = {};
 
-    vk::ShaderModule vertShader = vkInit::create_shader_module(spesifications.vertShaderPath, spesifications.LogicalDevice, debug);
+	vk::ShaderModule vertShader = vkInit::create_shader_module(spesifications.vertShaderPath, spesifications.LogicalDevice, debug);
 
-    vertShaderInfo.stage = vk::ShaderStageFlagBits::eVertex;
+	vertShaderInfo.stage = vk::ShaderStageFlagBits::eVertex;
 
-    vertShaderInfo.pName = "main";
+	vertShaderInfo.pName = "main";
 
-    vertShaderInfo.module = vertShader;
+	vertShaderInfo.module = vertShader;
 
-    shaderStages.push_back(vertShaderInfo);
+	shaderStages.push_back(vertShaderInfo);
 
-    //To make the scissor and viewport
-    std::vector<vk::DynamicState> dynamicStates = {
-    vk::DynamicState::eViewport, 
-    vk::DynamicState::eScissor
-    }; 
+	//To make the scissor and viewport
+	std::vector<vk::DynamicState> dynamicStates = {
+	vk::DynamicState::eViewport, 
+	vk::DynamicState::eScissor
+	}; 
 
-    vk::PipelineDynamicStateCreateInfo dynamicStateCreateInfo({}, dynamicStates);
+	vk::PipelineDynamicStateCreateInfo dynamicStateCreateInfo({}, dynamicStates);
 
-    pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo; 
+	pipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo; 
 
-    //viewport and scissor
+	//viewport and scissor
 
-    vk::Viewport viewport = {};
+	vk::Viewport viewport = {};
 
-    viewport.x = 0.0f;
-    
-    viewport.y = 0.0f;
-    
-    viewport.width = spesifications.swapchainExtent.width;
+	viewport.x = 0.0f;
+	
+	viewport.y = 0.0f;
+	
+	viewport.width = spesifications.swapchainExtent.width;
 
-    viewport.height = spesifications.swapchainExtent.height;
-    
-    viewport.maxDepth = 1.0f;
-    viewport.minDepth = 0.0f;
+	viewport.height = spesifications.swapchainExtent.height;
+	
+	viewport.maxDepth = 1.0f;
+	viewport.minDepth = 0.0f;
 
-    vk::Rect2D scissor = {}; 
+	vk::Rect2D scissor = {}; 
 
-    scissor.offset.x = 0.0;
-    scissor.offset.y = 0.0f;
+	scissor.offset.x = 0.0;
+	scissor.offset.y = 0.0f;
 
-    scissor.extent = spesifications.swapchainExtent;
+	scissor.extent = spesifications.swapchainExtent;
 
-    vk::PipelineViewportStateCreateInfo viewportInfo = {};
+	vk::PipelineViewportStateCreateInfo viewportInfo = {};
 
-    viewportInfo.flags = vk::PipelineViewportStateCreateFlags();
+	viewportInfo.flags = vk::PipelineViewportStateCreateFlags();
 
-    viewportInfo.viewportCount = 1;
-    
-    viewportInfo.scissorCount = 1;
-    
-    viewportInfo.pViewports = &viewport;
+	viewportInfo.viewportCount = 1;
+	
+	viewportInfo.scissorCount = 1;
+	
+	viewportInfo.pViewports = &viewport;
 
-    viewportInfo.pScissors = &scissor;
+	viewportInfo.pScissors = &scissor;
 
 
-    pipelineCreateInfo.pViewportState = &viewportInfo;
+	pipelineCreateInfo.pViewportState = &viewportInfo;
 
 
-    //Rasteurizer state
+	//Rasteurizer state
 
-    vk::PipelineRasterizationStateCreateInfo rastInfo = {};
+	vk::PipelineRasterizationStateCreateInfo rastInfo = {};
 
-    rastInfo.flags = vk::PipelineRasterizationStateCreateFlags();
+	rastInfo.flags = vk::PipelineRasterizationStateCreateFlags();
 
-    rastInfo.depthClampEnable = VK_FALSE;
-    
-    rastInfo.rasterizerDiscardEnable = VK_FALSE;
+	rastInfo.depthClampEnable = VK_FALSE;
+	
+	rastInfo.rasterizerDiscardEnable = VK_FALSE;
 
-    rastInfo.rasterizerDiscardEnable = VK_FALSE;
+	rastInfo.rasterizerDiscardEnable = VK_FALSE;
 
-    rastInfo.polygonMode = vk::PolygonMode::eFill;
-    
-    rastInfo.lineWidth = 1.0f;
+	rastInfo.polygonMode = vk::PolygonMode::eFill;
+	
+	rastInfo.lineWidth = 1.0f;
 
-    rastInfo.cullMode = vk::CullModeFlagBits::eBack;
-    
-    rastInfo.frontFace = vk::FrontFace::eClockwise;
-    
-    rastInfo.depthBiasEnable = VK_FALSE;
+	rastInfo.cullMode = vk::CullModeFlagBits::eBack;
+	
+	rastInfo.frontFace = vk::FrontFace::eClockwise;
+	
+	rastInfo.depthBiasEnable = VK_FALSE;
 
-    
-    pipelineCreateInfo.pRasterizationState = &rastInfo;
+	
+	pipelineCreateInfo.pRasterizationState = &rastInfo;
 
 
-    //fragment shader
+	//fragment shader
 
-    vk::PipelineShaderStageCreateInfo fragShaderInfo = {};
+	vk::PipelineShaderStageCreateInfo fragShaderInfo = {};
 
-    vk::ShaderModule fragShader = vkInit::create_shader_module(spesifications.fragShaderPath, spesifications.LogicalDevice, debug); 
+	vk::ShaderModule fragShader = vkInit::create_shader_module(spesifications.fragShaderPath, spesifications.LogicalDevice, debug); 
 
-    fragShaderInfo.stage = vk::ShaderStageFlagBits::eFragment;
+	fragShaderInfo.stage = vk::ShaderStageFlagBits::eFragment;
 
-    fragShaderInfo.pName = "main";
+	fragShaderInfo.pName = "main";
 
-    fragShaderInfo.module = fragShader;
+	fragShaderInfo.module = fragShader;
 
-    shaderStages.push_back(fragShaderInfo); 
+	shaderStages.push_back(fragShaderInfo); 
 
 
-    pipelineCreateInfo.stageCount = shaderStages.size();
-    pipelineCreateInfo.pStages = shaderStages.data();
+	pipelineCreateInfo.stageCount = shaderStages.size();
+	pipelineCreateInfo.pStages = shaderStages.data();
 
 
-    //Multisampling
+	//Multisampling
 
 
-    vk::PipelineMultisampleStateCreateInfo multisamplingInfo = {};
+	vk::PipelineMultisampleStateCreateInfo multisamplingInfo = {};
 
-    multisamplingInfo.flags = vk::PipelineMultisampleStateCreateFlags();
+	multisamplingInfo.flags = vk::PipelineMultisampleStateCreateFlags();
 
-    multisamplingInfo.sampleShadingEnable = VK_FALSE;
+	multisamplingInfo.sampleShadingEnable = VK_FALSE;
 
-    multisamplingInfo.rasterizationSamples = vk::SampleCountFlagBits::e1;
+	multisamplingInfo.rasterizationSamples = vk::SampleCountFlagBits::e1;
 
 
-    pipelineCreateInfo.pMultisampleState = &multisamplingInfo;
+	pipelineCreateInfo.pMultisampleState = &multisamplingInfo;
 
 
-    vk::PipelineColorBlendAttachmentState colorBlendAttachment = {}; 
+	vk::PipelineColorBlendAttachmentState colorBlendAttachment = {}; 
 
-    colorBlendAttachment.colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA;
-    colorBlendAttachment.blendEnable = VK_FALSE;
+	colorBlendAttachment.colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA;
+	colorBlendAttachment.blendEnable = VK_FALSE;
 
-    vk::PipelineColorBlendStateCreateInfo colorBlendInfo = {};
+	vk::PipelineColorBlendStateCreateInfo colorBlendInfo = {};
 
-    colorBlendInfo.flags = vk::PipelineColorBlendStateCreateFlags();
+	colorBlendInfo.flags = vk::PipelineColorBlendStateCreateFlags();
 
-    colorBlendInfo.logicOpEnable = VK_FALSE;
-    
-    colorBlendInfo.logicOp = vk::LogicOp::eCopy;
-    
-    colorBlendInfo.attachmentCount = 1;
-    
-    colorBlendInfo.pAttachments = &colorBlendAttachment;
+	colorBlendInfo.logicOpEnable = VK_FALSE;
+	
+	colorBlendInfo.logicOp = vk::LogicOp::eCopy;
+	
+	colorBlendInfo.attachmentCount = 1;
+	
+	colorBlendInfo.pAttachments = &colorBlendAttachment;
 
-    colorBlendInfo.blendConstants[0] = 0.0f;
-    colorBlendInfo.blendConstants[1] = 0.0f;
-    colorBlendInfo.blendConstants[2] = 0.0f;
-    colorBlendInfo.blendConstants[3] = 0.0f;
+	colorBlendInfo.blendConstants[0] = 0.0f;
+	colorBlendInfo.blendConstants[1] = 0.0f;
+	colorBlendInfo.blendConstants[2] = 0.0f;
+	colorBlendInfo.blendConstants[3] = 0.0f;
 
-    pipelineCreateInfo.pColorBlendState = &colorBlendInfo;
-    
+	pipelineCreateInfo.pColorBlendState = &colorBlendInfo;
+	
 
-    vk::PipelineLayout pipelineLayout = create_pipeline_layout(spesifications.LogicalDevice, debug);
-    pipelineCreateInfo.layout = pipelineLayout;
+	vk::PipelineLayout pipelineLayout = create_pipeline_layout(spesifications.LogicalDevice, jsonpath, debug);
+	pipelineCreateInfo.layout = pipelineLayout;
 
 
-    vk::RenderPass renderPass = create_render_pass(spesifications.LogicalDevice, spesifications.swapchainFormat, debug);
-    pipelineCreateInfo.renderPass = renderPass; 
+	vk::RenderPass renderPass = create_render_pass(spesifications.LogicalDevice, spesifications.swapchainFormat, debug);
+	pipelineCreateInfo.renderPass = renderPass; 
 
-    pipelineCreateInfo.basePipelineHandle = nullptr;
+	pipelineCreateInfo.basePipelineHandle = nullptr;
 
 
 
-    //Creating Pipeline
+	//Creating Pipeline
 
-    vk::Pipeline pipeline = nullptr;
+	vk::Pipeline pipeline = nullptr;
 
-    try
-    {
-        vk::ResultValue<vk::Pipeline> result = spesifications.LogicalDevice.createGraphicsPipeline(nullptr, pipelineCreateInfo); 
-        if (result.result == vk::Result::eSuccess) 
-        {
-            pipeline = result.value;
-        }
-    }
-    catch (vk::SystemError& err)
-    {
-        std::cerr << "Error creating pipeline: " << err.what() << "\n";
-    }
+	try
+	{
+		vk::ResultValue<vk::Pipeline> result = spesifications.LogicalDevice.createGraphicsPipeline(nullptr, pipelineCreateInfo); 
+		if (result.result == vk::Result::eSuccess) 
+		{
+			pipeline = result.value;
+		}
+	}
+	catch (vk::SystemError& err)
+	{
+		std::cerr << "Error creating pipeline: " << err.what() << "\n";
+	}
 
 
 
-    GraphicsPipelineOutBundle output = {};
+	GraphicsPipelineOutBundle output = {};
 
-    output.renderpass = renderPass; 
-    output.pipelineLayout = pipelineLayout; 
-    output.pipeline = pipeline;
+	output.renderpass = renderPass; 
+	output.pipelineLayout = pipelineLayout; 
+	output.pipeline = pipeline;
 
 
 
-    
-    
-    spesifications.LogicalDevice.destroyShaderModule(vertShader);
-    spesifications.LogicalDevice.destroyShaderModule(fragShader);
+	
+	
+	spesifications.LogicalDevice.destroyShaderModule(vertShader);
+	spesifications.LogicalDevice.destroyShaderModule(fragShader);
 
 
 
-    return output;
+	return output;
 }
 
 
 
-vk::PipelineLayout vkInit::create_pipeline_layout(vk::Device& logicalDevice, bool debug)
+vk::PipelineLayout vkInit::create_pipeline_layout(vk::Device& logicalDevice, std::filesystem::path json, bool debug) 
 {
-    if (debug)
-    {
-        std::cout << "Creating pipeline layout... \n";
-    }
-    vk::PipelineLayoutCreateInfo layoutInfo = {};
-    
-    layoutInfo.flags = vk::PipelineLayoutCreateFlags();
+	if (debug)
+	{
+		std::cout << "Creating pipeline layout... \n";
+	}
+	vk::PipelineLayoutCreateInfo layoutInfo = {};
+	
+	layoutInfo.flags = vk::PipelineLayoutCreateFlags();
 
-    layoutInfo.setLayoutCount = 0;
-    
-    layoutInfo.pushConstantRangeCount = 1;
-    
-    vk::PushConstantRange constantRangeInfo = create_push_constant(0, sizeof(vkUtil::ObjectData), vk::ShaderStageFlagBits::eVertex, debug);
+	layoutInfo.setLayoutCount = 0;
+	
+	
+	std::vector<PushConstentsOutJSON> filevec = read_json_push_constants(json);
+	std::vector<vk::PushConstantRange> constantRangesInfo;
 
-    layoutInfo.pPushConstantRanges = &constantRangeInfo;
+	if (filevec.size() != vkUtil::renderedObjects.size())
+	{
+		throw std::runtime_error("The number of push constants does not match the number of objects in the scene");
+	}
+	for (size_t i = 0; i < filevec.size(); i++) 
+	{
+		constantRangesInfo.emplace_back(create_push_constant(filevec[i].offset, sizeof(*vkUtil::renderedObjects[i]), filevec[i].shader, debug)); 
+	}
+
+	layoutInfo.pushConstantRangeCount = UINT32(constantRangesInfo.size());
+
+	layoutInfo.pPushConstantRanges = constantRangesInfo.data();
 
 
-    
-    try
-    {
-        return logicalDevice.createPipelineLayout(layoutInfo);
-    }
-    catch (vk::SystemError& err)
-    {
-        std::cerr << "Error creating the pipeline layout: " << err.what() << "\n";
-        return nullptr;
-    }
+	
+	try
+	{
+		return logicalDevice.createPipelineLayout(layoutInfo);
+	}
+	catch (vk::SystemError& err)
+	{
+		std::cerr << "Error creating the pipeline layout: " << err.what() << "\n";
+		return nullptr;
+	}
 
 
-    return nullptr;
+	return nullptr;
 }
 
 vk::RenderPass vkInit::create_render_pass(vk::Device& logicalDevice, vk::Format format, bool debug)
 {
 
-    if (debug)
-    {
-        std::cout << "Creating renderpass... \n";
-    }
+	if (debug)
+	{
+		std::cout << "Creating renderpass... \n";
+	}
 
-    vk::AttachmentDescription colorAttachment = {};
+	vk::AttachmentDescription colorAttachment = {};
 
-    colorAttachment.flags = vk::AttachmentDescriptionFlags(); 
+	colorAttachment.flags = vk::AttachmentDescriptionFlags(); 
 
-    colorAttachment.format = format;
+	colorAttachment.format = format;
 
-    colorAttachment.samples = vk::SampleCountFlagBits::e1;
+	colorAttachment.samples = vk::SampleCountFlagBits::e1;
 
-    colorAttachment.loadOp = vk::AttachmentLoadOp::eClear; 
-    
-    colorAttachment.storeOp= vk::AttachmentStoreOp::eStore;
+	colorAttachment.loadOp = vk::AttachmentLoadOp::eClear; 
+	
+	colorAttachment.storeOp= vk::AttachmentStoreOp::eStore;
 
-    colorAttachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare; 
-    
-    colorAttachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+	colorAttachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare; 
+	
+	colorAttachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
 
-    colorAttachment.initialLayout = vk::ImageLayout::eUndefined;
+	colorAttachment.initialLayout = vk::ImageLayout::eUndefined;
 
-    colorAttachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
-
-
-    vk::AttachmentReference attachmentRef = {};
-
-    attachmentRef.attachment = 0;
-
-    attachmentRef.layout = vk::ImageLayout::eColorAttachmentOptimal; 
-
-    vk::SubpassDescription subpass = {};
-
-    subpass.flags = vk::SubpassDescriptionFlags();
-
-    subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
-
-    subpass.colorAttachmentCount = 1;
-
-    subpass.pColorAttachments = &attachmentRef;
+	colorAttachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
 
 
+	vk::AttachmentReference attachmentRef = {};
+
+	attachmentRef.attachment = 0;
+
+	attachmentRef.layout = vk::ImageLayout::eColorAttachmentOptimal; 
+
+	vk::SubpassDescription subpass = {};
+
+	subpass.flags = vk::SubpassDescriptionFlags();
+
+	subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
+
+	subpass.colorAttachmentCount = 1;
+
+	subpass.pColorAttachments = &attachmentRef;
 
 
 
-    vk::RenderPassCreateInfo renderPassCreateInfo = {};
-
-    renderPassCreateInfo.flags = vk::RenderPassCreateFlags();
-    
-    renderPassCreateInfo.attachmentCount = 1;
-    
-    renderPassCreateInfo.pAttachments = &colorAttachment;
-
-    renderPassCreateInfo.subpassCount = 1;
-
-    renderPassCreateInfo.pSubpasses = &subpass;
-    
-    try
-    {
-        return logicalDevice.createRenderPass(renderPassCreateInfo);
-    }
-    catch (vk::SystemError& err)
-    {
-        std::cerr << "Error creating Renderpass: " << err.what() << "\n";
-        return nullptr;
-    }
 
 
+	vk::RenderPassCreateInfo renderPassCreateInfo = {};
 
-    return nullptr;
+	renderPassCreateInfo.flags = vk::RenderPassCreateFlags();
+	
+	renderPassCreateInfo.attachmentCount = 1;
+	
+	renderPassCreateInfo.pAttachments = &colorAttachment;
+
+	renderPassCreateInfo.subpassCount = 1;
+
+	renderPassCreateInfo.pSubpasses = &subpass;
+	
+	try
+	{
+		return logicalDevice.createRenderPass(renderPassCreateInfo);
+	}
+	catch (vk::SystemError& err)
+	{
+		std::cerr << "Error creating Renderpass: " << err.what() << "\n";
+		return nullptr;
+	}
+
+
+
+	return nullptr;
+}
+
+
+
+void vkInit::PushConstentsOutJSON::from_json(const JsonReader& j)
+{
+	offset = j.get<uint32_t>("offset");
+
+	std::string_view shaderStage = j.get<std::string_view>("shader");
+
+	if (shaderStage == "vertex")
+	{
+		shader = vk::ShaderStageFlagBits::eVertex;
+	}
+	else if (shaderStage == "fragment")
+	{
+		shader = vk::ShaderStageFlagBits::eFragment;
+	}
+	else {
+		throw std::runtime_error("Unsupported shader stage");
+	}
 }

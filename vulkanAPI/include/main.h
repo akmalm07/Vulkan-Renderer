@@ -24,7 +24,10 @@ namespace GameRenderer
 
 		engine.load_meshes(meshes);
 
-		engine.render();
+		while (engine.running())
+		{
+			engine.render();
+		}
 	}
 }
 

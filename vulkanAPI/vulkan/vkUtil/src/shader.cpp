@@ -64,3 +64,18 @@ namespace vkInit
 		return nullptr;
 	}
 }
+
+vk::ShaderStageFlagBits vkUtil::enum_to_vk(ShaderStage stage)
+{
+	switch (stage)
+	{
+	case ShaderStage::VERTEX:
+		return vk::ShaderStageFlagBits::eVertex;
+	case ShaderStage::FRAGMENT:
+		return vk::ShaderStageFlagBits::eFragment;
+	case ShaderStage::COMPUTE:
+		return vk::ShaderStageFlagBits::eCompute;
+	default:
+		return vk::ShaderStageFlagBits();
+	}
+}

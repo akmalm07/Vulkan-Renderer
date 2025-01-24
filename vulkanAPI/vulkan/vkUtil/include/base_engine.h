@@ -32,13 +32,7 @@ public:
 
 	vk::PhysicalDevice get_physical_device() const;
 
-	template<vkType::ValidObj T>
-	void send_as_push_const(T& data, vk::CommandBuffer cmdBuffer, vk::ShaderStageFlagBits shader, uint32_t offset)
-	{
-		cmdBuffer.pushConstants(_vkPipelineLayout, shader, offset, sizeof(data), &data); 
-	}
-
-	void draw_scene();
+	inline bool running() const{ return !_window.GetShouldClose(); }
 
 	virtual ~BaseEngine(); 
 
@@ -97,6 +91,8 @@ protected:
 
 	vkVert::StrideBundle _stride;
 
+	const std::filesystem::path _shaderVertPath = "..\\shaders\\vertex.spv";
+	const std::filesystem::path _shaderFragPath = "..\\shaders\\fragment.spv";
 
 	//uint8_t pos;
 	//uint8_t col;

@@ -35,6 +35,7 @@ struct PositionFunc
 
 	PositionFunc() = default;
 	PositionFunc(const T& pos) : _position(pos) {}
+	PositionFunc(const std::initializer_list<Vertex>& pos) { std::copy(pos.begin(), pos.end(), glm::value_ptr(_position)); }
 
 	std::array<Vertex, c_pos_size> get_pos() const 
 	{
@@ -50,6 +51,7 @@ struct ColorFunc
 
 	ColorFunc() = default;
 	ColorFunc(const T& col) : _color(col) {}
+	ColorFunc(const std::initializer_list<Vertex>& col) { std::copy(col.begin(), col.end(), glm::value_ptr(_color)); }
 
 	std::array<Vertex, c_col_size> get_col() const
 	{
@@ -64,6 +66,7 @@ struct NormalFunc {
 
 	NormalFunc() = default;
 	NormalFunc(const T& norm) : _normal(norm) {}
+	NormalFunc(const std::initializer_list<Vertex>& norm) { std::copy(norm.begin(), norm.end(), glm::value_ptr(_normal)); }
 
 	std::array<Vertex, c_norm_size> get_norm() const
 	{
@@ -78,6 +81,7 @@ struct TextureFunc {
 
 	TextureFunc() = default;
 	TextureFunc(const T& tex) : _texture(tex) {}
+	TextureFunc(const std::initializer_list<Vertex>& tex) { std::copy(tex.begin(), tex.end(), glm::value_ptr(_texture)); }
 
 	std::array<Vertex, c_tex_size> get_tex() const
 	{

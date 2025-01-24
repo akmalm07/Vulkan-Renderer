@@ -15,6 +15,10 @@ public:
 	MeshT(std::list<vkType::Vert>& vertices, std::list<vkType::Index>& indices);
 	MeshT(std::list<vkType::Vert>& vertices);
 
+	MeshT(vkType::Vert vertex);
+
+	MeshT(vkType::Vert vertex, vkType::Index index);
+
 	MeshT(std::initializer_list<vkType::Vert> verts);
 	MeshT(std::initializer_list<vkType::Vert> verts, std::initializer_list<vkType::Index> inds);
 

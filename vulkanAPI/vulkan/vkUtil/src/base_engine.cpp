@@ -285,14 +285,11 @@ void BaseEngine::destroy_swapchain()
 
 
 void BaseEngine::make_pipeline()
-
-
-
 {
 	vkInit::GraphicsPipelineInBundle spesifications = {};
 
-	spesifications.vertShaderPath = "Shaders\\vertex.spv";
-	spesifications.fragShaderPath = "Shaders\\fragment.spv";
+	spesifications.vertShaderPath = _shaderVertPath;
+	spesifications.fragShaderPath = _shaderFragPath;
 	spesifications.LogicalDevice =   _vkLogicalDevice;
 	spesifications.swapchainExtent = _vkSwapchainExtent;
 	spesifications.swapchainFormat = _vkSwapchainFormat;
@@ -308,7 +305,7 @@ void BaseEngine::make_pipeline()
 	std::vector<vkDiscription::DiscriptorBundle> vecOfDescriptions;
 	vecOfDescriptions.emplace_back(discription);
 
-	vkInit::GraphicsPipelineOutBundle output = vkInit::create_pipeline(spesifications, vecOfDescriptions, _debugMode);
+	vkInit::GraphicsPipelineOutBundle output = vkInit::create_pipeline(spesifications, vecOfDescriptions, "global\\push_const.json", _debugMode);
 
 
 	_vkPipeline = output.pipeline;
