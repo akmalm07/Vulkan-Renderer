@@ -89,8 +89,8 @@ void Engine::draw_scene(vk::CommandBuffer& cmdBuffer) const
 		for (const auto& position : _scene->get_triangles_pos())
 		{
 			glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(position, 0.0f)); 
-			vkUtil::ObjectData objectData;
-			objectData.model = model;
+			vkUtil::ObjectData objectData(vk::ShaderStageFlagBits::eVertex);
+			objectData._model = model;
 			send_as_push_const(objectData, cmdBuffer, vkUtil::ShaderStage::VERTEX, 0);
 		}
 	}

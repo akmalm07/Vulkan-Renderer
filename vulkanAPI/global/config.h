@@ -51,8 +51,22 @@ namespace vkType
 	class Drawable
 	{};
 
+	struct PushConst
+	{
+		const uint32_t _offset; 
+		const uint32_t _size;
+		const vk::ShaderStageFlagBits _shader;
+
+		PushConst( uint32_t size, uint32_t offset, vk::ShaderStageFlagBits _shader)
+			: _size(size), _offset(offset), _shader(_shader) {}
+
+	};
+
 	template <class T>
 	concept ValidObj = std::is_class_v<T> &&  std::is_base_of_v<Drawable, T>; 
+
+	template <class T>
+	concept PushConstant = std::is_class_v<T> &&  std::is_base_of_v<PushConst, T>; 
 
 
 	template <class T>

@@ -12,6 +12,7 @@
 #include "vkUtil\include\window.h"
 #include "vkUtil\include\sync.h"
 #include "vkUtil\include\scene.h"
+#include "vkUtil\include\render_structs.h"
 
 
 
@@ -305,7 +306,7 @@ void BaseEngine::make_pipeline()
 	std::vector<vkDiscription::DiscriptorBundle> vecOfDescriptions;
 	vecOfDescriptions.emplace_back(discription);
 
-	vkInit::GraphicsPipelineOutBundle output = vkInit::create_pipeline(spesifications, vecOfDescriptions, "global\\push_const.json", _debugMode);
+	vkInit::GraphicsPipelineOutBundle output = vkInit::create_pipeline(spesifications, vecOfDescriptions, , _debugMode);
 
 
 	_vkPipeline = output.pipeline;

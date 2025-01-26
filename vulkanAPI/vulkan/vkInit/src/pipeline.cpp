@@ -2,19 +2,22 @@
 
 #include "vkInit\include\pipeline.h"
 #include "vkUtil\include\shader.h"
-#include "vkUtil\include\json_reader.h"
 #include "vkUtil\include\render_structs.h"
 
-std::vector<vkInit::PushConstentsOutJSON> vkInit::read_json_push_constants(const std::filesystem::path& path)
+std::vector<vk::PushConstantRange> vkInit::evaluate_push_constants(const std::vector<vkType::PushConst>& pushConsts, bool debug)
 {
+	std::vector<vk::PushConstantRange> pushConstants;
 
-	JsonReader reader(path);
+	for (const auto& push : pushConsts)
+	{
+		pushConstants.emplace_back(create_push_constant(push._offset, push._size, push._shader, debug)); 
+	}
 
-	read_;
+	return pushConstants;
 
 }
 
-vk::PushConstantRange vkInit::create_push_constant(size_t offset, size_t size, vk::ShaderStageFlagBits shader, bool debug)
+vk::PushConstantRange vkInit::create_push_constant(uint32_t offset, uint32_t size, vk::ShaderStageFlagBits shader, bool debug)
 {
 	vk::PushConstantRange pushConstantInfo = {};
 
@@ -29,7 +32,7 @@ vk::PushConstantRange vkInit::create_push_constant(size_t offset, size_t size, v
 }
 
 vkInit::GraphicsPipelineOutBundle vkInit::create_pipeline(GraphicsPipelineInBundle& spesifications, 
-	std::vector<vkDiscription::DiscriptorBundle>& discriptorSet, std::filesystem::path jsonpath, bool debug)
+	std::vector<vkDiscription::DiscriptorBundle>& discriptorSet, const std::vector<vkType::PushConst>& pushConsts, bool debug)
 {
 
 	if (debug)
@@ -247,7 +250,7 @@ vkInit::GraphicsPipelineOutBundle vkInit::create_pipeline(GraphicsPipelineInBund
 	pipelineCreateInfo.pColorBlendState = &colorBlendInfo;
 	
 
-	vk::PipelineLayout pipelineLayout = create_pipeline_layout(spesifications.LogicalDevice, jsonpath, debug);
+	vk::PipelineLayout pipelineLayout = create_pipeline_layout(spesifications.LogicalDevice, pushConsts, debug); 
 	pipelineCreateInfo.layout = pipelineLayout;
 
 
@@ -297,7 +300,7 @@ vkInit::GraphicsPipelineOutBundle vkInit::create_pipeline(GraphicsPipelineInBund
 
 
 
-vk::PipelineLayout vkInit::create_pipeline_layout(vk::Device& logicalDevice, std::filesystem::path json, bool debug) 
+vk::PipelineLayout vkInit::create_pipeline_layout(vk::Device& logicalDevice, const std::vector<vkType::PushConst>& pushs, bool debug)
 {
 	if (debug)
 	{
@@ -309,22 +312,11 @@ vk::PipelineLayout vkInit::create_pipeline_layout(vk::Device& logicalDevice, std
 
 	layoutInfo.setLayoutCount = 0;
 	
-	
-	std::vector<PushConstentsOutJSON> filevec = read_json_push_constants(json);
-	std::vector<vk::PushConstantRange> constantRangesInfo;
+	std::vector<vk::PushConstantRange> pushConsts = evaluate_push_constants(pushs, debug);
 
-	if (filevec.size() != vkUtil::renderedObjects.size())
-	{
-		throw std::runtime_error("The number of push constants does not match the number of objects in the scene");
-	}
-	for (size_t i = 0; i < filevec.size(); i++) 
-	{
-		constantRangesInfo.emplace_back(create_push_constant(filevec[i].offset, sizeof(*vkUtil::renderedObjects[i]), filevec[i].shader, debug)); 
-	}
+	layoutInfo.pushConstantRangeCount = UINT32(pushConsts.size()); 
 
-	layoutInfo.pushConstantRangeCount = UINT32(constantRangesInfo.size());
-
-	layoutInfo.pPushConstantRanges = constantRangesInfo.data();
+	layoutInfo.pPushConstantRanges = pushConsts.data(); 
 
 
 	
@@ -418,23 +410,3 @@ vk::RenderPass vkInit::create_render_pass(vk::Device& logicalDevice, vk::Format 
 	return nullptr;
 }
 
-
-
-void vkInit::PushConstentsOutJSON::from_json(const JsonReader& j)
-{
-	offset = j.get<uint32_t>("offset");
-
-	std::string_view shaderStage = j.get<std::string_view>("shader");
-
-	if (shaderStage == "vertex")
-	{
-		shader = vk::ShaderStageFlagBits::eVertex;
-	}
-	else if (shaderStage == "fragment")
-	{
-		shader = vk::ShaderStageFlagBits::eFragment;
-	}
-	else {
-		throw std::runtime_error("Unsupported shader stage");
-	}
-}
