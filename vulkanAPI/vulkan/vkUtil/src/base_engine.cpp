@@ -13,6 +13,7 @@
 #include "vkUtil\include\sync.h"
 #include "vkUtil\include\scene.h"
 #include "vkUtil\include\render_structs.h"
+#include "vkUtil\include\const_pushes.h"
 
 
 
@@ -294,6 +295,7 @@ void BaseEngine::make_pipeline()
 	spesifications.LogicalDevice =   _vkLogicalDevice;
 	spesifications.swapchainExtent = _vkSwapchainExtent;
 	spesifications.swapchainFormat = _vkSwapchainFormat;
+	spesifications.instanced = false;
 
 	vkDiscription::DiscriptorBundle discription = {
 			_stride.pos,
@@ -306,7 +308,8 @@ void BaseEngine::make_pipeline()
 	std::vector<vkDiscription::DiscriptorBundle> vecOfDescriptions;
 	vecOfDescriptions.emplace_back(discription);
 
-	vkInit::GraphicsPipelineOutBundle output = vkInit::create_pipeline(spesifications, vecOfDescriptions, , _debugMode);
+	vkInit::GraphicsPipelineOutBundle output = vkInit::create_pipeline(spesifications, vecOfDescriptions, 
+		vkUtil::PushConstRegistery::get_instance().get_push_consts(), _debugMode);
 
 
 	_vkPipeline = output.pipeline;

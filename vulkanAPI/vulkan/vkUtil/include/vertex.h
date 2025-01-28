@@ -46,10 +46,10 @@ public:
 	}
 
 
-	VertexT(const std::initializer_list<Vertex>& p, const std::initializer_list<Vertex>& c, const std::initializer_list<Vertex>& n, const std::initializer_list<Vertex>& t)
+	VertexT(const std::initializer_list<vkType::Vertex>& p, const std::initializer_list<vkType::Vertex>& c, const std::initializer_list<vkType::Vertex>& n, const std::initializer_list<vkType::Vertex>& t)
 		: Pos(p), Col(c), Norm(n), Tex(t) {}
 
-	void initalize(const std::initializer_list<Vertex>& p, const std::initializer_list<Vertex>& c, const std::initializer_list<Vertex>& n, const std::initializer_list<Vertex>& t)
+	void initalize(const std::initializer_list<vkType::Vertex>& p, const std::initializer_list<vkType::Vertex>& c, const std::initializer_list<vkType::Vertex>& n, const std::initializer_list<vkType::Vertex>& t)
 
 	{
 		std::copy(p.begin(), p.end(), glm::value_ptr(_position));
@@ -59,9 +59,9 @@ public:
 	}
 
 
-	std::list<Vertex> get_raw() const
+	std::list<vkType::Vertex> get_raw() const 
 	{
-		std::list<Vertex> raw;
+		std::list<vkType::Vertex> raw;
 		auto pos = Pos::get_pos(); 
 		auto col = Col::get_col();
 		auto norm= Norm::get_norm();
@@ -74,7 +74,7 @@ public:
 		return raw;
 	}
 
-	size_t size() const
+	static size_t size() 
 	{
 		return c_pos_size + c_col_size + c_norm_size + c_tex_size;
 	}
@@ -135,25 +135,25 @@ public:
 	}
 	
 
-	VertexT(const std::initializer_list<Vertex>& p, const std::initializer_list<Vertex>& c)
+	VertexT(const std::initializer_list<vkType::Vertex>& p, const std::initializer_list<vkType::Vertex>& c)
 		: Pos(p), Col(c) {} 
 
-	void initalize(const std::initializer_list<Vertex>& p, const std::initializer_list<Vertex>& c)
+	void initalize(const std::initializer_list<vkType::Vertex>& p, const std::initializer_list<vkType::Vertex>& c)
 
 	{
 		std::copy(p.begin(), p.end(), glm::value_ptr(_position)); 
 		std::copy(c.begin(), c.end(), glm::value_ptr(_color));  
 	}
 
-	size_t size() const
+	static size_t size() 
 	{
 		return c_pos_size + c_col_size;
 	}
 
 
-	std::list<Vertex> get_raw() const
+	std::list<vkType::Vertex> get_raw() const
 	{
-		std::list<Vertex> raw;
+		std::list<vkType::Vertex> raw;
 		auto pos = Pos::get_pos();   
 		auto col = Col::get_col();  
 
@@ -222,16 +222,16 @@ public:
 		_normal = n;
 	}
 
-	size_t size() const
+	static size_t size() 
 	{
 		return c_pos_size + c_col_size + c_norm_size;
 	}
 
 
-	VertexT(const std::initializer_list<Vertex>& p, const std::initializer_list<Vertex>& c, const std::initializer_list<Vertex>& n)
+	VertexT(const std::initializer_list<vkType::Vertex>& p, const std::initializer_list<vkType::Vertex>& c, const std::initializer_list<vkType::Vertex>& n)
 		: Pos(p), Col(c), Norm(n) {}
 
-	void initalize(const std::initializer_list<Vertex>& p, const std::initializer_list<Vertex>& c, const std::initializer_list<Vertex>& n)
+	void initalize(const std::initializer_list<vkType::Vertex>& p, const std::initializer_list<vkType::Vertex>& c, const std::initializer_list<vkType::Vertex>& n)
 
 	{
 		std::copy(p.begin(), p.end(), glm::value_ptr(_position));
@@ -241,9 +241,9 @@ public:
 
 
 
-	std::list<Vertex> get_raw()  const
+	std::list<vkType::Vertex> get_raw()  const
 	{
-		std::list<Vertex> raw;
+		std::list<vkType::Vertex> raw;
 		auto pos =  Pos::get_pos();   
 		auto col =  Col::get_col();    
 		auto norm = Norm::get_norm();   
@@ -316,10 +316,10 @@ public:
 	}
 
 
-	VertexT(const std::initializer_list<Vertex>& p, const std::initializer_list<Vertex>& c, const std::initializer_list<Vertex>& t)
+	VertexT(const std::initializer_list<vkType::Vertex>& p, const std::initializer_list<vkType::Vertex>& c, const std::initializer_list<vkType::Vertex>& t)
 		: Pos(p), Col(c), Tex(t) {} 
 
-	void initalize(const std::initializer_list<Vertex>& p, const std::initializer_list<Vertex>& c, const std::initializer_list<Vertex>& t)
+	void initalize(const std::initializer_list<vkType::Vertex>& p, const std::initializer_list<vkType::Vertex>& c, const std::initializer_list<vkType::Vertex>& t)
 
 	{
 		std::copy(p.begin(), p.end(), glm::value_ptr(_position));
@@ -327,15 +327,15 @@ public:
 		std::copy(t.begin(), t.end(), glm::value_ptr(_texture));
 	}
 
-	size_t size() const
+	static size_t size() 
 	{
 		return c_pos_size + c_col_size + c_tex_size;
 	}
 
 
-	std::list<Vertex> get_raw() const
+	std::list<vkType::Vertex> get_raw() const
 	{
-		std::list<Vertex> raw;
+		std::list<vkType::Vertex> raw;
 		auto pos = Pos::get_pos();      
 		auto col = Col::get_col();      
 		auto tex = Tex::get_tex();    
@@ -383,5 +383,5 @@ public:
 
 namespace vkType
 {
-	using Vert = VertexT<pos, col, norm, tex>;
+	using Vert = VertexT<UserInput::pos, UserInput::col, UserInput::norm, UserInput::tex>;
 }

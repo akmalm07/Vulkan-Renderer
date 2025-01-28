@@ -25,21 +25,21 @@ namespace vkUtil {
 	}
 
 
-	uint32_t evaluate_offset_push_const(const vkType::PushConst& item)
+	uint32_t evaluate_offset_push_const(size_t size)
 	{
-		static uint32_t offset = 0;
-		static uint32_t size = 0;
+		static uint32_t s_offset = 0;
+		static uint32_t s_size = 0;
 
-		offset += size;
+		s_offset += size;
 
-		size = item._size;
+		s_size = size;
 
-		if (offset == 0)
+		if (s_offset == 0)
 		{
 			return 0;
 		}
 
-		return offset;
+		return s_offset;
 	}
 
 } // namespace vkUtil

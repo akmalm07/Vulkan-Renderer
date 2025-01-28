@@ -8,7 +8,7 @@ namespace vkUtil {
 
 
     ObjectData::ObjectData(ShaderStage  shader) 
-        : PushConst(sizeof(*this), evaluate_offset_push_const(*this), enum_to_vk(shader))
+        : PushConst(sizeof(c_data), evaluate_offset_push_const(sizeof(c_data)), enum_to_vk(shader))
     {}
 
 

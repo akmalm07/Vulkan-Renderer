@@ -1,15 +1,18 @@
 #include "pch.h"
 
 #include "vkInit\include\discription.h" 
+#include "vkUtil\include\vertex.h" 
 
 
 namespace vkDiscription
 {
-	std::vector <vk::VertexInputAttributeDescription> vkDiscription::get_attribute_descriptions(vkVert::StrideBundle stride, uint32_t binding, bool debug)
+	
+
+	UserInput::AttributeDescription get_attribute_descriptions_one_buffer(uint32_t binding, bool debug) 
 	{
 		uint32_t location = 0;
 
-		if (stride.pos == vkVert::PosStride::NONE && debug)
+		if constexpr (std::same_as<UserInput::pos, std::nullptr_t> && debug) 
 		{
 			std::cout << "Error:: No position was sent to the attribute description\n";
 			return {};
@@ -19,53 +22,74 @@ namespace vkDiscription
 
 		attributes.reserve(4);
 
-		attributes.push_back(std::move(get_attribute_description(stride.pos, 0, binding, location))); 
+		if (debug)
+		{
+			std::cout << "Creating Attribute Descriptions for binding "<< binding << " ... \n";
+			std::cout << "\tCreating Attribute Description of position for VertexBuffer... \n";
+		}
+
+		attributes.emplace_back(get_attribute_desc<UserInput::pos>(0, binding, location));  
 
 		location++;
-		uint32_t offset = vkVert::enumerate_pos_stride(stride.pos);
+		uint32_t offset = vkVert::enumerate_type<UserInput::pos>();
 
-		if (stride.col != vkVert::ColorStride::NONE)
+		if constexpr (!std::same_as<UserInput::col, std::nullptr_t>)
 		{
+			if (debug)
+			{
+				std::cout << "\tCreating Attribute Description of color for VertexBuffer... \n";
+			}
+
 			location++;
 
-			attributes.push_back(std::move(get_attribute_description(stride.col, offset * sizeof(Vertex), binding, location)));
+			attributes.emplace_back(get_attribute_desc<UserInput::col>(offset * sizeof(vkType::Vertex), binding, location));
 
-			offset += vkVert::enumerate_color_stride(stride.col); 
+			offset += UINT32(vkVert::enumerate_type<UserInput::col>());
 		}
 
-
-		if (stride.norm != vkVert::NormalStride::NONE)
+		if constexpr (!std::same_as<UserInput::norm, std::nullptr_t>) 
 		{
+			if (debug)
+			{
+				std::cout << "\tCreating Attribute Description of normal for VertexBuffer... \n";
+			}
+
 			location++;
 
-			attributes.push_back(std::move(get_attribute_description(stride.norm, offset * sizeof(Vertex), binding, location)));
+			attributes.emplace_back(get_attribute_desc<UserInput::norm>(offset * sizeof(vkType::Vertex), binding, location));
 
-			offset += vkVert::enumerate_normal_stride(stride.norm);
+			offset += UINT32(vkVert::enumerate_type<UserInput::norm>());
 
 		}
 
-		if (stride.tex != vkVert::TextureStride::NONE)
+		if constexpr (!std::same_as<UserInput::tex, std::nullptr_t>) 
 		{
+			if (debug)
+			{
+				std::cout << "\tCreating Attribute Description of texture for VertexBuffer... \n";
+			}
+
 			location++;
 
-			attributes.push_back(std::move(get_attribute_description(stride.tex, offset * sizeof(Vertex), binding, location))); 
+			attributes.emplace_back(get_attribute_desc<UserInput::tex>(offset * sizeof(vkType::Vertex), binding, location)); 
 
-			offset += vkVert::enumerate_tex_stride(stride.tex);
+			offset += UINT32(vkVert::enumerate_type<UserInput::tex>());
 		}
 
 		return attributes;
 	}
 
-
-
-	vk::VertexInputBindingDescription vkDiscription::get_binding_description(uint32_t sizeOfEachVertex, uint32_t binding, bool perInstenceInput)
+	vk::VertexInputBindingDescription get_binding_description(uint32_t binding, bool perInstenceInput, bool debug)
 	{
-
+		if (debug)
+		{
+			std::cout << "Creating Binding " << binding << " Description for VertexBuffer... \n";
+		}
 		vk::VertexInputBindingDescription descriptionSet = {};
 
 		descriptionSet.binding = binding;
 
-		descriptionSet.stride = sizeOfEachVertex;
+		descriptionSet.stride = vkType::Vert::size();
 
 		descriptionSet.inputRate = (perInstenceInput ? vk::VertexInputRate::eInstance : vk::VertexInputRate::eVertex);
 

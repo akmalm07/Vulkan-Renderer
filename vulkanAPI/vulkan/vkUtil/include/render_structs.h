@@ -6,12 +6,16 @@
 namespace vkUtil {
 
 
-    struct ObjectData : public vkType::Drawable, public vkType::PushConst
-    {
-    public:
-        ObjectData(ShaderStage shader);
-        glm::mat4 _model;
-    };
+	struct ObjectData : public vkType::PushConst
+	{
+	public:
+		ObjectData(ShaderStage shader);
+
+		struct alignas(16) : public vkType::Drawable
+		{
+			glm::mat4 _model;
+		} c_data;
+	};
 
 
 

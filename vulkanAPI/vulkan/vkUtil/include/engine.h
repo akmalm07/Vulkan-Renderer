@@ -34,12 +34,12 @@ public:
 
 	void load_scene(std::unique_ptr<SceneT>& scene);
 
-	void draw_scene(vk::CommandBuffer& cmdBuffer) const	;
+	void draw_scene(vk::CommandBuffer& cmdBuffer) const;
 
 	void draw(vk::CommandBuffer& commandBuffer) const override;
 
 	template<vkType::ValidObj T>
-	void send_as_push_const(T& data, vk::CommandBuffer cmdBuffer, vkUtil::ShaderStage shader, uint32_t offset) const;
+	void send_as_push_const(T& data, vk::CommandBuffer& cmdBuffer, vkUtil::ShaderStage shader, uint32_t offset) const;
 
 	~Engine() override
 	{
@@ -49,11 +49,15 @@ public:
 
 private:
 
+	mutable std::vector<std::function<void()>> _pushConstCalls;
+
 	std::unique_ptr <SceneT> _scene; 
 
 	mutable std::unique_ptr<VertexBufferT> _vertexBuffer;    
 	mutable std::unique_ptr<IndexBufferT> _indexBuffer;
 
+private:
+	void call_push_consts() const;
 
 
 };
@@ -66,8 +70,9 @@ private:
 //	using engine = Engine<pos, col, norm, tex>; 
 //}
 
-template<vkType::ValidObj T>
-inline void Engine::send_as_push_const(T& data, vk::CommandBuffer cmdBuffer, vkUtil::ShaderStage shader, uint32_t offset) const
+template<vkType::ValidObj T> 
+inline void Engine::send_as_push_const(T& data, vk::CommandBuffer& cmdBuffer, vkUtil::ShaderStage shader, uint32_t offset) const
 {
-	cmdBuffer.pushConstants(_vkPipelineLayout, vkUtil::enum_to_vk(shader), offset, sizeof(data), &data); 
+	_pushConstCalls.emplace_back([this, &cmdBuffer, shader, offset, &data]()  
+		{ cmdBuffer.pushConstants(_vkPipelineLayout, vkUtil::enum_to_vk(shader), offset, sizeof(data), &data); }); 
 }

@@ -18,20 +18,6 @@
 
 
 
-//USER DEFITIONS
-using pos = glm::vec2;
-
-using col = glm::vec3;
-
-using norm = std::nullptr_t;
-
-using tex = std::nullptr_t;
-
-
-
-
-
-
 #define UINT32(x) static_cast<uint32_t>(x)
 
 #define SIZET(x) static_cast<size_t>(x)
@@ -42,12 +28,55 @@ using tex = std::nullptr_t;
 
 #define VERTEX_TYPE float 
 
-using Index = INDEX_TYPE;  
-using Vertex = VERTEX_TYPE;  
 
+using OncePerVertBuffer = vk::VertexInputAttributeDescription;
+using AllInOneVertBuffer = std::vector<vk::VertexInputAttributeDescription>;
+
+
+
+namespace UserInput
+{
+	//USER DEFITIONS
+	using pos = glm::vec2;
+
+	using col = glm::vec3;
+
+	using norm = std::nullptr_t;
+
+	using tex = std::nullptr_t;
+
+	using AttributeDescription = AllInOneVertBuffer; 
+
+
+
+} // namespace UserInput
+
+
+
+
+#define DEBUG
+
+#ifndef NDEBUG
+
+#define VK_CHECK_RESULT(f) {																	\
+		auto res = (f);																			\
+		if (res != vk::Result::eSuccess) {														\
+			std::cerr << "Fatal : VkResult is \"" << vk::to_string(res) << "\" in " << __FILE__	\
+				<< " at line " << __LINE__ << std::endl;											\
+			assert(res == vk::Result::eSuccess);													\
+		}																						\
+	}		\
+
+
+#define DEBUG_ITERATOR(vec, statement) for (const auto& item : vec) { statement; }
+
+#endif
 
 namespace vkType
 {
+	using Index = INDEX_TYPE;   
+	using Vertex = VERTEX_TYPE;   
+
 	class Drawable
 	{};
 

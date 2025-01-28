@@ -14,5 +14,5 @@ namespace
         }
     };
 
-    static _BEFORE_INT_MAIN_INIT_ initializer;
+	static _BEFORE_INT_MAIN_INIT_ _initializer_; // This will be called before main
 }

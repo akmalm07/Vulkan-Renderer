@@ -190,9 +190,9 @@ std::list <vkType::Index> MeshT::get_indices() const
 }
 
 
-std::list <Vertex> MeshT::get_vertices_raw() const	
+std::list <vkType::Vertex> MeshT::get_vertices_raw() const	
 {
-	std::list<Vertex> raw;
+	std::list<vkType::Vertex> raw;
 	for (const auto& vertex : _vertices)
 	{
 		const auto& vert = vertex.get_raw();

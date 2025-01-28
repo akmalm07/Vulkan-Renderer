@@ -15,16 +15,16 @@ namespace glm
 	
 
 	template<size_t S, class T>
-	std::array<Vertex, S> get_arr(const T& t)
+	std::array<vkType::Vertex, S> get_arr(const T& t)
 	{
-		std::array<Vertex, S> arr;
+		std::array<vkType::Vertex, S> arr; 
 		for (size_t i = 0; i < S; i++)
 		{
 			arr[i] = t[i];
 		}
 		return arr;
 	}
-}
+}// namespace glm
 
 
 template <vkType::GLMVec T>
@@ -35,9 +35,9 @@ struct PositionFunc
 
 	PositionFunc() = default;
 	PositionFunc(const T& pos) : _position(pos) {}
-	PositionFunc(const std::initializer_list<Vertex>& pos) { std::copy(pos.begin(), pos.end(), glm::value_ptr(_position)); }
+	PositionFunc(const std::initializer_list<vkType::Vertex>& pos) { std::copy(pos.begin(), pos.end(), glm::value_ptr(_position)); }
 
-	std::array<Vertex, c_pos_size> get_pos() const 
+	std::array<vkType::Vertex, c_pos_size> get_pos() const
 	{
 		return glm::get_arr<c_pos_size>(_position);
 	}
@@ -51,9 +51,9 @@ struct ColorFunc
 
 	ColorFunc() = default;
 	ColorFunc(const T& col) : _color(col) {}
-	ColorFunc(const std::initializer_list<Vertex>& col) { std::copy(col.begin(), col.end(), glm::value_ptr(_color)); }
+	ColorFunc(const std::initializer_list<vkType::Vertex>& col) { std::copy(col.begin(), col.end(), glm::value_ptr(_color)); }
 
-	std::array<Vertex, c_col_size> get_col() const
+	std::array<vkType::Vertex, c_col_size> get_col() const
 	{
 		return glm::get_arr<c_col_size>(_color); 
 	}
@@ -66,9 +66,9 @@ struct NormalFunc {
 
 	NormalFunc() = default;
 	NormalFunc(const T& norm) : _normal(norm) {}
-	NormalFunc(const std::initializer_list<Vertex>& norm) { std::copy(norm.begin(), norm.end(), glm::value_ptr(_normal)); }
+	NormalFunc(const std::initializer_list<vkType::Vertex>& norm) { std::copy(norm.begin(), norm.end(), glm::value_ptr(_normal)); }
 
-	std::array<Vertex, c_norm_size> get_norm() const
+	std::array<vkType::Vertex, c_norm_size> get_norm() const
 	{
 		return glm::get_arr<c_norm_size>(_normal);
 	}
@@ -81,9 +81,9 @@ struct TextureFunc {
 
 	TextureFunc() = default;
 	TextureFunc(const T& tex) : _texture(tex) {}
-	TextureFunc(const std::initializer_list<Vertex>& tex) { std::copy(tex.begin(), tex.end(), glm::value_ptr(_texture)); }
+	TextureFunc(const std::initializer_list<vkType::Vertex>& tex) { std::copy(tex.begin(), tex.end(), glm::value_ptr(_texture)); }
 
-	std::array<Vertex, c_tex_size> get_tex() const
+	std::array<vkType::Vertex, c_tex_size> get_tex() const
 	{
 		return glm::get_arr<c_tex_size>(_texture);
 	}

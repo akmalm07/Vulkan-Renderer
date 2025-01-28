@@ -25,6 +25,8 @@ namespace vkInit {
 
 		vk::Format swapchainFormat;
 		vk::Extent2D swapchainExtent;
+
+		bool instanced;
 	};
 	
 	struct GraphicsPipelineOutBundle
@@ -40,8 +42,7 @@ namespace vkInit {
 
 	vk::PushConstantRange create_push_constant(uint32_t offset, uint32_t size, vk::ShaderStageFlagBits shader, bool debug);
 
-	GraphicsPipelineOutBundle create_pipeline(GraphicsPipelineInBundle& spesifications, 
-		std::vector<vkDiscription::DiscriptorBundle>& discriptorSet, const std::vector<vkType::PushConst>& pushConsts, bool debug);
+	GraphicsPipelineOutBundle create_pipeline(GraphicsPipelineInBundle& spesifications, bool debug);
 	
 	vk::PipelineLayout create_pipeline_layout(vk::Device& logicalDevice, const std::vector<vkType::PushConst>& pushs, bool debug);
 

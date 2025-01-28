@@ -20,7 +20,7 @@ public:
 	std::vector <MeshT> get_triangles();
 	
 
-	std::vector <pos> get_triangles_pos();
+	std::vector <UserInput::pos> get_triangles_pos();
 
 
 	~SceneT();

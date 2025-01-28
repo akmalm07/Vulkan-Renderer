@@ -1,0 +1,5 @@
+WELCOME TO THE VULKAN RENDERING API!
+
+
+Here is my notation:
+

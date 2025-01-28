@@ -27,9 +27,9 @@ std::vector <MeshT> SceneT::get_triangles()
 	return triangles;
 }
 
-std::vector <pos> SceneT::get_triangles_pos()
+std::vector <UserInput::pos> SceneT::get_triangles_pos()
 {
-	std::vector<pos> positions;
+	std::vector<UserInput::pos> positions;
 	for (size_t i = 0; const auto& mesh : triangles)
 	{
 		for (const auto& vert : mesh.get_vertices())

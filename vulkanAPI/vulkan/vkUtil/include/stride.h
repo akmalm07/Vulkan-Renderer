@@ -4,6 +4,15 @@
 
 namespace vkVert {
 
+	enum class Stride : uint8_t
+	{
+		NONE = 0,
+		STRIDE_2D,
+		STRIDE_3D,
+		STRIDE_4D
+	};
+
+
 	enum class PosStride : uint8_t 
 	{
 		NONE = 0,
@@ -137,7 +146,63 @@ namespace vkVert {
 		}
 	}
 
+
+
+
+	template <vkType::GLMVec T>	
+	uint8_t enumerate_type()
+	{
+		if constexpr (std::is_same_v<T, glm::vec2>)
+		{
+			return 2;
+		}
+		else if constexpr (std::is_same_v<T, glm::vec3>)
+		{
+			return 3;
+		}
+		else if constexpr (std::is_same_v<T, glm::vec4>)
+		{
+			return 4;
+		}
+		else if constexpr (std::is_same_v<T, std::nullptr_t>)
+		{
+			return 0;
+		}
+		else
+		{
+			std::cout << "Error: an unknown type was entered!\n";
+			return 0;
+		}
+	}
+
+
+	template <vkType::GLMVec T>
+	constexpr Stride enumify_type() 
+	{
+		if constexpr (std::same_as<T, glm::vec2>)
+		{
+			return Stride::STRIDE_2D;
+		}
+		else if constexpr (std::same_as<T, glm::vec3>)
+		{
+			return Stride::STRIDE_3D;
+		}
+		else if constexpr (std::same_as<T, glm::vec4>)
+		{
+			return Stride::STRIDE_4D;
+		}
+		else if constexpr (std::same_as<T, std::nullptr_t>)
+		{
+			return Stride::NONE;
+		}
+		else
+		{
+			std::cout << "Error: an unknown type was entered for Stride!\n";
+			return Stride::NONE;
+		}
+	}
+
 	template <class T>
 	concept Enum = std::is_same_v<T, PosStride> || std::is_same_v<T, ColorStride> ||
-		std::is_same_v<T, NormalStride> || std::is_same_v<T, TextureStride>;
+		std::is_same_v<T, NormalStride> || std::is_same_v<T, TextureStride> || std::is_same_v<T, Stride>;
 }

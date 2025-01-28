@@ -64,7 +64,7 @@ public:
 	std::list <vkType::Index> get_indices() const;
 
 
-	std::list <Vertex> get_vertices_raw() const;
+	std::list <vkType::Vertex> get_vertices_raw() const;
 
 	void clear();
 
