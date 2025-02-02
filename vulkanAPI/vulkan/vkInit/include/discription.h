@@ -2,26 +2,47 @@
 
 #include "config.h"
 
+#include "vkUtil\include\vertex.h"
 #include "vkUtil\include\stride.h"
 
 
-namespace vkDiscription {
+namespace vkDiscription 
+{
 
-	AllInOneVertBuffer get_attribute_descriptions_one_buffer(uint32_t binding, bool debug);
+	struct DescriptionOutBundleSeperate
+	{
+		std::array<vk::VertexInputAttributeDescription, vkType::Vert::size()> bindingAttrib; 
+		std::array<vk::VertexInputBindingDescription, vkType::Vert::size()> bindingDesc; 
+	}; 
+
+	struct DescriptionOutBundle
+	{
+		std::array<vk::VertexInputAttributeDescription, vkType::Vert::size()> bindingAttrib; 
+		vk::VertexInputBindingDescription bindingDesc; 
+	}; 
+
+
+
 
 	template<vkType::GLMVec T>
-	OncePerVertBuffer get_attribute_descriptions_seperate_buffers(uint32_t binding, bool debug);
-
+	vk::VertexInputAttributeDescription get_attribute_descriptions(uint32_t binding, bool debug); 
 	vk::VertexInputBindingDescription get_binding_description(uint32_t binding, bool perInstenceInput, bool debug);
 
-	template<vkType::GLMVec T>
-	vk::VertexInputAttributeDescription get_attribute_desc(uint32_t offset, uint32_t binding, uint32_t location);
+	DescriptionOutBundleSeperate bind_attrib_and_desc_seperate(std::array<bool, vkType::Vert::size()>instanced, bool debug);
+	DescriptionOutBundle bind_attrib_and_desc(bool instanced, bool debug);
 
+	
+	std::variant<DescriptionOutBundle, DescriptionOutBundleSeperate> attrib_and_desc(bool instanced, bool debug);
+	std::variant<DescriptionOutBundle, DescriptionOutBundleSeperate> attrib_and_desc(std::array<bool, vkType::Vert::size()>instanced, bool debug);
+	
 
 }
 
+
+namespace // Im just a helper function
+{
 	template<vkType::GLMVec T>
-	vk::VertexInputAttributeDescription vkDiscription::get_attribute_desc(uint32_t offset,
+	vk::VertexInputAttributeDescription get_attribute_desc(uint32_t offset,
 		uint32_t binding, uint32_t location)
 	{
 		vk::VertexInputAttributeDescription disc;
@@ -55,14 +76,30 @@ namespace vkDiscription {
 	}
 
 
-
-	template<vkType::GLMVec T>
-	OncePerVertBuffer vkDiscription::get_attribute_descriptions_seperate_buffers(uint32_t binding, bool debug)  
+	inline uint32_t& get_S_location()
 	{
-		static uint32_t location = 0;
-		static uint32_t offset = 0;
+		static uint32_t s_location = 0;
+		return s_location;
+	
+	}
 
-		if (location == 0)
+	inline uint32_t& get_S_offset()
+	{
+		static uint32_t s_location = 0;
+		return s_location;
+	
+	}
+
+}
+
+
+	template<vkType::GLMVec T> 
+	vk::VertexInputAttributeDescription vkDiscription::get_attribute_descriptions(uint32_t binding, bool debug)
+	{
+		uint32_t& s_location = get_S_location();
+		uint32_t& s_offset = get_S_offset();
+
+		if (s_location == 0)
 		{
 			if constexpr (std::same_as<T, std::nullptr_t> && debug)
 			{
@@ -70,10 +107,11 @@ namespace vkDiscription {
 				return {};
 			}
 
-			vk::VertexInputAttributeDescription attribute = get_attribute_desc<UserInput::pos>(0, binding, location); 
-			 
-			location++;
-			offset += vkVert::enumerate_type<UserInput::pos>(); 
+			vk::VertexInputAttributeDescription attribute = std::move(get_attribute_desc<UserInput::pos>(0, binding, s_location)); 
+
+
+			s_location++;
+			s_offset += vkVert::enumerate_type<UserInput::pos>();
 
 			return attribute;
 		}
@@ -81,17 +119,16 @@ namespace vkDiscription {
 		{
 			if constexpr (!std::same_as<T, std::nullptr_t>)
 			{
-				location++;
 
-				vk::VertexInputAttributeDescription attribute = get_attribute_desc<T>(offset * sizeof(vkType::Vertex), binding, location));
+				vk::VertexInputAttributeDescription attribute = std::move(get_attribute_desc<T>(s_offset * sizeof(vkType::Vertex), binding, s_location));
 
-				offset += UINT32(vkVert::enumerate_col_type<T>()); 
+				s_location++;
+				s_offset += UINT32(vkVert::enumerate_type<T>());
 
 				return attribute;
 			}
 
 		}
 
-		throw std::runtime_error("Error: Unknown type was entered for get_attribute_descriptions_seperate_buffers\n");  
-		return nullptr;
+		throw std::runtime_error("Error: Unknown type was entered for get_attribute_descriptions\n");
 	}

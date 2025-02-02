@@ -2,8 +2,10 @@
 
 #include "config.h"
 
-#include "vkUtil\include\render_structs.h"
 #include "vkInit\include\discription.h"
+#include "vkUtil\include\render_structs.h"
+#include "vkUtil\include\vertex.h" 
+#include "vkUtil\include\pipeline_bundles.h" 
 
 
 
@@ -15,28 +17,6 @@ namespace vkInit {
 	//	vk::ShaderStageFlagBits shader;
 	//	uint32_t offset;
 	//};
-
-	struct GraphicsPipelineInBundle
-	{
-		vk::Device LogicalDevice;
-
-		std::filesystem::path vertShaderPath;
-		std::filesystem::path fragShaderPath;
-
-		vk::Format swapchainFormat;
-		vk::Extent2D swapchainExtent;
-
-		bool instanced;
-	};
-	
-	struct GraphicsPipelineOutBundle
-	{
-		vk::RenderPass renderpass;
-		vk::PipelineLayout pipelineLayout;
-		vk::Pipeline pipeline;
-
-	};
-
 
 	std::vector<vk::PushConstantRange> evaluate_push_constants(const std::vector<vkType::PushConst>& pushConsts, bool debug);
 

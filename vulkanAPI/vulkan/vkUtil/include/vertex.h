@@ -74,9 +74,14 @@ public:
 		return raw;
 	}
 
-	static size_t size() 
+	constexpr static size_t count() 
 	{
 		return c_pos_size + c_col_size + c_norm_size + c_tex_size;
+	}
+	
+	constexpr static size_t size() 
+	{
+		return 4;
 	}
 
 	VertexT& operator=(const VertexT& other)
@@ -145,10 +150,16 @@ public:
 		std::copy(c.begin(), c.end(), glm::value_ptr(_color));  
 	}
 
-	static size_t size() 
+	constexpr static size_t count()  
 	{
 		return c_pos_size + c_col_size;
 	}
+
+		constexpr static size_t size()  
+	{
+		return 2;
+	}
+
 
 
 	std::list<vkType::Vertex> get_raw() const
@@ -185,8 +196,6 @@ public:
 
 
 	VertexT(VertexT&& other) = default;
-
-
 };
 
 
@@ -222,9 +231,14 @@ public:
 		_normal = n;
 	}
 
-	static size_t size() 
+	constexpr static size_t count() 
 	{
 		return c_pos_size + c_col_size + c_norm_size;
+	}
+	
+	constexpr static size_t size() 
+	{
+		return 3;
 	}
 
 
@@ -280,6 +294,7 @@ public:
 
 
 	VertexT(VertexT&& other) = default;
+
 }; 
 
 
@@ -327,10 +342,17 @@ public:
 		std::copy(t.begin(), t.end(), glm::value_ptr(_texture));
 	}
 
-	static size_t size() 
+	constexpr static size_t count() 
 	{
 		return c_pos_size + c_col_size + c_tex_size;
 	}
+
+	
+	constexpr static size_t size() 
+	{
+		return 3;
+	}
+
 
 
 	std::list<vkType::Vertex> get_raw() const
@@ -371,11 +393,6 @@ public:
 
 
 	VertexT(VertexT&& other) = default;
-	
-	//operator unsigned short() const
-	//{
-	//	static_assert(false, "Conversion not implemented");
-	//}
 };
 
 

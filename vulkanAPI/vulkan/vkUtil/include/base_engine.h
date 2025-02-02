@@ -85,14 +85,14 @@ protected:
 
 	vk::RenderPass _vkRenderpass;
 
-	//Command variubles
+	//Command variubles  
 	vk::CommandPool _vkCommandPool;
 	vk::CommandBuffer _vkMainCommandBuffer;
 
 	vkVert::StrideBundle _stride;
 
-	const std::filesystem::path _shaderVertPath = "..\\shaders\\vertex.spv";
-	const std::filesystem::path _shaderFragPath = "..\\shaders\\fragment.spv";
+	const std::filesystem::path _shaderVertPath = UserInput::v_shader_path;  
+	const std::filesystem::path _shaderFragPath = UserInput::f_shader_path; 
 
 	//uint8_t pos;
 	//uint8_t col;

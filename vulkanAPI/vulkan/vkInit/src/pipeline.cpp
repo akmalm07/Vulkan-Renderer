@@ -1,10 +1,11 @@
 #include "pch.h"
 
 #include "vkInit\include\pipeline.h"
+#include "vkInit\include\discription.h"
+#include "vkUtil\include\vertex.h"
 #include "vkUtil\include\shader.h"
 #include "vkUtil\include\render_structs.h"
 #include "vkUtil\include\const_pushes.h"
-#include "vkInit\include\discription.h"
 
 
 namespace vkInit
@@ -16,6 +17,7 @@ namespace vkInit
 
 		for (const auto& push : pushConsts)
 		{
+			std::cout << "Push constant offset: " << push._offset << " size: " << push._size << " shader: " << UINT32(push._shader) << "\n";
 			pushConstants.emplace_back(create_push_constant(push._offset, push._size, push._shader, debug));
 		}
 
@@ -60,51 +62,40 @@ namespace vkInit
 
 
 
-		vk::VertexInputBindingDescription bindingDescription = {};
-
-		uint32_t numOfDescriptors = 0; 
-		uint32_t numOfAttrib = 0; 
-
-		if constexpr (std::same_as<UserInput::AttributeDescription, std::vector<vk::VertexInputAttributeDescription>>)
+		auto discriptorsIn = vkDiscription::attrib_and_desc(spesifications.instanced, debug);
 		{
-			std::vector<vk::VertexInputAttributeDescription> bindingAttributes = vkDiscription::get_attribute_descriptions_one_buffer(0, debug);
+			std::optional<vkDiscription::DescriptionOutBundle> in;
+			std::optional<vkDiscription::DescriptionOutBundleSeperate> inSep;
 
-			vk::VertexInputBindingDescription bindingDescription = vkDiscription::get_binding_description(0, spesifications.instanced, debug);
+			if constexpr (std::same_as<UserInput::AttributeDescription, AllInOneVertBuffer>)
+			{
+				in = std::get<vkDiscription::DescriptionOutBundle>(discriptorsIn);
+			}
+			else if constexpr (std::same_as<UserInput::AttributeDescription, OncePerVertBuffer>)
+			{
+				inSep = std::get<vkDiscription::DescriptionOutBundleSeperate>(discriptorsIn);
+			}
 
-			vertexInputInfo.vertexAttributeDescriptionCount = bindingAttributes.size(); 
-			vertexInputInfo.pVertexAttributeDescriptions = bindingAttributes.data();
-
-			vertexInputInfo.vertexBindingDescriptionCount = 1;
-			vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+			if (in.has_value())
+			{
+				vertexInputInfo.vertexBindingDescriptionCount = 1;
+				vertexInputInfo.pVertexBindingDescriptions = &in->bindingDesc;
+				vertexInputInfo.vertexAttributeDescriptionCount = in->bindingAttrib.size();
+				vertexInputInfo.pVertexAttributeDescriptions = in->bindingAttrib.data();
+			}
+			else if (inSep.has_value())
+			{
+				vertexInputInfo.vertexBindingDescriptionCount = inSep->bindingDesc.size();
+				vertexInputInfo.pVertexBindingDescriptions = inSep->bindingDesc.data();
+				vertexInputInfo.vertexAttributeDescriptionCount = inSep->bindingAttrib.size();
+				vertexInputInfo.pVertexAttributeDescriptions = inSep->bindingAttrib.data();
+			}
+			else
+			{
+				std::cerr << "Error creating vertex input: " << "No discriptor bundle was created" << "\n";
+				return {};
+			}
 		}
-		else
-		{
-
-			//  FIXME: This is a placeholder for the actual implementation
-			// The actual implementation will be a loop that will iterate over the vertexDiscriptors
-			// and create the bindingAttributes and bindingDescription for each vertexDiscriptor
-			// The bindingAttributes will be added to the vertexInputInfo.pVertexAttributeDescriptions
-			 
-			
-			//for (size_t i = 0; i < vertexDiscriptors.size(); i++)
-			//{
-			//	uint32_t totalOffset = vkVert::enumerate_pos_stride(vertexDiscriptors[i].stride.pos) +
-			//		vkVert::enumerate_color_stride(vertexDiscriptors[i].stride.col) +
-			//		vkVert::enumerate_tex_stride(vertexDiscriptors[i].stride.tex) +
-			//		vkVert::enumerate_normal_stride(vertexDiscriptors[i].stride.norm);
-
-
-			//	bindingAttributes = vkDiscription::get_attribute_descriptions(vertexDiscriptors[i].stride, i, debug);
-
-			//	bindingDescription = vkDiscription::get_binding_description(totalOffset * sizeof(Vertex), i, vertexDiscriptors[i].isPerInstanceRate);
-
-			//	numOfAttrib = numOfAttrib + bindingAttributes.size();
-
-
-			//	numOfDescriptors++;
-			//}
-		}
-
 		vertexInputInfo.flags = vk::PipelineVertexInputStateCreateFlags();
 
 		pipelineCreateInfo.pVertexInputState = &vertexInputInfo;

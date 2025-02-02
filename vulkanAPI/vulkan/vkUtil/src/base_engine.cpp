@@ -14,6 +14,7 @@
 #include "vkUtil\include\scene.h"
 #include "vkUtil\include\render_structs.h"
 #include "vkUtil\include\const_pushes.h"
+#include "vkUtil\include\pipeline_bundles.h"
 
 
 
@@ -288,28 +289,17 @@ void BaseEngine::destroy_swapchain()
 
 void BaseEngine::make_pipeline()
 {
-	vkInit::GraphicsPipelineInBundle spesifications = {};
+	vkInit::GraphicsPipelineInBundle spesifications = {}; 
 
 	spesifications.vertShaderPath = _shaderVertPath;
 	spesifications.fragShaderPath = _shaderFragPath;
 	spesifications.LogicalDevice =   _vkLogicalDevice;
 	spesifications.swapchainExtent = _vkSwapchainExtent;
 	spesifications.swapchainFormat = _vkSwapchainFormat;
-	spesifications.instanced = false;
+	spesifications.instanced = false; 
 
-	vkDiscription::DiscriptorBundle discription = {
-			_stride.pos,
-			_stride.col,
-			_stride.norm,
-			_stride.tex,
-		false
-	};
 
-	std::vector<vkDiscription::DiscriptorBundle> vecOfDescriptions;
-	vecOfDescriptions.emplace_back(discription);
-
-	vkInit::GraphicsPipelineOutBundle output = vkInit::create_pipeline(spesifications, vecOfDescriptions, 
-		vkUtil::PushConstRegistery::get_instance().get_push_consts(), _debugMode);
+	vkInit::GraphicsPipelineOutBundle output = vkInit::create_pipeline(spesifications, _debugMode);
 
 
 	_vkPipeline = output.pipeline;
@@ -408,7 +398,7 @@ void BaseEngine::record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t
 void BaseEngine::render()
 {
 
-	_vkLogicalDevice.waitForFences(1, &_vkSwapchainFrames[_frameNum].vkFenceInFlight, VK_TRUE, UINT64_MAX);
+	CheckVkResult(_vkLogicalDevice.waitForFences(1, &_vkSwapchainFrames[_frameNum].vkFenceInFlight, VK_TRUE, UINT64_MAX));
 
 
 	uint32_t imageIndex{};
@@ -428,12 +418,12 @@ void BaseEngine::render()
 	}
 	catch (vk::OutOfDateKHRError& err) 
 	{
-		std::cout << "swapchain OUT OF DATE " << err.what() << "\n";
+		std::cout << "Swapchain OUT OF DATE: " << err.what() << "\n";
 		return;
 	}
 	catch (vk::IncompatibleDisplayKHRError& err) 
 	{
-		std::cout << "Remakeing swapchain: " << err.what() << "\n";
+		std::cout << "Remakeing Swapchain: " << err.what() << "\n";
 		remake_swapchain();
 		return;
 	}

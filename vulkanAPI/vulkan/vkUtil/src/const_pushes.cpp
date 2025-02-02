@@ -25,12 +25,12 @@ namespace vkUtil {
 	}
 
 
-	uint32_t evaluate_offset_push_const(size_t size)
+	[[nodiscard]] uint32_t evaluate_offset_push_const(size_t size)
 	{
 		static uint32_t s_offset = 0;
 		static uint32_t s_size = 0;
 
-		s_offset += size;
+		s_offset += s_size;
 
 		s_size = size;
 

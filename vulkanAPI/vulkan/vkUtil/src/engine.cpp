@@ -73,7 +73,7 @@ void Engine::load_meshes(std::vector<MeshT>& meshes) const
 }
 
 
-void Engine::load_scene(std::unique_ptr<SceneT>& scene)
+void Engine::load_scene(std::unique_ptr<SceneT> scene)
 {
 	if (scene)
 	{
@@ -147,7 +147,7 @@ void Engine::call_push_consts() const
 	{
 		pushConst();
 	}
-
+	_pushConstCalls.clear();
 }
 
 

@@ -5,6 +5,8 @@
 #include "vkUtil\include\mesh.h"
 #include "vkUtil\include\vertex.h"
 
+#include <memory>
+
 namespace GameRenderer
 {
 	using namespace vkType;
@@ -23,7 +25,7 @@ namespace GameRenderer
 		meshes.push_back(mesh);
 
 		engine.load_meshes(meshes);
-
+		engine.load_scene(std::move(std::make_unique<Scene>()));
 		while (engine.running())
 		{
 			engine.render();

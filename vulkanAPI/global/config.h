@@ -17,7 +17,6 @@
 #include <iterator>
 
 
-
 #define UINT32(x) static_cast<uint32_t>(x)
 
 #define SIZET(x) static_cast<size_t>(x)
@@ -34,6 +33,15 @@ using AllInOneVertBuffer = std::vector<vk::VertexInputAttributeDescription>;
 
 
 
+
+inline void CheckVkResult(vk::Result result)
+{ 
+	if (result != vk::Result::eSuccess) 
+	{
+		throw std::runtime_error("Vulkan Error: " + vk::to_string(result) + "\n");
+	}
+}
+
 namespace UserInput
 {
 	//USER DEFITIONS
@@ -46,6 +54,9 @@ namespace UserInput
 	using tex = std::nullptr_t;
 
 	using AttributeDescription = AllInOneVertBuffer; 
+
+	const char v_shader_path[] = "..\\shaders\\vertex.spv"; 
+	const char f_shader_path[] = "..\\shaders\\fragment.spv"; 
 
 
 
@@ -90,6 +101,15 @@ namespace vkType
 			: _size(size), _offset(offset), _shader(_shader) {}
 
 	};
+
+	struct NULLOBJ
+	{
+		NULLOBJ() = default;
+	};
+
+
+	template <class T>
+	concept VertBuff = std::same_as<OncePerVertBuffer, T> || std::same_as<AllInOneVertBuffer, T>; 
 
 	template <class T>
 	concept ValidObj = std::is_class_v<T> &&  std::is_base_of_v<Drawable, T>; 
