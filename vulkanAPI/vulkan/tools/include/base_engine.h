@@ -1,14 +1,14 @@
 #pragma once
 
 #include "vkUtil\include\vertex.h"
-#include "vkUtil\include\stride.h"
+#include "tools\include\stride.h"
 
 #include "vkUtil\include\render_structs.h"
 #include "vkUtil\include\swapchain_frames.h"
 #include "config.h"
 
 
-#include "vkUtil\include\window.h"
+#include "tools\include\window.h"
 
 
 

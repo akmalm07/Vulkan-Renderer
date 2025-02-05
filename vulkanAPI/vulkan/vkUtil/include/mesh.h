@@ -1,7 +1,7 @@
 #pragma once
 
 #include "config.h"
-#include "vkUtil\include\stride.h"
+#include "tools\include\stride.h"
 #include "vkUtil\include\vertex.h"
 
 

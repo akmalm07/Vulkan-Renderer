@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include "timer.h"
+#include "tools\include\timer.h"
 
 Timer::Timer()
 {
@@ -22,8 +22,6 @@ void Timer::StopTime()
 	float milliseconds = static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
 
 	std::cout << milliseconds << " ms \n"; 
-
-
 
 }
 

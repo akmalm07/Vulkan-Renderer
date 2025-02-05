@@ -1,10 +1,10 @@
 #pragma once
 
 #include "config.h"
-#include "vkUtil\include\keys.h"
+#include "tools\include\keys.h"
 
-#include "vkUtil\include\keys.h"
-#include "vkUtil\include\window_input.h"
+#include "tools\include\keys.h"
+#include "tools\include\window_input.h"
 
 
 namespace vkUtil {

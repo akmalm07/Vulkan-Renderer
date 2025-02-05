@@ -1,10 +1,10 @@
 #include "pch.h"
 
-#include "vkUtil\include\window_input.h"
+#include "tools\include\window_input.h"
 
-#include "vkUtil\include\keys.h"
+#include "tools\include\keys.h"
 
-#include "vkUtil\include\window.h"
+#include "tools\include\window.h"
 
 
 namespace vkUtil {

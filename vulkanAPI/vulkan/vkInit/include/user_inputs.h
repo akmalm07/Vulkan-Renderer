@@ -22,7 +22,7 @@ namespace UserInput
 	const char v_shader_path[] = "..\\shaders\\vertex.spv";
 	const char f_shader_path[] = "..\\shaders\\fragment.spv";
 
-	const vk::ClearValue clear_color = { std::array<float, 4>{1.0f, 0.0f, 1.0f, 1.0f} };
+	const vk::ClearValue clear_color = { std::array<float, 4>{0.5f, 5.0f, 0.1f, 1.0f} };
 
 
 

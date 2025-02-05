@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include "scene.h"
+#include "tools\include\scene.h"
 
 SceneT::SceneT()
 {

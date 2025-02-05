@@ -2,11 +2,11 @@
 
 #include "config.h"
 
-#include "vkUtil\include\base_engine.h"
+#include "tools\include\base_engine.h"
 #include "vkUtil\include\mesh.h"
 #include "vkUtil\include\VertexBuffer.h"
 #include "vkUtil\include\IndexBuffer.h"
-#include "vkUtil\include\scene.h"
+#include "tools\include\scene.h"
 #include "vkUtil\include\shader.h"
 
 #include <queue>

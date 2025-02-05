@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include "shader.h"
+#include "vkUtil\include\shader.h"
 
 namespace vkInit
 {

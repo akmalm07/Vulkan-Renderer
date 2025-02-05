@@ -3,7 +3,7 @@
 #include "config.h"
 
 #include "vkUtil\include\vertex.h"
-#include "vkUtil\include\stride.h"
+#include "tools\include\stride.h"
 
 
 namespace vkDiscription 

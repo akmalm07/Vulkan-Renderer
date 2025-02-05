@@ -4,7 +4,6 @@
 
 #include "predefines.h"
 #include <glm\glm.hpp>
-#include <type_traits>
 
 #include <type_traits>
 

@@ -1,7 +1,7 @@
 #include "pch.h"
 
-#include "IndexBuffer.h"
-#include "memory.h"
+#include "vkUtil\include\IndexBuffer.h"
+#include "vkUtil\include\memory.h"
 
 
 IndexBufferT::IndexBufferT() : BufferFather() 

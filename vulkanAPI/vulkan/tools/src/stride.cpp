@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include "stride.h"
+#include "tools\include\stride.h"
 
 namespace vkVert
 {

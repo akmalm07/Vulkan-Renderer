@@ -2,7 +2,7 @@
 
 #include "config.h"
 
-#include "swapchain.h"
+#include "vkInit\include\swapchain.h"
 
 
 

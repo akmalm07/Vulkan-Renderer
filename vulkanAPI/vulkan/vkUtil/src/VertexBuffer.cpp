@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include "VertexBuffer.h"
+#include "vkUtil\include\VertexBuffer.h"
 
 
 

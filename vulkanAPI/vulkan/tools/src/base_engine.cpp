@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include "vkUtil\include\base_engine.h"
+#include "tools\include\base_engine.h"
 #include "vkInit\include\instance.h"
 #include "vkInit\include\logging.h"
 #include "vkInit\include\device.h"
@@ -9,12 +9,13 @@
 #include "vkInit\include\discription.h"
 #include "vkUtil\include\framebuffer.h"
 #include "vkUtil\include\command.h"
-#include "vkUtil\include\window.h"
+#include "tools\include\window.h"
 #include "vkUtil\include\sync.h"
-#include "vkUtil\include\scene.h"
+#include "tools\include\scene.h"
 #include "vkUtil\include\render_structs.h"
 #include "vkUtil\include\const_pushes.h"
 #include "vkUtil\include\pipeline_bundles.h"
+#include "tools\include\timer.h"
 
 
 
@@ -392,7 +393,8 @@ void BaseEngine::record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t
 
 void BaseEngine::render()
 {
-
+	Timer timer;
+	
 	_window.pollEvents();
 
 	CheckVkResult(_vkLogicalDevice.waitForFences(1, &_vkSwapchainFrames[_frameNum].vkFenceInFlight, VK_TRUE, UINT64_MAX));
