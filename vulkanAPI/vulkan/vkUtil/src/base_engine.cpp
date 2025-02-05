@@ -235,9 +235,6 @@ void BaseEngine::make_swapchain()
 void BaseEngine::remake_swapchain()
 {
 
-	_window.SetBufferWidth(0); 
-	_window.SetBufferHeight(0); 
-
 	while (_window.GetBufferWidth() == 0 || _window.GetBufferHeight() == 0)
 	{
 		_window.waitEvents(); 
@@ -360,11 +357,9 @@ void BaseEngine::record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t
 
 	renderPassBeginInfo.renderArea.extent = _vkSwapchainExtent;
 
-	vk::ClearValue clearColor = { std::array<float, 4>{1.0f, 1.0f, 1.0f, 1.0f} };
-
 	renderPassBeginInfo.clearValueCount = 1;
 
-	renderPassBeginInfo.pClearValues = &clearColor;
+	renderPassBeginInfo.pClearValues = &UserInput::clear_color;
 
 	commandBuffer.beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
 
@@ -397,6 +392,8 @@ void BaseEngine::record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t
 
 void BaseEngine::render()
 {
+
+	_window.pollEvents();
 
 	CheckVkResult(_vkLogicalDevice.waitForFences(1, &_vkSwapchainFrames[_frameNum].vkFenceInFlight, VK_TRUE, UINT64_MAX));
 
@@ -572,9 +569,9 @@ BaseEngine::~BaseEngine()
 		std::cout << "Goodbye see you!\n";
 	}
 
+	_vkLogicalDevice.waitIdle();
 
 	destroy_swapchain();
-
 
 	_vkLogicalDevice.destroyCommandPool(_vkCommandPool);
 
@@ -586,20 +583,12 @@ BaseEngine::~BaseEngine()
 	_vkLogicalDevice.destroyRenderPass(_vkRenderpass);
 
 
-
-
 	_instance.destroySurfaceKHR(_vkPresentSurface);
 
 	if (_debugMode)
 	{
 		_instance.destroyDebugUtilsMessengerEXT(_debugMessenger, nullptr, _dldi);
 	}
-	/*
-	* from vulkan_funcs.hpp:
-	*
-	* void _instance::destroy( Optional<const VULKAN_HPP_NAMESPACE::AllocationCallbacks> allocator = nullptr,
-											Dispatch const & d = ::vk::getDispatchLoaderStatic())
-	*/
 
 
 	_vkLogicalDevice.destroy();

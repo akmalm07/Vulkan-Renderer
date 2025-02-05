@@ -11,6 +11,8 @@ namespace vkUtil {
 
 	uint32_t Window::g_numOfWindows = 0;
 
+	bool Window::_calledBufferSize = true;
+
 	Window::Window()
 	{
 
@@ -162,6 +164,26 @@ namespace vkUtil {
 	}
 
 
+
+	int Window::GetBufferWidth() 
+	{ 
+		if (_calledBufferSize)
+		{
+			glfwGetFramebufferSize(_mainWindow, &_bufferWidth, &_bufferHeight);
+			_calledBufferSize = false;
+		}
+		return _bufferWidth; 
+	}
+
+	int Window::GetBufferHeight() 
+	{ 
+		_calledBufferSize = true;
+
+		glfwGetFramebufferSize(_mainWindow, &_bufferWidth, &_bufferHeight); 
+		return _bufferHeight; 
+	}
+
+
 	bool Window::SetWindow(GLFWwindow* window) 
 	{ 
 		if (!window)
@@ -252,6 +274,13 @@ namespace vkUtil {
 	{
 		_keys[key] = val;
 	}
+
+
+	bool Window::IsMouseButtonPressed() const
+	{
+		return _isMouseButtonPressed; 
+	}
+
 
 	bool Window::IsFirstClick() const
 	{

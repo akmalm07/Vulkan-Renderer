@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include <cstdint>
 
 //statically load vulkan library
 #include <vulkan\vulkan.hpp>
@@ -41,11 +41,16 @@
 #include <array>
 #include <list>
 
-#include <cstdint>
 
 
 #include <glm\glm.hpp>
 #include <glm\gtc\matrix_transform.hpp>
 #include <glm\gtc\type_ptr.hpp> 
 
-#include "config.h"
+#include "vkInit\include\predefines.h"
+
+#include "vkInit\include\user_inputs.h"
+
+#include "vkInit\include\debug.h"
+
+#include "vkInit\include\types.h"

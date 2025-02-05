@@ -27,10 +27,6 @@ namespace vkUtil {
 		void DelKeyComb(Keys key, Mods mod); 
 		void DelKeyComb(Keys key); 
 
-		void SetBufferWidth(int width) { _bufferWidth = width; }
-
-		void SetBufferHeight(int height) { _bufferHeight = height; } 
-
 		void SetWidth(int width) { _width = width; }
 		
 		void SetHeight(int height) { _height = height; }
@@ -53,15 +49,14 @@ namespace vkUtil {
 		void SetCursorLocked();
 		void SetCursorNormal();
 
-		inline GLint GetBufferWidth() const { return _bufferWidth; }
-		inline GLint GetBufferHeight() const { return _bufferHeight; }
-
+		int GetBufferWidth(); 
+		int GetBufferHeight(); 
 		inline GLFWwindow* GetWindow() const { return _mainWindow; }
 		
 		bool SetWindow(GLFWwindow* window);
 
-		inline GLint GetWidth() const { return _width; }
-		inline GLint GetHeight() const { return _height; }
+		inline int GetWidth() const { return _width; }
+		inline int GetHeight() const { return _height; }
 
 
 		float GetLeftOrtho() const;
@@ -70,7 +65,7 @@ namespace vkUtil {
 		float GetRightOrtho() const;
 
 
-		bool IsMouseButtonPressed(Mouse mouse) const;
+		bool IsMouseButtonPressed() const;
 
 		bool IsFirstClick() const;
 
@@ -103,6 +98,8 @@ namespace vkUtil {
 		//Window Vars
 
 		static constexpr size_t KEY_CONST = 1024;
+
+		static bool _calledBufferSize;
 
 		static uint32_t g_numOfWindows; 
 

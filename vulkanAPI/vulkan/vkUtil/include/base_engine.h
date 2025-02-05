@@ -38,7 +38,6 @@ public:
 
 protected: 
 
-	//whether to print debug messages in functions
 	bool _debugMode = true;
 
 	//glfw window parameters
