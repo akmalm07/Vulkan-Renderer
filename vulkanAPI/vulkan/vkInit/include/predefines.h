@@ -21,6 +21,7 @@ namespace vk
 
 #define VERTEX_TYPE float 
 
+#define MOVE_ITR(x) std::make_move_iterator(x)
 
 using OncePerVertBuffer = vk::VertexInputAttributeDescription; 
 using AllInOneVertBuffer = std::vector<vk::VertexInputAttributeDescription>; 

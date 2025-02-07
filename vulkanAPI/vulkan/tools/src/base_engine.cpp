@@ -145,6 +145,25 @@ BaseEngine::BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool
 
 
 
+void BaseEngine::updateFPS()
+{
+	static double previousTime = glfwGetTime();
+	static int frameCount = 0;
+
+	double currentTime = glfwGetTime();
+	frameCount++;
+
+	if (currentTime - previousTime >= 1.0)
+	{
+		std::stringstream title;
+		title << _window.GetName() << " - FPS: " << frameCount;
+
+		_window.SetName(title.str().c_str());
+
+		frameCount = 0;
+		previousTime = currentTime;
+	}
+}
 
 
 void BaseEngine::build_glfw_window() 
@@ -393,7 +412,7 @@ void BaseEngine::record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t
 
 void BaseEngine::render()
 {
-	Timer timer;
+	updateFPS();
 	
 	_window.pollEvents();
 

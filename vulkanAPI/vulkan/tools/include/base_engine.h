@@ -27,6 +27,7 @@ public:
 
 	virtual void draw(vk::CommandBuffer& commandBuffer) const = 0;
 
+	void updateFPS();
 
 	vk::Device get_logical_device() const;
 

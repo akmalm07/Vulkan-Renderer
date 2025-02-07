@@ -34,6 +34,7 @@
 #include <fstream>
 #include <filesystem>
 #include <algorithm>
+#include <sstream>
 #include <type_traits>
 #include <variant>
 #include <memory>

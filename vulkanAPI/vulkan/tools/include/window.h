@@ -70,6 +70,7 @@ namespace vkUtil {
 		bool IsFirstClick() const;
 
 		std::string GetName() const { return _name; }
+		void SetName(const char* name) const { glfwSetWindowTitle(_mainWindow, name); }
 
 		double GetMouseCurrentX() const { return _mouseCurrentX; }
 		double GetMouseCurrentY() const { return _mouseCurrentY; }

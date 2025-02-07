@@ -67,10 +67,10 @@ public:
 		auto norm= Norm::get_norm();
 		auto tex=  Tex::get_tex(); 
 
-		raw.insert(raw.end(), std::make_move_iterator(pos.begin()), std::make_move_iterator(pos.end()));
-		raw.insert(raw.end(), std::make_move_iterator(col.begin()), std::make_move_iterator(col.end()));
-		raw.insert(raw.end(), std::make_move_iterator(norm.begin()), std::make_move_iterator(norm.end()));
-		raw.insert(raw.end(), std::make_move_iterator(tex.begin()), std::make_move_iterator(tex.end()));
+		raw.insert(raw.end(), MOVE_ITR(pos.begin()), MOVE_ITR(pos.end()));
+		raw.insert(raw.end(), MOVE_ITR(col.begin()), MOVE_ITR(col.end()));
+		raw.insert(raw.end(), MOVE_ITR(norm.begin()), MOVE_ITR(norm.end()));
+		raw.insert(raw.end(), MOVE_ITR(tex.begin()), MOVE_ITR(tex.end()));
 		return raw;
 	}
 
@@ -168,8 +168,8 @@ public:
 		auto pos = Pos::get_pos();   
 		auto col = Col::get_col();  
 
-		raw.insert(raw.end(), std::make_move_iterator(pos.begin()), std::make_move_iterator(pos.end())); 
-		raw.insert(raw.end(), std::make_move_iterator(col.begin()), std::make_move_iterator(col.end())); 
+		raw.insert(raw.end(), MOVE_ITR(pos.begin()), MOVE_ITR(pos.end())); 
+		raw.insert(raw.end(), MOVE_ITR(col.begin()), MOVE_ITR(col.end())); 
 		return raw;
 	}
 
@@ -262,9 +262,9 @@ public:
 		auto col =  Col::get_col();    
 		auto norm = Norm::get_norm();   
 
-		raw.insert(raw.end(), std::make_move_iterator(pos.begin()), std::make_move_iterator(pos.end())); 
-		raw.insert(raw.end(), std::make_move_iterator(col.begin()), std::make_move_iterator(col.end())); 
-		raw.insert(raw.end(), std::make_move_iterator(norm.begin()), std::make_move_iterator(norm.end())); 
+		raw.insert(raw.end(), MOVE_ITR(pos.begin()), MOVE_ITR(pos.end())); 
+		raw.insert(raw.end(), MOVE_ITR(col.begin()), MOVE_ITR(col.end())); 
+		raw.insert(raw.end(), MOVE_ITR(norm.begin()), MOVE_ITR(norm.end())); 
 		return raw;
 	}
 
@@ -362,9 +362,9 @@ public:
 		auto col = Col::get_col();      
 		auto tex = Tex::get_tex();    
 
-		raw.insert(raw.end(), std::make_move_iterator(pos.begin()), std::make_move_iterator(pos.end()));  
-		raw.insert(raw.end(), std::make_move_iterator(col.begin()), std::make_move_iterator(col.end())); 
-		raw.insert(raw.end(), std::make_move_iterator(tex.begin()), std::make_move_iterator(tex.end()));  
+		raw.insert(raw.end(), MOVE_ITR(pos.begin()), MOVE_ITR(pos.end()));  
+		raw.insert(raw.end(), MOVE_ITR(col.begin()), MOVE_ITR(col.end())); 
+		raw.insert(raw.end(), MOVE_ITR(tex.begin()), MOVE_ITR(tex.end()));  
 		return raw;
 	}
 

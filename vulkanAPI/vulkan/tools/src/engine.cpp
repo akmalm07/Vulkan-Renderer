@@ -9,7 +9,7 @@ Engine::Engine() :
 
 
 Engine::Engine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool debug) :
-	BaseEngine(glfwWindow, stride, debug)
+	BaseEngine(glfwWindow, stride, debug) 
 {}
 
 
@@ -17,6 +17,38 @@ Engine::Engine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool debug) 
 Engine::Engine(vkVert::StrideBundle stride, int width, int height, bool debug) :
 	BaseEngine(stride, width, height, debug) 
 {}
+
+
+void Engine::load_mesh(MeshT& mesh) const
+{
+	std::vector<vkType::Vertex> vertices;
+
+	std::vector<vkType::Index> indices;
+
+	const auto& verts = mesh.get_vertices_raw();
+
+	vertices.insert(vertices.end(), MOVE_ITR(verts.begin()), MOVE_ITR(verts.end()));
+
+	DEBUG_ITERATOR(verts);
+
+	vkUtil::BufferInitInput bufferInfo = {};
+
+	bufferInfo.logicalDevice = _vkLogicalDevice;
+
+	bufferInfo.physicalDevice = _vkPhysicalDevice;
+
+	_vertexBuffer = std::make_unique<VertexBuffer>(bufferInfo);
+	_vertexBuffer->initalize(vertices, _debugMode);
+
+	const auto& inds = mesh.get_indices();
+	if (!inds.empty()) 
+	{
+		indices.insert(indices.end(), MOVE_ITR(inds.begin()), MOVE_ITR(inds.end())); 
+		_indexBuffer = std::make_unique<IndexBuffer>(bufferInfo);
+		_indexBuffer->initalize(indices, _debugMode);
+	}
+}
+
 
 
 void Engine::load_meshes(std::vector<MeshT>& meshes) const
@@ -38,7 +70,7 @@ void Engine::load_meshes(std::vector<MeshT>& meshes) const
 	for (auto& mesh : meshes)
 	{
 		const auto& verts = mesh.get_vertices_raw();
-		vertices.insert(vertices.end(), std::make_move_iterator(verts.begin()), std::make_move_iterator(verts.end()));
+		vertices.insert(vertices.end(), MOVE_ITR(verts.begin()), MOVE_ITR(verts.end()));
 
 		/*		for (const auto& vert : vertices)
 				{
@@ -47,12 +79,12 @@ void Engine::load_meshes(std::vector<MeshT>& meshes) const
 				std::cout << "\n";
 				std::cout << "SIZE: " << vertices.size() << "\n";
 				*/
-		if (mesh.get_indices().empty()) 
+		if (mesh.get_indices().empty())
 		{
 			continue;
 		}
 		const auto& inds = mesh.get_indices();
-		indices.insert(indices.end(), std::make_move_iterator(inds.begin()), std::make_move_iterator(inds.end()));
+		indices.insert(indices.end(), MOVE_ITR(inds.begin()), MOVE_ITR(inds.end()));
 	}
 
 	vkUtil::BufferInitInput bufferInfo = {};
@@ -73,6 +105,8 @@ void Engine::load_meshes(std::vector<MeshT>& meshes) const
 }
 
 
+
+
 void Engine::load_scene(std::unique_ptr<SceneT> scene)
 {
 	if (scene)
@@ -84,16 +118,20 @@ void Engine::load_scene(std::unique_ptr<SceneT> scene)
 
 void Engine::draw_scene(vk::CommandBuffer& cmdBuffer) const
 {
-	if (_scene)
-	{
-		for (const auto& position : _scene->get_triangles_pos())
-		{ 
-			glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(position, 0.0f)); 
-			vkUtil::ObjectData objectData(vkUtil::ShaderStage::VERTEX);
-			objectData.c_data._model = std::move(model);
-			send_as_push_const(objectData.c_data, cmdBuffer, vkUtil::ShaderStage::VERTEX, 0);
-		}
-	}
+	//if (_scene)
+	//{
+	//	for (const auto& position : _scene->get_triangles_pos())
+	//	{ 
+	//		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(position.x, position.y, 0.0f));
+	//		vkUtil::ObjectData objectData(vkUtil::ShaderStage::VERTEX);
+	//		objectData.c_data._model = model;
+	//		send_as_push_const(objectData.c_data, cmdBuffer, vkUtil::ShaderStage::VERTEX, 0);
+	//	}
+	//}
+
+	vkUtil::ObjectData objectData(vkUtil::ShaderStage::VERTEX);
+	objectData.c_data._model = glm::mat4(1.0f);
+	send_as_push_const(objectData.c_data, cmdBuffer, vkUtil::ShaderStage::VERTEX, 0); 
 }
 
 
@@ -109,7 +147,6 @@ void Engine::draw_scene(vk::CommandBuffer& cmdBuffer) const
 
 void Engine::draw(vk::CommandBuffer& commandBuffer) const
 {
-
 	draw_scene(commandBuffer);
 	
 	bool hasVertBuffer = _vertexBuffer != nullptr; 

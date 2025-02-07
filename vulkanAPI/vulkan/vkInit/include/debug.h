@@ -16,7 +16,10 @@
 	}		\
 
 
-#define DEBUG_ITERATOR(vec, statement) for (const auto& item : vec) { statement; }
+#define DEBUG_ITERATOR(vec) \
+for (const auto& item : vec) \
+{ std::cout << " " << item << " "; } \
+std::cout << "\n"; 
 
 
 inline void CheckVkResult(vk::Result result) 

@@ -134,15 +134,15 @@ size_t MeshT::ind_size() const
 
 void MeshT::insert(std::list<vkType::Vert>& vertices, std::list<vkType::Index>& indices)
 {
-	_vertices.insert(_vertices.end(), std::make_move_iterator(vertices.begin()), std::make_move_iterator(vertices.end()));
-	_indices.insert(_indices.end(), std::make_move_iterator(indices.begin()), std::make_move_iterator(indices.end()));
+	_vertices.insert(_vertices.end(), MOVE_ITR(vertices.begin()), MOVE_ITR(vertices.end()));
+	_indices.insert(_indices.end(), MOVE_ITR(indices.begin()), MOVE_ITR(indices.end()));
 	_verticesCount += vertices.size();
 	_indicesCount += indices.size();
 }
 
 void MeshT::insert(std::list<vkType::Vert>& vertices)
 {
-	_vertices.insert(_vertices.end(), std::make_move_iterator(vertices.begin()), std::make_move_iterator(vertices.end())); 
+	_vertices.insert(_vertices.end(), MOVE_ITR(vertices.begin()), MOVE_ITR(vertices.end())); 
 	_verticesCount = _vertices.size();
 }
 
@@ -196,7 +196,7 @@ std::list <vkType::Vertex> MeshT::get_vertices_raw() const
 	for (const auto& vertex : _vertices)
 	{
 		const auto& vert = vertex.get_raw();
-		raw.insert(raw.end(), std::make_move_iterator(vert.begin()), std::make_move_iterator(vert.end()));
+		raw.insert(raw.end(), MOVE_ITR(vert.begin()), MOVE_ITR(vert.end()));
 	}
 
 	return raw;

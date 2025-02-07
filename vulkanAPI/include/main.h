@@ -15,16 +15,13 @@ namespace GameRenderer
 	{
 		Engine engine;
 
-		Vert v1 = { {0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}};
-		Vert v2 = { {0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}};
-		Vert v3 = { {1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}};
+		Vert v1 = { {-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f} };
+		Vert v2 = { {0.5f, 0.5f  }, {0.0f, 1.0f, 0.0f} };
+		Vert v3 = { {1.0f, -1.0f }, {0.0f, 0.0f, 1.0f} };
 
 		Mesh mesh = { v1, v2, v3 };
 
-		std::vector<Mesh> meshes;
-		meshes.push_back(mesh);
-
-		engine.load_meshes(meshes);
+		engine.load_mesh(mesh);
 		engine.load_scene(std::move(std::make_unique<Scene>()));
 		while (engine.running())
 		{

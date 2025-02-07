@@ -3,6 +3,7 @@
 #include "config.h"
 
 #include "tools\include\base_engine.h"
+
 #include "vkUtil\include\mesh.h"
 #include "vkUtil\include\VertexBuffer.h"
 #include "vkUtil\include\IndexBuffer.h"
@@ -32,6 +33,8 @@ public:
 	Engine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool debug);
 
 	void load_meshes(std::vector<MeshT>& meshes) const;
+
+	void load_mesh(MeshT& mesh) const;
 
 	void load_scene(std::unique_ptr<SceneT> scene);
 

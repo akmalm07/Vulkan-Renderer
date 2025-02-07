@@ -80,14 +80,14 @@ namespace vkInit
 			{
 				vertexInputInfo.vertexBindingDescriptionCount = 1;
 				vertexInputInfo.pVertexBindingDescriptions = &in->bindingDesc;
-				vertexInputInfo.vertexAttributeDescriptionCount = in->bindingAttrib.size();
+				vertexInputInfo.vertexAttributeDescriptionCount = UINT32(in->bindingAttrib.size());
 				vertexInputInfo.pVertexAttributeDescriptions = in->bindingAttrib.data();
 			}
 			else if (inSep.has_value())
 			{
-				vertexInputInfo.vertexBindingDescriptionCount = inSep->bindingDesc.size();
+				vertexInputInfo.vertexBindingDescriptionCount = UINT32(inSep->bindingDesc.size());
 				vertexInputInfo.pVertexBindingDescriptions = inSep->bindingDesc.data();
-				vertexInputInfo.vertexAttributeDescriptionCount = inSep->bindingAttrib.size();
+				vertexInputInfo.vertexAttributeDescriptionCount = UINT32(inSep->bindingAttrib.size());
 				vertexInputInfo.pVertexAttributeDescriptions = inSep->bindingAttrib.data();
 			}
 			else
@@ -141,9 +141,9 @@ namespace vkInit
 
 		viewport.y = 0.0f;
 
-		viewport.width = spesifications.swapchainExtent.width;
+		viewport.width = UINT32(spesifications.swapchainExtent.width);
 
-		viewport.height = spesifications.swapchainExtent.height;
+		viewport.height = UINT32(spesifications.swapchainExtent.height);
 
 		viewport.maxDepth = 1.0f;
 		viewport.minDepth = 0.0f;
@@ -212,7 +212,7 @@ namespace vkInit
 		shaderStages.push_back(fragShaderInfo);
 
 
-		pipelineCreateInfo.stageCount = shaderStages.size();
+		pipelineCreateInfo.stageCount = UINT32(shaderStages.size());
 		pipelineCreateInfo.pStages = shaderStages.data();
 
 
