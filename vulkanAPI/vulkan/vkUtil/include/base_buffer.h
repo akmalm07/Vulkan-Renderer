@@ -31,7 +31,7 @@ protected:
 
 
 	template <vkType::BufferType T>
-	void createBuffer(std::vector<T>& data, vk::DeviceMemory& bufferMemory, vk::BufferUsageFlagBits usage, size_t& count, bool debug)
+	void createBuffer(const std::vector<T>& data, vk::DeviceMemory& bufferMemory, vk::BufferUsageFlagBits usage, bool debug)
 	{
 		std::string_view bufferStr = (usage == vk::BufferUsageFlagBits::eVertexBuffer ? "vertex" : (usage == vk::BufferUsageFlagBits::eIndexBuffer ? "index" : "unknown buffer"));
 
@@ -50,7 +50,7 @@ protected:
 		vkUtil::BufferInput input = {};
 		input.device = physicalDevice;
 		input.logicalDevice = device;
-		input.size = data.size() * sizeof(data[0]);
+		input.size = data.size() * sizeof(data[0]);// FIX THE SIZE!!!!
 		input.usage = usage;
 
 
@@ -89,6 +89,5 @@ protected:
 		device.unmapMemory(bufferMemory);
 
 
-		count = data.size();
 	}
 };

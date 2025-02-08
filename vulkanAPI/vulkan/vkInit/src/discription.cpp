@@ -20,7 +20,7 @@ namespace vkDiscription
 		descriptionSet.binding = binding;
 
 		descriptionSet.stride = vkType::Vert::count() * sizeof(vkType::Vertex);
-
+		 
 		descriptionSet.inputRate = (perInstenceInput ? vk::VertexInputRate::eInstance : vk::VertexInputRate::eVertex);
 
 		return descriptionSet;

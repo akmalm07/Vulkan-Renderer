@@ -19,7 +19,7 @@ public:
 	
 	IndexBufferT(const vkUtil::BufferInitInput& bufferInfo);
 	
-	void initalize(std::vector<vkType::Index>& data, bool debug);
+	void initalize(const std::vector<vkType::Index>& data, bool debug);
 
 	void bind_buffer(vk::CommandBuffer& cmdBuffer, size_t offsets) const;
 

@@ -105,7 +105,7 @@ namespace vkInit
 
 		inputAssemblyInfo.flags = vk::PipelineInputAssemblyStateCreateFlags();
 
-		inputAssemblyInfo.topology = vk::PrimitiveTopology::eTriangleList;
+		inputAssemblyInfo.topology = vk::PrimitiveTopology::eTriangleList;// ::eTriangleList 
 
 		pipelineCreateInfo.pInputAssemblyState = &inputAssemblyInfo;
 
@@ -187,7 +187,7 @@ namespace vkInit
 
 		rastInfo.lineWidth = 1.0f;
 
-		rastInfo.cullMode = vk::CullModeFlagBits::eBack;
+		rastInfo.cullMode = vk::CullModeFlagBits::eBack; // ::eBack 
 
 		rastInfo.frontFace = vk::FrontFace::eClockwise;
 

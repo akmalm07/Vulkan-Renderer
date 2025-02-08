@@ -155,7 +155,7 @@ public:
 		return c_pos_size + c_col_size;
 	}
 
-		constexpr static size_t size()  
+	constexpr static size_t size()  
 	{
 		return 2;
 	}

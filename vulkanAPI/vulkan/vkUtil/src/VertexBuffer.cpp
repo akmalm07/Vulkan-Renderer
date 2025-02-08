@@ -2,6 +2,7 @@
 
 #include "vkUtil\include\VertexBuffer.h"
 
+#include "vkUtil\include\vertex.h"
 
 
 VertexBufferT::VertexBufferT() : BufferFather()
@@ -14,9 +15,10 @@ VertexBufferT::VertexBufferT(const vkUtil::BufferInitInput& input) :
 }
 
 
-void VertexBufferT::initalize(std::vector<float>& data, bool debug)
+void VertexBufferT::initalize(const std::vector<vkType::Vertex>& data, bool debug)
 {
-	createBuffer<float>(data, bufferMemory, vk::BufferUsageFlagBits::eVertexBuffer, vertexCount, debug);
+	createBuffer<vkType::Vertex>(data, bufferMemory, vk::BufferUsageFlagBits::eVertexBuffer, debug);
+	vertexCount = data.size() / vkType::Vert::count();
 }
 
 

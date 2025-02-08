@@ -23,7 +23,7 @@ public:
 	VertexBufferT(const vkUtil::BufferInitInput& input);
 
 
-	void initalize(std::vector<float>& data, bool debug);
+	void initalize(const std::vector<vkType::Vertex>& data, bool debug);
 
 
 	size_t vertex_count() const;

@@ -10,7 +10,7 @@ namespace
     {
         _BEFORE_INT_MAIN_INIT_()
         {
-            vkUtil::PushConstRegistery::get_instance().add_push_const(vkUtil::ObjectData(vkUtil::ShaderStage::VERTEX));
+            //vkUtil::PushConstRegistery::get_instance().add_push_const(vkUtil::ObjectData(vkUtil::ShaderStage::VERTEX));
         }
     };
 

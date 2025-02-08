@@ -38,18 +38,6 @@ std::vector <UserInput::pos> SceneT::get_triangles_pos()
 		}
 	}
 
-	//static int count = 0;
-	//if (count == 0)
-	//{
-	//	std::cout << "\nPOSITIONS: ";
-	//	for (const auto& post : positions)
-	//	{
-	//		std::cout << " " << post.x << " " << post.y << " ";
-
-	//	}
-	//	count++;
-	//}
-
 	return positions; 
 }
 

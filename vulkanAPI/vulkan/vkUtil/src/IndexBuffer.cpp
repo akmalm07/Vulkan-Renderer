@@ -12,9 +12,10 @@ IndexBufferT::IndexBufferT(const vkUtil::BufferInitInput& bufferInfo)
 {}
 
 
-void IndexBufferT::initalize(std::vector<vkType::Index>& data, bool debug)
+void IndexBufferT::initalize(const std::vector<vkType::Index>& data, bool debug)
 {
-	createBuffer<vkType::Index>(data, bufferMemory, vk::BufferUsageFlagBits::eIndexBuffer, indexCount, debug); 
+	createBuffer<vkType::Index>(data, bufferMemory, vk::BufferUsageFlagBits::eIndexBuffer, debug);
+	indexCount = data.size();
 }
 
 

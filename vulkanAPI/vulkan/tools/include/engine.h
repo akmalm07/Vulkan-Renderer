@@ -33,6 +33,8 @@ public:
 	Engine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool debug);
 
 	void load_meshes(std::vector<MeshT>& meshes) const;
+	
+	void load_meshes(std::vector<vkType::Vertex>& meshes, std::vector<vkType::Index>& indices) const;
 
 	void load_mesh(MeshT& mesh) const;
 

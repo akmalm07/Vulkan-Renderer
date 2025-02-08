@@ -87,6 +87,8 @@ void Engine::load_meshes(std::vector<MeshT>& meshes) const
 		indices.insert(indices.end(), MOVE_ITR(inds.begin()), MOVE_ITR(inds.end()));
 	}
 
+
+
 	vkUtil::BufferInitInput bufferInfo = {};
 
 	bufferInfo.logicalDevice = _vkLogicalDevice;
@@ -97,11 +99,38 @@ void Engine::load_meshes(std::vector<MeshT>& meshes) const
 
 	_vertexBuffer->initalize(vertices, _debugMode);
 
+	DEBUG_ITERATOR(vertices);
+
+
 	if (!indices.empty())
 	{
 		_indexBuffer = std::make_unique<IndexBuffer>(bufferInfo);
 		_indexBuffer->initalize(indices, _debugMode);
 	}
+}
+
+void Engine::load_meshes(std::vector<vkType::Vertex>& meshes, std::vector<vkType::Index>& indices) const
+{
+
+	vkUtil::BufferInitInput bufferInfo = {};
+
+	bufferInfo.logicalDevice = _vkLogicalDevice;
+
+	bufferInfo.physicalDevice = _vkPhysicalDevice;
+
+	_vertexBuffer = std::make_unique<VertexBuffer>(bufferInfo);
+
+	_vertexBuffer->initalize(meshes, _debugMode);
+
+	DEBUG_ITERATOR(meshes); 
+
+
+	if (!indices.empty()) 
+	{
+		_indexBuffer = std::make_unique<IndexBuffer>(bufferInfo); 
+		_indexBuffer->initalize(indices, _debugMode); 
+	}
+
 }
 
 
@@ -116,8 +145,13 @@ void Engine::load_scene(std::unique_ptr<SceneT> scene)
 }
 
 
+
 void Engine::draw_scene(vk::CommandBuffer& cmdBuffer) const
 {
+	//For now, we are not using the scene class,
+	// so we will just draw the mesh
+	//FIX IMMIDIATELY TO DRAW IN THE CORRECT ORDER
+
 	//if (_scene)
 	//{
 	//	for (const auto& position : _scene->get_triangles_pos())
@@ -129,9 +163,9 @@ void Engine::draw_scene(vk::CommandBuffer& cmdBuffer) const
 	//	}
 	//}
 
-	vkUtil::ObjectData objectData(vkUtil::ShaderStage::VERTEX);
-	objectData.c_data._model = glm::mat4(1.0f);
-	send_as_push_const(objectData.c_data, cmdBuffer, vkUtil::ShaderStage::VERTEX, 0); 
+	//vkUtil::ObjectData objectData(vkUtil::ShaderStage::VERTEX);
+	//objectData.c_data._model = glm::mat4(1.0f);
+	//send_as_push_const(objectData.c_data, cmdBuffer, vkUtil::ShaderStage::VERTEX, 0); 
 }
 
 
