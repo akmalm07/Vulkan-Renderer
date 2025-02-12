@@ -34,6 +34,11 @@ namespace vkType
 	};
 
 
+
+	template<class Func, class ... Args>
+	concept BoolLambdaVardic = std::same_as<Func, std::function<bool(Args...)>>;
+
+
 	template <class T>
 	concept VertBuff = std::same_as<OncePerVertBuffer, T> || std::same_as<AllInOneVertBuffer, T>;
 

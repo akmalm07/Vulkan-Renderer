@@ -1,7 +1,7 @@
 #pragma once
 
 #include "config.h"
-#include "vkUtil\include\shader.h"
+#include "vkUtil\include\shader_bundles.h"
 
 namespace vkUtil {
 

@@ -10,36 +10,36 @@
 namespace vkUtil {
 
 
-	class Window
+	class WindowT
 	{
 	public:
-		Window();
+		WindowT();
 
-		Window(GLint windowWidth, GLint windowHeight, const std::string& name, bool isOrtho);
+		WindowT(GLint windowWidth, GLint windowHeight, const std::string& name, bool isOrtho);
 
-		bool CreateWindow(const std::string& name, int width, int height); 
+		bool CreateWindow(const std::string& name, int width, int height);
 
-		template<class ... Args>
-		void AddKeyComb(Keys key, Action action, std::function<bool(Args...)> function, std::tuple<Args...> args);
-		template<class ... Args>
-		void AddKeyComb(Keys key, Action action, Mods mod, std::function<bool(Args...)> function, std::tuple<Args...> args);
+		float GetAspectRatio() const;
 
-		void DelKeyComb(Keys key, Mods mod); 
-		void DelKeyComb(Keys key); 
+		void DelKeyComb(Keys key, Mods mod);
+		void DelKeyComb(Keys key);
+
+		void DelAABButton(std::string_view name);
 
 		void SetWidth(int width) { _width = width; }
-		
+
 		void SetHeight(int height) { _height = height; }
-		
+
 		//template<class ... Args>
 		//void AddMouseClick(Mouse mouse, std::function<bool(Args...)> function);
 		//void DelMouseClick(Mouse mouse);
 
-		template<class ... Args>
-		void AddAABButton(float cordX, float cordY, float width, float height, Action action, Mouse button,
-			std::function<bool(Args...)> function, std::string_view str, std::tuple<Args...> args);
-		
-		void DelAABButton(std::string_view name);
+
+		template<class F, class ... Args>
+		void AddKeyComb(const KeyCombInput& input, F&& function, std::tuple<Args...> args);
+
+		template<class F, class ... Args>
+		void AddAABButton(const AABButtonInput& input, F&& function, std::string_view str, std::tuple<Args...> args);
 
 
 		void SetOrtho(float left, float right, float top, float bottom);
@@ -49,10 +49,10 @@ namespace vkUtil {
 		void SetCursorLocked();
 		void SetCursorNormal();
 
-		int GetBufferWidth(); 
-		int GetBufferHeight(); 
+		int GetBufferWidth();
+		int GetBufferHeight();
 		inline GLFWwindow* GetWindow() const { return _mainWindow; }
-		
+
 		bool SetWindow(GLFWwindow* window);
 
 		inline int GetWidth() const { return _width; }
@@ -90,9 +90,9 @@ namespace vkUtil {
 		void ClearWindow();
 
 		void pollEvents() const { glfwPollEvents(); }
-		void waitEvents() const { glfwWaitEvents(); } 
+		void waitEvents() const { glfwWaitEvents(); }
 
-		~Window();
+		~WindowT();
 
 	private:
 
@@ -102,13 +102,15 @@ namespace vkUtil {
 
 		static bool _calledBufferSize;
 
-		static uint32_t g_numOfWindows; 
+		static uint32_t g_numOfWindows;
+
+		float _aspectRatio;
 
 		GLFWwindow* _mainWindow = nullptr;
 
 		int _width = 0, _height = 0;
 		int _bufferWidth = 0, _bufferHeight = 0;
-		
+
 		std::optional<float> _leftOrtho, _rightOrtho, _topOrtho, _bottomOrtho;
 
 
@@ -120,18 +122,18 @@ namespace vkUtil {
 
 		double _mouseCurrentX = 0.0;
 		double _mouseCurrentY = 0.0;
-		
+
 		//double _mouseAfterX = 0.0;
 		//double _mouseAfterY = 0.0;
-		
+
 		bool _mouseFirstMoved = true;
 
 		bool _isMouseButtonPressed = false;
 
 
-		std::array<bool, KEY_CONST> _keys{false}; 
+		std::array<bool, KEY_CONST> _keys{ false };
 
- 
+
 		std::string _name = "";
 
 		std::array<std::unordered_map <std::pair<Keys, Mods>, std::unique_ptr<KeyCombB>>, SIZET(Action::Count)> _keyCombs;
@@ -147,6 +149,8 @@ namespace vkUtil {
 		//void setMouseAfterY(double posY);
 		//WindowButton& FindWindowButtonName(const std::string& name);
 
+		private:
+
 		void setKey(unsigned int key, bool val);
 
 		//const std::string TranslateCoordinatesToNotation(uint32_t rank, uint32_t file);
@@ -160,34 +164,64 @@ namespace vkUtil {
 		static void m_HandleMouseCursor(GLFWwindow* window, double posX, double posY);
 		static void m_HandleMouseButtons(GLFWwindow* window, int button, int action, int mods);
 
-		//	void RunTempLoop(std::promise<bool>& didTrans); 
 
+
+		template<class F, class ... Args>
+			requires vkType::BoolLambdaVardic<F, Args...>
+		void AddKeyCombT(const KeyCombInput& input, F&& function, std::tuple<Args...> args);
+
+		template<class F, class ... Args>
+			requires vkType::BoolLambdaVardic<F, Args...>
+		void AddAABButtonT(const AABButtonInput& input, F&& function, std::string_view str, std::tuple<Args...> args);
 
 	};
 
-}// Namespace vkUtil
 
 
 
-	template<class ... Args>
-	void vkUtil::Window::AddKeyComb(Keys key, Action action, std::function<bool(Args...)> function, std::tuple<Args...> args)
+
+	template<class F, class ... Args>
+		requires vkType::BoolLambdaVardic<F, Args...>
+	inline void AddKeyCombT(const KeyCombInput& input, F&& function, std::tuple<Args...> args) // recently changed, needs testing
 	{
-		_keyCombs[SIZET(action)].emplace(std::make_pair(key, Mods::None), key, action);
-	}
-
-	template<class ... Args>
-	void vkUtil::Window::AddKeyComb(Keys key, Action action, Mods mod, std::function<bool(Args...)> function, std::tuple<Args...> args)
-	{
-		_keyCombs[SIZET(action)].emplace(std::make_pair(key, Mods::None), std::unique_ptr<KeyComb<Args...>>(key, action, function, std::forward<Args>(args)...));
-	}
-
-
-	template<class ... Args>
-	void vkUtil::Window::AddAABButton(float cordX, float cordY, float width, float height, Action action, Mouse button, 
-		std::function<bool(Args...)> function, std::string_view str, std::tuple<Args...> args) 
-	{
-		_AABButtons[SIZET(action)].emplace(str, std::unique_ptr<AABButton<Args...>>(cordX, cordY, width, height, action, button, function, std::forward<Args>(args)...));
-
+		Mod val = Mods::None;
+		if (input.mod != Mods::None)
+		{
+			val = input.mod;
+		}
+		_keyCombs[SIZET(action)].emplace(std::make_pair(input.name, val), 
+			std::unique_ptr<KeyComb<Args...>>(input, std::forward<F>(function), std::forward<Args>(args)...)); 
 	}
 
 
+	template<class F, class ... Args>
+		requires vkType::BoolLambdaVardic<F, Args...>
+	inline void WindowT::AddAABButtonT(const AABButtonInput& input, F&& function, std::string_view str, std::tuple<Args...> args) // recently changed, needs testing
+	{
+		_AABButtons[SIZET(action)].emplace(str, std::unique_ptr<AABButton<Args...>>(input, std::forward<F>(function), std::forward<Args>(args)...)); 
+
+	}
+
+
+
+	template<class F, class ...Args>
+	inline void WindowT::AddKeyComb(const KeyCombInput& input, F&& function, std::tuple<Args...> args)
+	{
+		using Func = std::function<bool(Args...)>; 
+		AddKeyCombT<Func, Args...>(input, std::forward<F>(function), std::forward<Args>(args)...); 
+	}
+
+	template<class F, class ...Args>
+	inline void WindowT::AddAABButton(const AABButtonInput& input, F&& function, std::string_view str, std::tuple<Args...> args)
+	{
+		using Func = std::function<bool(Args...)>; 
+		AddAABButtonT<Func, Args...>(input, std::forward<F>(function), str, std::forward<Args>(args)...); 
+	}
+
+}
+
+
+namespace vkType
+{
+	using Window = vkUtil::WindowT;
+}

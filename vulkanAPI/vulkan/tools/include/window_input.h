@@ -8,6 +8,35 @@
 namespace vkUtil {
 
 
+	/*-------------------------------*/
+// Helper functions for passing into the ctors of the derived classes
+
+	struct KeyCombInput
+	{
+		Keys number;
+		Action action;
+		Mods mod = Mods::None;;
+	};
+
+	struct MouseButtonInput
+	{
+		Mouse name;
+		Action action;
+	};
+
+	struct AABButtonInput
+	{
+		float cordX;
+		float cordY;
+		float width;
+		float height;
+		Action action;
+		Mouse button;
+		std::string_view name;
+	};
+
+
+
 	template<class ... Args>
 	struct MouseButton;	// forward declaration
 
@@ -24,7 +53,7 @@ namespace vkUtil {
 
 		MouseButtonB();
 
-		MouseButtonB(Mouse name, Action action);
+		MouseButtonB(const MouseButtonInput& in);
 
 		virtual bool execute() const = 0;
 
@@ -56,9 +85,7 @@ namespace vkUtil {
 
 		AABButtonB();
 
-		AABButtonB(float cordX, float cordY, float width, float height, Action action, Mouse button, std::string_view name);
-
-		AABButtonB(float cordX, float cordY, float width, float height, Action action, Mouse button);
+		AABButtonB(const AABButtonInput& in);
 
 		virtual bool execute() const = 0;
 
@@ -91,7 +118,7 @@ namespace vkUtil {
 
 		KeyCombB();
 
-		KeyCombB(Keys number, Action action);
+		KeyCombB(const KeyCombInput& in);
 
 		KeyCombB(Keys number, Action action, Mods mod);
 
@@ -115,10 +142,7 @@ namespace vkUtil {
 	};
 
 
-
-
 	//----------------------------------------------
-
 
 	//Templated derived classes for user input
 	template<class ... Args>
@@ -126,8 +150,8 @@ namespace vkUtil {
 	{
 	public:
 
-		AABButton(float cordX, float cordY, float sizeX, float sizeY, Action action, Mouse mouse, std::function<bool(Args...)>& func, std::tuple<Args...> initial)
-			: AABButtonB(cordX, cordY, sizeX, sizeY, action, mouse), _func(func), _args(std::move(initial))
+		AABButton(const MouseButtonInput& in, std::function<bool(Args...)> func, std::tuple<Args...> initial)
+			: AABButtonB(in), _func(func), _args(std::move(initial))
 		{}
 
 		bool execute() const override
@@ -164,12 +188,8 @@ namespace vkUtil {
 	{
 	public:
 
-		KeyComb(Keys number, Action action, std::function<bool(Args...)>& func, std::tuple<Args...> initial) :
-			KeyCombB(number, action), _func(func), _args(std::move(initial))
-		{}
-
-		KeyComb(Keys number, Action action, Mods mod, std::function<bool(Args...)>& func, std::tuple<Args...> initial) :
-			KeyCombB(number, action, mod), _func(func), _args(std::move(initial))
+		KeyComb(const KeyCombInput& in, std::function<bool(Args...)>& func, std::tuple<Args...> initial) : // well tested system
+			KeyCombB(in), _func(func), _args(std::move(initial))
 		{}
 
 		void changeParameter(Args&&... args)
@@ -208,8 +228,8 @@ namespace vkUtil {
 	{
 	public:
 
-		MouseButton(Mouse name, Action action, std::function<bool(Args...)>& func, std::tuple<Args...> initial) :
-			MouseButtonB(name, action), _func(func), _args(std::move(initial))
+		MouseButton(const MouseButtonInput& in, std::function<bool(Args...)>& func, std::tuple<Args...> initial) :
+			MouseButtonB(in), _func(func), _args(std::move(initial))
 		{}
 
 		void changeParameter(Args&&... args)
@@ -219,7 +239,7 @@ namespace vkUtil {
 
 		bool execute() const override
 		{
-			_result = std::apply(_func, _args);
+			_result = std::apply(_func, _args);// can use std::invoke if the args are not in a tuple
 			return _result;
 		}
 
@@ -235,5 +255,6 @@ namespace vkUtil {
 		std::tuple<Args...> _args;
 
 	};
+
 
 }

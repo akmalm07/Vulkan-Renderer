@@ -307,7 +307,8 @@ namespace vkInit
 
 
 
-	vk::PipelineLayout create_pipeline_layout(vk::Device& logicalDevice, const std::vector<vkType::PushConst>& pushs, bool debug)
+	vk::PipelineLayout create_pipeline_layout(vk::Device& logicalDevice, const std::vector<vk::DescriptorSetLayout>& layouts,
+		const std::vector<vkType::PushConst>& pushs, bool debug)
 	{
 
 		if (debug)
@@ -326,6 +327,9 @@ namespace vkInit
 
 		layoutInfo.pPushConstantRanges = pushConsts.data();
 
+		layoutInfo.setLayoutCount = UINT32(layouts.size());
+
+		layoutInfo.pSetLayouts = layouts.data();
 
 
 		try

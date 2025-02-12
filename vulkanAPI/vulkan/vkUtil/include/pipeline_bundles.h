@@ -18,6 +18,7 @@ namespace vkInit
 
 		vk::Format swapchainFormat;
 		vk::Extent2D swapchainExtent;
+		std::vector<vk::DescriptorSetLayout> descriptorSetLayouts; 
 	};
 
 	template <vkType::VertBuff T>

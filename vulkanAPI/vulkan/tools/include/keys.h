@@ -19,6 +19,10 @@ namespace vkUtil {
 	enum class Keys
 	{
 		None = GLFW_KEY_UNKNOWN,
+		Up = GLFW_KEY_UP,
+		Down = GLFW_KEY_DOWN,
+		Left = GLFW_KEY_LEFT,
+		Right = GLFW_KEY_RIGHT,
 		Space = GLFW_KEY_SPACE,
 		Apost = GLFW_KEY_APOSTROPHE, 
 		Comma = GLFW_KEY_COMMA, 

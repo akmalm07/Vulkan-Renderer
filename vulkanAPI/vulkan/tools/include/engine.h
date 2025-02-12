@@ -8,7 +8,7 @@
 #include "vkUtil\include\VertexBuffer.h"
 #include "vkUtil\include\IndexBuffer.h"
 #include "tools\include\scene.h"
-#include "vkUtil\include\shader.h"
+#include "vkUtil\include\shader_bundles.h"
 
 #include <queue>
 

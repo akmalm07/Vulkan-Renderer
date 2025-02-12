@@ -1,11 +1,13 @@
 #pragma once
 
+#include "config.h"
+
 #include "vkUtil\include\vertex.h"
 #include "tools\include\stride.h"
 
 #include "vkUtil\include\render_structs.h"
 #include "vkUtil\include\swapchain_frames.h"
-#include "config.h"
+#include "vkUtil\include\camera.h"
 
 
 #include "tools\include\window.h"
@@ -19,9 +21,9 @@ public:
 
 	BaseEngine();
 
-	BaseEngine(vkVert::StrideBundle stride, int width, int height, bool debug);
+	BaseEngine(vkVert::StrideBundle stride, int width, int height, bool orthoOrPerpective, bool debug);
 
-	BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool debug);
+	BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool orthoOrPerpective, bool debug);
 
 	void render();
 
@@ -42,7 +44,9 @@ protected:
 	bool _debugMode = true;
 
 	//glfw window parameters
-	vkUtil::Window _window;  
+	vkUtil::WindowT _window;
+
+	vkUtil::CameraT _camera;
 
 	//vulkan instance
 	vk::Instance _instance = nullptr;
@@ -132,4 +136,7 @@ protected:
 	void make_frame_sync_objects();
 
 	void record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t imageIndex);
+
+
+	void is_ortho(bool orthoOrPerpective);
 };

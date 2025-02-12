@@ -15,6 +15,7 @@
 #include "vkUtil\include\render_structs.h"
 #include "vkUtil\include\const_pushes.h"
 #include "vkUtil\include\pipeline_bundles.h"
+#include "vkUtil\include\camera.h"
 #include "tools\include\timer.h"
 
 
@@ -42,6 +43,8 @@ BaseEngine::BaseEngine()
 
 	build_glfw_window();
 
+	is_ortho(true);
+
 	make_instance();
 
 	make_debug_messenger();
@@ -60,9 +63,8 @@ BaseEngine::BaseEngine()
 
 
 
-BaseEngine::BaseEngine(vkVert::StrideBundle stride, int width, int height, bool debug)
+BaseEngine::BaseEngine(vkVert::StrideBundle stride, int width, int height, bool orthoOrPerpective, bool debug)
 {
-
 
 	_debugMode = debug;
 
@@ -78,10 +80,12 @@ BaseEngine::BaseEngine(vkVert::StrideBundle stride, int width, int height, bool 
 
 
 	if (_debugMode) {
-		std::cout << "Making a graphics BaseEngine\n";
+		std::cout << "Making a graphics BaseEngine\n"; 
 	}
 
 	build_glfw_window(width, height);  
+
+	is_ortho(orthoOrPerpective); 
 
 	make_instance(); 
 
@@ -102,8 +106,9 @@ BaseEngine::BaseEngine(vkVert::StrideBundle stride, int width, int height, bool 
 
 
 
-BaseEngine::BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool debug) 
+BaseEngine::BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool orthoOrPerpective, bool debug)
 {
+	is_ortho(orthoOrPerpective);
 
 	_debugMode = debug;
 
@@ -298,7 +303,6 @@ void BaseEngine::destroy_swapchain()
 	_maxFramesInFlight = 0;
 
 	_frameNum = 0;
-
 }
 
 
@@ -405,6 +409,44 @@ void BaseEngine::record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t
 	}
 
 
+
+}
+
+void BaseEngine::is_ortho(bool orthoOrPerpective)
+{
+	if (orthoOrPerpective)
+	{
+		vkUtil::CameraBundleOrthographic bundle; 
+		bundle.bottom = _window.GetBottomOrtho();
+		bundle.left = _window.GetLeftOrtho();
+		bundle.right = _window.GetWidth();
+		bundle.top = _window.GetHeight();
+		bundle.nearZ = 0.1f;
+		bundle.farZ = 100.0f;
+		bundle.speed = 0.5f;
+		bundle.turnSpeed = 0.5f;
+		bundle.position = glm::vec3(0.0f, 0.0f, 0.0f);
+		bundle.startPYR = glm::vec3(0.0f, 0.0f, 0.0f);
+		bundle.front = glm::vec3(0.0f, 0.0f, -1.0f);
+		
+		_camera = std::move(vkUtil::CameraT(bundle));
+	}
+	else
+	{
+		vkUtil::CameraBundlePerspective bundle; 
+		bundle.fov = 45.0f;
+		bundle.aspectRatio = _window.GetAspectRatio();
+		bundle.nearZ = 0.1f;
+		bundle.farZ = 100.0f;
+		bundle.speed = 0.5f;
+		bundle.turnSpeed = 0.5f;
+		bundle.position = glm::vec3(0.0f, 0.0f, 0.0f);
+		bundle.startPYR = glm::vec3(0.0f, 0.0f, 0.0f);
+		bundle.front = glm::vec3(0.0f, 0.0f, -1.0f);
+		
+		_camera = std::move(vkUtil::CameraT(bundle)); 
+
+	}
 
 }
 

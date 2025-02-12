@@ -9,11 +9,11 @@
 
 namespace vkUtil {
 
-	uint32_t Window::g_numOfWindows = 0;
+	uint32_t WindowT::g_numOfWindows = 0;
 
-	bool Window::_calledBufferSize = true;
+	bool WindowT::_calledBufferSize = true;
 
-	Window::Window()
+	WindowT::WindowT()
 	{
 
 		_name = "Untitled Window";
@@ -28,12 +28,13 @@ namespace vkUtil {
 		_topOrtho = 0.0f;
 		_bottomOrtho = 0.0f;
 
+		_aspectRatio = 1.0f;
 
 		_keys.fill(false);
 	
 	}
 
-	Window::Window(GLint windowWidth, GLint windowHeight, const std::string& name, bool isOrtho)
+	WindowT::WindowT(GLint windowWidth, GLint windowHeight, const std::string& name, bool isOrtho)
 	{
 		
 		_name = name;
@@ -50,10 +51,11 @@ namespace vkUtil {
 		_keys.fill(false);
 
 
+		_aspectRatio = windowWidth / windowHeight;
+
 		if (isOrtho)
 		{
-			float aspectRatio = windowWidth / windowHeight;
-			if (aspectRatio >= 1.0f)
+			if (_aspectRatio >= 1.0f)
 			{
 				_leftOrtho = -1.0f * aspectRatio;
 				_rightOrtho = 1.0f * aspectRatio;
@@ -64,15 +66,15 @@ namespace vkUtil {
 			{
 				_leftOrtho = -1.0f;
 				_rightOrtho = 1.0f;
-				_topOrtho = 1.0f / aspectRatio;
-				_bottomOrtho = -1.0f / aspectRatio;
+				_topOrtho = 1.0f / _aspectRatio;
+				_bottomOrtho = -1.0f / _aspectRatio;
 			}
 		}
 
 	}
 
 
-	bool Window::CreateWindow(const std::string& name, int width, int height)
+	bool WindowT::CreateWindow(const std::string& name, int width, int height)
 	{
 		if (g_numOfWindows == 0)
 		{
@@ -125,47 +127,52 @@ namespace vkUtil {
 		return true;
 	}
 
+	float WindowT::GetAspectRatio() const
+	{
+		return _aspectRatio;
+	}
 
-	void Window::SetShouldClose(bool trueOrFalse)
+
+	void WindowT::SetShouldClose(bool trueOrFalse)
 	{
 		return glfwSetWindowShouldClose(_mainWindow, (trueOrFalse ? GLFW_TRUE : GLFW_FALSE));
 	}
 
 
-	float Window::GetLeftOrtho() const 
+	float WindowT::GetLeftOrtho() const 
 	{ 
 		return (_leftOrtho.has_value() ? _leftOrtho.value() : throw std::runtime_error("_leftOrtho has not VALUE!")); 
 	}
 
-	float Window::GetBottomOrtho() const 
+	float WindowT::GetBottomOrtho() const 
 	{ 
 		return (_bottomOrtho.has_value() ? _bottomOrtho.value() : throw std::runtime_error("_bottomOrtho has not VALUE!")); 
 	}
 
-	float Window::GetTopOrtho() const 
+	float WindowT::GetTopOrtho() const 
 	{ 
 		return (_topOrtho.has_value() ? _topOrtho.value() : throw std::runtime_error("_topOrtho has not VALUE!")); 
 	}
 
-	float Window::GetRightOrtho() const 
+	float WindowT::GetRightOrtho() const 
 	{ 
 		return (_rightOrtho.has_value() ? _rightOrtho.value() : throw std::runtime_error("_rightOrtho has not VALUE!")); 
 	}
 
 
-	void Window::SetCursorLocked()
+	void WindowT::SetCursorLocked()
 	{
 		glfwSetInputMode(_mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
 
-	void Window::SetCursorNormal()
+	void WindowT::SetCursorNormal()
 	{
 		glfwSetInputMode(_mainWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 
 
 
-	int Window::GetBufferWidth() 
+	int WindowT::GetBufferWidth() 
 	{ 
 		if (_calledBufferSize)
 		{
@@ -175,7 +182,7 @@ namespace vkUtil {
 		return _bufferWidth; 
 	}
 
-	int Window::GetBufferHeight() 
+	int WindowT::GetBufferHeight() 
 	{ 
 		_calledBufferSize = true;
 
@@ -184,7 +191,7 @@ namespace vkUtil {
 	}
 
 
-	bool Window::SetWindow(GLFWwindow* window) 
+	bool WindowT::SetWindow(GLFWwindow* window) 
 	{ 
 		if (!window)
 		{
@@ -217,7 +224,7 @@ namespace vkUtil {
 	}
 
 
-	void Window::DelAABButton(std::string_view name)
+	void WindowT::DelAABButton(std::string_view name)
 	{
 		for (auto& item : _AABButtons)
 		{
@@ -232,7 +239,7 @@ namespace vkUtil {
 
 	}
 
-	void Window::DelKeyComb(Keys name, Mods mod)
+	void WindowT::DelKeyComb(Keys name, Mods mod)
 	{
 		for (auto& item : _keyCombs)
 		{
@@ -246,7 +253,7 @@ namespace vkUtil {
 		}
 	}	
 
-	void Window::DelKeyComb(Keys name)
+	void WindowT::DelKeyComb(Keys name)
 	{
 		for (auto& item : _keyCombs)
 		{
@@ -261,7 +268,7 @@ namespace vkUtil {
 	}
 
 
-	void Window::SetOrtho(float left, float right, float top, float bottom)
+	void WindowT::SetOrtho(float left, float right, float top, float bottom)
 	{
 		_leftOrtho = left;
 		_rightOrtho = right;
@@ -270,30 +277,30 @@ namespace vkUtil {
 	}
 
 
-	void Window::setKey(unsigned int key, bool val)
+	void WindowT::setKey(unsigned int key, bool val)
 	{
 		_keys[key] = val;
 	}
 
 
-	bool Window::IsMouseButtonPressed() const
+	bool WindowT::IsMouseButtonPressed() const
 	{
 		return _isMouseButtonPressed; 
 	}
 
 
-	bool Window::IsFirstClick() const
+	bool WindowT::IsFirstClick() const
 	{
 		return _isFirstClick;
 	}
 
-	void Window::MakeWindowContextCurrent()
+	void WindowT::MakeWindowContextCurrent()
 	{
 		glfwMakeContextCurrent(_mainWindow);
 	}
 
 
-	void Window::ClearWindow()
+	void WindowT::ClearWindow()
 	{
 
 		if (!_mainWindow)
@@ -307,7 +314,7 @@ namespace vkUtil {
 		//GraphicsHandlerAPI::DeleteWindow(_mainWindow);
 	}
 
-	Window::~Window()
+	WindowT::~WindowT()
 	{
 		ClearWindow();
 	}
@@ -315,7 +322,7 @@ namespace vkUtil {
 
 	//Private Functions
 
-	void Window::CreateCallbacks()
+	void WindowT::CreateCallbacks()
 	{
 		//glfwSetWindowUserPointer(_mainWindow, this); 
 		glfwSetKeyCallback(_mainWindow, m_HandleKeys);
@@ -324,7 +331,7 @@ namespace vkUtil {
 	}
 
 
-	void Window::m_HandleKeys(GLFWwindow* window, int key, int code, int action, int mode)
+	void WindowT::m_HandleKeys(GLFWwindow* window, int key, int code, int action, int mode)
 	{
 		Window* instance = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
@@ -332,7 +339,7 @@ namespace vkUtil {
 	}
 
 
-	void Window::m_HandleMouseCursor(GLFWwindow* window, double posX, double posY)
+	void WindowT::m_HandleMouseCursor(GLFWwindow* window, double posX, double posY)
 	{
 		Window* instance = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
@@ -340,7 +347,7 @@ namespace vkUtil {
 	}
 
 
-	void Window::m_HandleMouseButtons(GLFWwindow* window, int button, int action, int mods)
+	void WindowT::m_HandleMouseButtons(GLFWwindow* window, int button, int action, int mods)
 	{
 		Window* instance = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
@@ -348,7 +355,7 @@ namespace vkUtil {
 	}
 
 
-	void Window::HandleKeys(int key, int code, int action, int mode)
+	void WindowT::HandleKeys(int key, int code, int action, int mode)
 	{
 		switch (action)
 		{
@@ -417,7 +424,7 @@ namespace vkUtil {
 
 	}
 
-	void Window::HandleMouseCursor(double posX, double posY)
+	void WindowT::HandleMouseCursor(double posX, double posY)
 	{
 		_mouseChangeX = posX - _mouseCurrentX;
 		_mouseChangeY = _mouseCurrentY - posY;
@@ -426,7 +433,7 @@ namespace vkUtil {
 		_mouseCurrentY = posY;
 	}
 
-	void Window::HandleMouseButtons(int mouseButton, int action, int mods)
+	void WindowT::HandleMouseButtons(int mouseButton, int action, int mods)
 	{
 		switch (action)
 		{
