@@ -26,6 +26,15 @@ JsonReader::JsonReader(const std::filesystem::path& json)
 	}
 }
 
+nlohmann::json::iterator JsonReader::begin()
+{
+	return _json.begin();
+}
+
+nlohmann::json::iterator JsonReader::end()
+{
+	return _json.end();
+}
 
 
 JsonReader::~JsonReader()

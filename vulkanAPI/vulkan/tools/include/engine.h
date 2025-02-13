@@ -27,10 +27,10 @@ public:
 
 	Engine();
 
-	Engine(vkVert::StrideBundle stride, int width, int height, bool debug);
+	Engine(vkVert::StrideBundle stride, int width, int height, bool orthoOrperspective, bool debug);
 
 
-	Engine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool debug);
+	Engine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool orthoOrperspective, bool debug);
 
 	void load_meshes(std::vector<MeshT>& meshes) const;
 	

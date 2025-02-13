@@ -98,11 +98,9 @@ protected:
 	const std::filesystem::path _shaderVertPath = UserInput::v_shader_path;  
 	const std::filesystem::path _shaderFragPath = UserInput::f_shader_path; 
 
-	//uint8_t pos;
-	//uint8_t col;
-	//uint8_t norm;
-	//uint8_t tex;
-
+	//Descriptor Sets
+	std::vector<vk::DescriptorSet> _vkDescriptorSets;
+	vk::DescriptorPool _vkDescriptorPool;
 
 	//Syncronization variubles
 	size_t _maxFramesInFlight, _frameNum;
@@ -128,6 +126,8 @@ protected:
 	void destroy_swapchain();
 
 	void make_pipeline();
+
+	void make_descriptor_sets();
 
 	void create_command_pool_and_command_buffers();
 

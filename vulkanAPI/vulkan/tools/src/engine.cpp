@@ -8,14 +8,14 @@ Engine::Engine() :
 {}
 
 
-Engine::Engine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool debug) :
-	BaseEngine(glfwWindow, stride, debug) 
+Engine::Engine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool orthoOrperspective, bool debug) :
+	BaseEngine(glfwWindow, stride, orthoOrperspective, debug)
 {}
 
 
 
-Engine::Engine(vkVert::StrideBundle stride, int width, int height, bool debug) :
-	BaseEngine(stride, width, height, debug) 
+Engine::Engine(vkVert::StrideBundle stride, int width, int height, bool orthoOrperspective, bool debug) :
+	BaseEngine(stride, width, height, orthoOrperspective, debug)
 {}
 
 

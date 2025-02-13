@@ -8,6 +8,17 @@
 namespace vkUtil
 {
 
+	struct DescriptorSetBindingBundle
+	{
+		vk::DescriptorType type;
+		vkUtil::ShaderStage stage;
+		uint32_t count;
+		uint32_t binding;
+		vk::Sampler* sampler = nullptr;
+
+	};
+
+
 	struct DescriptorSetInBundle
 	{
 		static vk::Device& device;
@@ -20,17 +31,8 @@ namespace vkUtil
 	struct DescriptorSetOutBundle
 	{
 		std::vector<vk::DescriptorSet> descriptorSets;
+		std::vector<vk::DescriptorSetLayout> descriptorSetLayouts;
 		vk::DescriptorPool pool;
 	};
 
-
-	struct DescriptorSetBindingBundle
-	{
-		vk::Device& device;
-		vk::DescriptorType type;
-		vkUtil::ShaderStage stage;
-		uint32_t count;
-		uint32_t binding;
-		vk::Sampler* sampler = nullptr;
-	};
 }

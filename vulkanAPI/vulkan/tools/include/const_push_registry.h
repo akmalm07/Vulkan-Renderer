@@ -3,7 +3,7 @@
 #include "config.h"
 
 
-namespace vkUtil {
+namespace tools {
 
 	class PushConstRegistery
 	{

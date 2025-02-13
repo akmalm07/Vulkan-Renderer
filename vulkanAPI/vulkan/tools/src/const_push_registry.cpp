@@ -1,8 +1,8 @@
 #include "pch.h"
-#include "vkUtil\include\const_pushes.h"
+#include "tools\include\const_push_registry.h"
 
-
-namespace vkUtil {
+namespace tools
+{
 
 	PushConstRegistery::PushConstRegistery() = default;
 
@@ -16,7 +16,7 @@ namespace vkUtil {
 
 	void PushConstRegistery::add_push_const(const vkType::PushConst& pushConst)
 	{
-		_pushConsts.push_back(pushConst); 
+		_pushConsts.push_back(pushConst);
 	}
 
 	std::vector<vkType::PushConst> PushConstRegistery::get_push_consts() const
@@ -42,4 +42,4 @@ namespace vkUtil {
 		return s_offset;
 	}
 
-} // namespace vkUtil
+}

@@ -27,5 +27,24 @@ namespace vkUtil
 		}
 	}
 
+	ShaderStage to_shader_stage(const std::string_view& stage)
+	{
+		if (stage == "vertex")
+		{
+			return ShaderStage::VERTEX;
+		}
+		else if (stage == "fragment")
+		{
+			return ShaderStage::FRAGMENT;
+		}
+		else if (stage == "compute")
+		{
+			return ShaderStage::COMPUTE;
+		}
+		else
+		{
+			throw std::runtime_error("Shader Stage not found");
+		}
+	}
 
 }

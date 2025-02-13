@@ -5,6 +5,7 @@
 #include <fstream>
 
 
+
 class JsonReader
 {
 private:
@@ -15,16 +16,29 @@ public:
 	JsonReader();
 	JsonReader(const std::filesystem::path& json);
 
-	template<class T>
+	nlohmann::json::iterator begin();
+
+	nlohmann::json::iterator end();
+
+	nlohmann::json operator[](std::string_view key) const
+	{
+		return _json[key.data()];
+	}
+
+	template<class T = nlohmann::json>
 	T get(std::string_view key) const;
 
 	~JsonReader();
 
 };
 
+namespace vkType
+{
+	using Json = nlohmann::json;
+}
 
 template<class T>
-T JsonReader::get(std::string_view key) const 
+inline T JsonReader::get(std::string_view key) const
 {
 	if (_json.contains(key))
 	{

@@ -13,7 +13,10 @@
 #include "vkUtil\include\sync.h"
 #include "tools\include\scene.h"
 #include "vkUtil\include\render_structs.h"
-#include "vkUtil\include\const_pushes.h"
+#include "tools\include\const_push_registry.h"
+#include "tools\include\descriptor_set_registry.h"
+#include "vkUtil\include\descriptor_set.h"
+#include "vkUtil\include\descriptor_set_bundles.h"
 #include "vkUtil\include\pipeline_bundles.h"
 #include "vkUtil\include\camera.h"
 #include "tools\include\timer.h"
@@ -327,6 +330,19 @@ void BaseEngine::make_pipeline()
 
 	_vkPipelineLayout = output.pipelineLayout;
 	_vkRenderpass = output.renderpass;
+
+}
+
+
+
+void BaseEngine::make_descriptor_sets()
+{
+
+	vkUtil::DescriptorSetOutBundle out = vkUtil::create_descriptor_set(tools::DescriptorSetRegistry::get_instance().get_descriptor_sets(), _debugMode);
+
+	_vkDescriptorSets = out.descriptorSets;
+
+	_vkDescriptorPool = out.pool;
 
 }
 

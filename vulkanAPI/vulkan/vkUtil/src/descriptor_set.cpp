@@ -26,16 +26,22 @@ namespace
 namespace vkUtil
 {
 
-	DescriptorSetOutBundle create_descriptor_set(const std::vector<DescriptorSetInBundle>& input)
+	DescriptorSetOutBundle create_descriptor_set(const std::vector<DescriptorSetInBundle>& input, std::vector<uint32_t> layouts, bool debug)
 	{
-		std::vector<vk::DescriptorSetLayoutBinding> layoutBindings; 
+		if (debug)
+		{
+			std::cout << "Creating Descriptor Set with " << input.size() << " Descriptor Set Bundles" << std::endl;
+		}
+
+		std::vector<std::vector<vk::DescriptorSetLayoutBinding>> layoutBindings; 
 
 		IdentifierArray arr;
 		for (const auto& bundle : input) 
 		{
+			std::vector<vk::DescriptorSetLayoutBinding> layoutBinding;
 			for (const auto& binding : bundle.bindings) 
 			{
-				layoutBindings.push_back(create_descriptor_set_layout_binding(binding)); 
+				layoutBinding.push_back(create_descriptor_set_layout_binding(binding, debug)); 
 
 				auto it = std::find(arr.types.begin(), arr.types.end(), binding.type);
 				if (it != arr.types.end())
@@ -44,13 +50,14 @@ namespace vkUtil
 				}
 
 			}
+			layoutBindings.push_back(layoutBinding);
 		}
 
 		std::vector<vk::DescriptorPoolSize> poolSizes;
 		poolSizes.reserve(10);
 
 
-		for (const auto& [i, item] : arr.counts | std::views::enumerate) 
+		for (const auto& [i, item] : arr.counts | std::views::enumerate)
 		{
 			if (item != 0)
 			{
@@ -61,18 +68,42 @@ namespace vkUtil
 			}
 		}
 
-		vk::DescriptorSetLayout layout = create_descriptor_set_layout(DescriptorSetInBundle::device, layoutBindings);
-		vk::DescriptorPool pool = create_descriptor_pool(DescriptorSetInBundle::device, poolSizes, input.size());
+		vk::DescriptorPool pool = create_descriptor_pool(DescriptorSetInBundle::device, poolSizes, input.size(), debug);
+		
+		std::vector<vk::DescriptorSetLayout> layout;
 
-		std::vector<vk::DescriptorSet> descriptorSets = create_descriptor_sets(DescriptorSetInBundle::device, pool, layout, input.size());
+		for (const uint32_t& lay : layouts)
+		{
+			bool notexecuted = true;
+			for (size_t i = 0; i < layoutBindings.size(); i++)
+			{
+				if (SIZET(lay) == layoutBindings[i].size())
+				{
+					layouts.emplace_back(create_descriptor_set_layout(DescriptorSetInBundle::device, layoutBindings[i], debug));
+					notexecuted = false;
+				}
+				if (notexecuted && i+1 == layoutBindings.size())
+				{
+					throw std::runtime_error("Layout count does not match binding count!");
+				}
+		}
 
-		return { descriptorSets, pool };
+		std::vector<vk::DescriptorSet> descriptorSets = create_descriptor_sets(DescriptorSetInBundle::device, pool, layout, input.size(), debug);
+
+
+
+		return { descriptorSets, layout, pool };
 
 	}
 
 
-	vk::DescriptorSetLayoutBinding create_descriptor_set_layout_binding(const DescriptorSetBindingBundle& input)
+	vk::DescriptorSetLayoutBinding create_descriptor_set_layout_binding(const DescriptorSetBindingBundle& input, bool debug)
 	{
+		if (debug) 
+		{
+			std::cout << "Creating Descriptor Set Layout Binding with binding: " << input.binding << " Type: " << vk::to_string(input.type) << " Count: " << input.count << std::endl;
+		}
+
 		vk::DescriptorSetLayoutBinding layoutBinding;
 		layoutBinding.binding = input.binding;
 		layoutBinding.descriptorType = input.type;
@@ -84,13 +115,22 @@ namespace vkUtil
 	}
 
 
-	vk::DescriptorSetLayout create_descriptor_set_layout(const vk::Device& device, const std::vector<vk::DescriptorSetLayoutBinding>& input)
+	vk::DescriptorSetLayout create_descriptor_set_layout(const vk::Device& device, const std::vector<vk::DescriptorSetLayoutBinding>& input, bool debug)
 	{
+		if (debug)
+		{
+			std::cout << "Creating Descriptor Set Layout with bindings: " << std::endl;
+			for (const auto& binding : input)
+			{
+				std::cout << "\tBinding: " << binding.binding << " Type: " << vk::to_string(binding.descriptorType) << " Count: " << binding.descriptorCount << std::endl;
+			}
+		}
 
 		vk::DescriptorSetLayoutCreateInfo layoutInfo;
 		layoutInfo.flags = vk::DescriptorSetLayoutCreateFlagBits();
 		layoutInfo.bindingCount = input.size();
 		layoutInfo.pBindings = input.data();
+
 		
 		try
 		{
@@ -106,8 +146,19 @@ namespace vkUtil
 
 
 
-	vk::DescriptorPool create_descriptor_pool(vk::Device& device, const std::vector<vk::DescriptorPoolSize>& poolSizes, uint32_t maxSets)
+	vk::DescriptorPool create_descriptor_pool(vk::Device& device, const std::vector<vk::DescriptorPoolSize>& poolSizes, uint32_t maxSets, bool debug)
 	{
+
+		if(debug)
+		{
+			std::cout << "Creating Descriptor Pool with sizes: " << std::endl;
+			for (const auto& poolSize : poolSizes)
+			{
+				std::cout << "\tType: " << vk::to_string(poolSize.type) << " Count: " << poolSize.descriptorCount << std::endl;
+			}
+		}
+
+
 		vk::DescriptorPoolCreateInfo poolInfo; 
 		poolInfo.flags = vk::DescriptorPoolCreateFlagBits(); 
 		poolInfo.maxSets = maxSets; 
@@ -125,8 +176,17 @@ namespace vkUtil
 
 	}
 
-	std::vector<vk::DescriptorSet> create_descriptor_sets(const vk::Device& device, const vk::DescriptorPool& pool, const vk::DescriptorSetLayout& layout, uint32_t descriptorSetCount)
+	std::vector<vk::DescriptorSet> create_descriptor_sets(const vk::Device& device, const vk::DescriptorPool& pool, const std::vector<vk::DescriptorSetLayout>& layout, uint32_t descriptorSetCount, bool debug)
 	{
+		if (descriptorSetCount != layout.size())
+		{
+			throw std::runtime_error("Descriptor Set Count does not match Layout Count!");
+		}
+		if (debug)
+		{
+			std::cout << "Creating " << descriptorSetCount << " Descriptor Sets" << std::endl;
+		}
+
 		vk::DescriptorSetAllocateInfo allocInfo; 
 		allocInfo.descriptorPool = pool; 
 		allocInfo.descriptorSetCount = descriptorSetCount; 
@@ -140,6 +200,58 @@ namespace vkUtil
 		catch (vk::SystemError& err)
 		{
 			throw std::runtime_error("failed to allocate descriptor sets!");
+		}
+	}
+
+	vk::DescriptorType to_descriptor_type(const std::string_view& type)
+	{
+		if (type == "sampler")
+		{
+			return vk::DescriptorType::eSampler;
+		}
+		else if (type == "combined_image_sampler")
+		{
+			return vk::DescriptorType::eCombinedImageSampler;
+		}
+		else if (type == "sampled_image")
+		{
+			return vk::DescriptorType::eSampledImage;
+		}
+		else if (type == "storage_image")
+		{
+			return vk::DescriptorType::eStorageImage;
+		}
+		else if (type == "uniform_texel_buffer")
+		{
+			return vk::DescriptorType::eUniformTexelBuffer;
+		}
+		else if (type == "storage_texel_buffer")
+		{
+			return vk::DescriptorType::eStorageTexelBuffer;
+		}
+		else if (type == "uniform_buffer")
+		{
+			return vk::DescriptorType::eUniformBuffer;
+		}
+		else if (type == "storage_buffer")
+		{
+			return vk::DescriptorType::eStorageBuffer;
+		}
+		else if (type == "uniform_buffer_dynamic")
+		{
+			return vk::DescriptorType::eUniformBufferDynamic;
+		}
+		else if (type == "storage_buffer_dynamic")
+		{
+			return vk::DescriptorType::eStorageBufferDynamic;
+		}
+		else if (type == "input_attachment")
+		{
+			return vk::DescriptorType::eInputAttachment;
+		}
+		else
+		{
+			throw std::runtime_error("Descriptor Type not found");
 		}
 	}
 

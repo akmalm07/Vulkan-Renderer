@@ -5,7 +5,7 @@
 #include "vkUtil\include\vertex.h"
 #include "vkUtil\include\shader.h"
 #include "vkUtil\include\render_structs.h"
-#include "vkUtil\include\const_pushes.h"
+#include "tools\include\const_push_registry.h"
 
 
 namespace vkInit
@@ -257,7 +257,7 @@ namespace vkInit
 
 
 		vk::PipelineLayout pipelineLayout = create_pipeline_layout(spesifications.LogicalDevice, 
-			vkUtil::PushConstRegistery::get_instance().get_push_consts(), debug);
+			tools::PushConstRegistery::get_instance().get_push_consts(), debug);
 		pipelineCreateInfo.layout = pipelineLayout;
 
 
