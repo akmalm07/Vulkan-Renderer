@@ -42,6 +42,8 @@
 #include <array>
 #include <list>
 #include <ranges>
+#include <stack>
+
 
 
 

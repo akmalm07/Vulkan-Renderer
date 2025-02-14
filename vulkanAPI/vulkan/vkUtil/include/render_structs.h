@@ -14,7 +14,7 @@ namespace vkUtil {
 		struct alignas(16) : public vkType::Drawable
 		{
 			glm::mat4 _model;
-		} c_data;
+		} data;
 	};
 
 

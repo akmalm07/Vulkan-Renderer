@@ -19,12 +19,13 @@ namespace vkType
 
 	struct PushConst
 	{
-		const uint32_t _offset;
-		const uint32_t _size;
-		const vk::ShaderStageFlagBits _shader;
+		uint32_t _offset;
+		uint32_t _size;
+		vk::ShaderStageFlagBits _shader;
 
 		PushConst(uint32_t size, uint32_t offset, vk::ShaderStageFlagBits _shader)
 			: _size(size), _offset(offset), _shader(_shader) {}
+
 
 	};
 

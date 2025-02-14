@@ -84,3 +84,4 @@ inline void Engine::send_as_push_const(T& data, vk::CommandBuffer& cmdBuffer, vk
 	_pushConstCalls.emplace_back([this, &cmdBuffer, shader, offset, &data]()   
 		{ cmdBuffer.pushConstants(_vkPipelineLayout, vkUtil::enum_to_vk(shader), offset, sizeof(data), &data); });  
 }
+

@@ -3,6 +3,7 @@
 #include "config.h" 
 #include <filesystem>
 
+
 #include "vkUtil\include\vertex.h" 
 
 namespace vkInit
@@ -19,6 +20,7 @@ namespace vkInit
 		vk::Format swapchainFormat;
 		vk::Extent2D swapchainExtent;
 		std::vector<vk::DescriptorSetLayout> descriptorSetLayouts; 
+		std::vector<vkType::PushConst> pushConsts; 
 	};
 
 	template <vkType::VertBuff T>
@@ -35,6 +37,7 @@ namespace vkInit
 	{
 		std::array<bool, vkType::Vert::size()> instanced;
 	};
+
 
 	using GraphicsPipelineInBundle = GraphicsPipelineInBundleT<UserInput::AttributeDescription>;
 

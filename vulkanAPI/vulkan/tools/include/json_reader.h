@@ -16,6 +16,8 @@ public:
 	JsonReader();
 	JsonReader(const std::filesystem::path& json);
 
+	JsonReader(const std::string& raw);
+
 	nlohmann::json::iterator begin();
 
 	nlohmann::json::iterator end();

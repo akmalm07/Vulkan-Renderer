@@ -13,7 +13,7 @@ namespace tools
 		return instance;
 	}
 
-	void DescriptorSetRegistry::intialize(std::vector<vkUtil::DescriptorSetInBundle> input, std::vector<uint32_t> layouts)
+	void DescriptorSetRegistry::intialize(std::vector<vkUtil::DescriptorSetInBundle> input, std::vector<vkUtil::DescriptorLayoutBundle> layouts)
 	{
 		m_createDescriptors = std::move(input);
 		m_layouts = std::move(layouts);
@@ -25,7 +25,7 @@ namespace tools
 		return m_createDescriptors;
 	}
 
-	std::vector<uint32_t> DescriptorSetRegistry::get_descriptor_set_layouts() const
+	std::vector<vkUtil::DescriptorLayoutBundle> DescriptorSetRegistry::get_descriptor_set_layouts() const
 	{
 		return m_layouts;
 	}

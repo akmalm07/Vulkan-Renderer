@@ -1,6 +1,9 @@
 {
+
+
   "descriptor_sets": [
     {
+      "layout": "descriptor_set_layout_0",
       "bindings": [
         {
           "binding": 0,
@@ -9,24 +12,18 @@
           "stage_flags": "vertex"
         }
       ]
+
 
     }
 
 
   ],
   "layouts": [
-
     {
-      "bindings": [
-        {
-          "binding": 0,
-          "descriptor_type": "uniform_buffer",
-          "descriptor_count": 1,
-          "stage_flags": "vertex"
-        }
-      ]
-
+      "binding_count": 1
     }
   ] 
  
+
+
 }

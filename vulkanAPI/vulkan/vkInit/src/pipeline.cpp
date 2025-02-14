@@ -257,7 +257,10 @@ namespace vkInit
 
 
 		vk::PipelineLayout pipelineLayout = create_pipeline_layout(spesifications.LogicalDevice, 
-			tools::PushConstRegistery::get_instance().get_push_consts(), debug);
+			spesifications.descriptorSetLayouts, 
+			spesifications.pushConsts,
+			debug);
+
 		pipelineCreateInfo.layout = pipelineLayout;
 
 

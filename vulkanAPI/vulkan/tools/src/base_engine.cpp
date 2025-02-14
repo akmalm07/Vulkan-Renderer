@@ -20,6 +20,7 @@
 #include "vkUtil\include\pipeline_bundles.h"
 #include "vkUtil\include\camera.h"
 #include "tools\include\timer.h"
+#include "tools\include\json_reader.h"
 
 
 
@@ -55,6 +56,10 @@ BaseEngine::BaseEngine()
 	make_physical_device();
 
 	make_swapchain();
+
+	read_json_files();
+
+	make_descriptor_sets_and_push_consts();
 
 	make_pipeline();
 
@@ -97,6 +102,10 @@ BaseEngine::BaseEngine(vkVert::StrideBundle stride, int width, int height, bool 
 	make_physical_device();
 
 	make_swapchain();
+
+	read_json_files();
+
+	make_descriptor_sets_and_push_consts();
 
 	make_pipeline();
 
@@ -144,6 +153,10 @@ BaseEngine::BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool
 
 	make_swapchain();
 
+	read_json_files();
+
+	make_descriptor_sets_and_push_consts();
+
 	make_pipeline();
 
 	make_framebuffer();
@@ -160,7 +173,7 @@ void BaseEngine::updateFPS()
 
 	double currentTime = glfwGetTime();
 	frameCount++;
-
+	
 	if (currentTime - previousTime >= 1.0)
 	{
 		std::stringstream title;
@@ -211,14 +224,56 @@ void BaseEngine::make_instance() {
 
 
 
-void BaseEngine::make_debug_messenger() {
+void BaseEngine::make_debug_messenger()
+{
 
-	if (!_debugMode) {
+	if (!_debugMode)
+	{
 		return;
 	}
 
 	_debugMessenger = vkInit::make_debug_messenger(_instance, _dldi);
 }
+
+void BaseEngine::read_json_files() //MODIFY THIS TO MAKE IT COMPATIBLE WITH THE NEW JSON UPDATES FOR LAYOUTS
+{
+	JsonReader decriptorSet(rawJson);
+
+	std::vector<vkUtil::DescriptorSetInBundle> descriptorSets;
+
+	for (const auto& set : decriptorSet["descriptor_sets"])
+	{
+		vkUtil::DescriptorSetInBundle bundle;
+
+		for (const auto& binding : set["bindings"])
+		{
+			bundle.bindings.emplace_back
+			(
+				vkUtil::to_descriptor_type(binding["descriptor_type"]),
+				vkUtil::to_shader_stage(binding["stage_flags"]),
+				binding["descriptor_count"],
+				binding["binding"]
+			);
+
+		}
+
+		descriptorSets.push_back(bundle);
+
+	}
+
+	std::vector<uint32_t> layouts;
+
+	for (const auto& layout : decriptorSet["layouts"])
+	{
+		std::vector<vk::DescriptorSetLayoutBinding> layoutBindings;
+
+		layouts.emplace_back(layout["binding_count"]);
+	}
+
+
+	tools::DescriptorSetRegistry::get_instance().intialize(descriptorSets, layouts);
+}
+
 
 
 
@@ -320,6 +375,9 @@ void BaseEngine::make_pipeline()
 	spesifications.LogicalDevice =   _vkLogicalDevice;
 	spesifications.swapchainExtent = _vkSwapchainExtent;
 	spesifications.swapchainFormat = _vkSwapchainFormat;
+	spesifications.swapchainFormat = _vkSwapchainFormat;
+	spesifications.descriptorSetLayouts = _vkDescriptorSetLayouts;
+	spesifications.pushConsts = _vkPushConsts;
 	spesifications.instanced = false; 
 
 
@@ -335,14 +393,25 @@ void BaseEngine::make_pipeline()
 
 
 
-void BaseEngine::make_descriptor_sets()
+void BaseEngine::make_descriptor_sets_and_push_consts()
 {
 
-	vkUtil::DescriptorSetOutBundle out = vkUtil::create_descriptor_set(tools::DescriptorSetRegistry::get_instance().get_descriptor_sets(), _debugMode);
+	tools::DescriptorSetRegistry& descReg = tools::DescriptorSetRegistry::get_instance();
+	tools::PushConstRegistery& pushReg = tools::PushConstRegistery::get_instance();
+
+	vkUtil::DescriptorSetOutBundle out = vkUtil::create_descriptor_set(
+		_vkLogicalDevice,
+		descReg.get_descriptor_sets(),
+		descReg.get_descriptor_set_layouts(),
+		_debugMode);
 
 	_vkDescriptorSets = out.descriptorSets;
 
 	_vkDescriptorPool = out.pool;
+
+	_vkDescriptorSetLayouts = out.descriptorSetLayouts;
+
+	_vkPushConsts = pushReg.get_push_consts();
 
 }
 

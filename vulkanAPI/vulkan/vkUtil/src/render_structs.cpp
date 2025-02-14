@@ -1,14 +1,15 @@
 #include "pch.h"
 #include "vkUtil/include/render_structs.h"
 #include "vkUtil/include/shader.h"
-#include "vkUtil/include/const_push_registry.h"
+#include "tools/include/const_push_registry.h"
 
 
-namespace vkUtil {
+namespace vkUtil 
+{
 
 
 	ObjectData::ObjectData(ShaderStage shader) 
-		: PushConst(sizeof(c_data), evaluate_offset_push_const(sizeof(c_data)), enum_to_vk(shader))
+		: PushConst(sizeof(data), tools::evaluate_offset_push_const(sizeof(data)), enum_to_vk(shader)) 
 	{
 	}
 

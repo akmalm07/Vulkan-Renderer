@@ -15,7 +15,7 @@ namespace vkUtil {
 	public:
 		WindowT();
 
-		WindowT(GLint windowWidth, GLint windowHeight, const std::string& name, bool isOrtho);
+		WindowT(int windowWidth, int windowHeight, const std::string& name, bool isOrtho);
 
 		bool CreateWindow(const std::string& name, int width, int height);
 
@@ -36,11 +36,10 @@ namespace vkUtil {
 
 
 		template<class F, class ... Args>
-		void AddKeyComb(const KeyCombInput& input, F&& function, std::tuple<Args...> args);
+		void AddAABButton(const AABButtonInput& input, F&& function, std::string_view str, Args&&... args);
 
 		template<class F, class ... Args>
-		void AddAABButton(const AABButtonInput& input, F&& function, std::string_view str, std::tuple<Args...> args);
-
+		void AddKeyComb(const KeyCombInput& input, F&& function, Args&&... args);
 
 		void SetOrtho(float left, float right, float top, float bottom);
 
@@ -149,7 +148,7 @@ namespace vkUtil {
 		//void setMouseAfterY(double posY);
 		//WindowButton& FindWindowButtonName(const std::string& name);
 
-		private:
+	private:
 
 		void setKey(unsigned int key, bool val);
 
@@ -163,63 +162,26 @@ namespace vkUtil {
 		static void m_HandleKeys(GLFWwindow* window, int key, int code, int action, int mode);
 		static void m_HandleMouseCursor(GLFWwindow* window, double posX, double posY);
 		static void m_HandleMouseButtons(GLFWwindow* window, int button, int action, int mods);
-
-
-
-		template<class F, class ... Args>
-			requires vkType::BoolLambdaVardic<F, Args...>
-		void AddKeyCombT(const KeyCombInput& input, F&& function, std::tuple<Args...> args);
-
-		template<class F, class ... Args>
-			requires vkType::BoolLambdaVardic<F, Args...>
-		void AddAABButtonT(const AABButtonInput& input, F&& function, std::string_view str, std::tuple<Args...> args);
-
 	};
 
-
-
-
-
-	template<class F, class ... Args>
-		requires vkType::BoolLambdaVardic<F, Args...>
-	inline void AddKeyCombT(const KeyCombInput& input, F&& function, std::tuple<Args...> args) // recently changed, needs testing
-	{
-		Mod val = Mods::None;
-		if (input.mod != Mods::None)
+		template<class F, class ... Args>
+		void WindowT::AddKeyComb(const KeyCombInput& input, F&& function, Args&&... args)
 		{
-			val = input.mod;
+			Mods val = (input.mod != Mods::None) ? input.mod : Mods::None;
+			_keyCombs[SIZET(input.action)].emplace(
+				std::pair(input.number, val),
+				std::make_unique<KeyComb<Args...>>(input, std::forward<F>(function), std::forward<Args>(args)...)
+			);
 		}
-		_keyCombs[SIZET(action)].emplace(std::make_pair(input.name, val), 
-			std::unique_ptr<KeyComb<Args...>>(input, std::forward<F>(function), std::forward<Args>(args)...)); 
-	}
 
-
-	template<class F, class ... Args>
-		requires vkType::BoolLambdaVardic<F, Args...>
-	inline void WindowT::AddAABButtonT(const AABButtonInput& input, F&& function, std::string_view str, std::tuple<Args...> args) // recently changed, needs testing
-	{
-		_AABButtons[SIZET(action)].emplace(str, std::unique_ptr<AABButton<Args...>>(input, std::forward<F>(function), std::forward<Args>(args)...)); 
-
-	}
-
-
-
-	template<class F, class ...Args>
-	inline void WindowT::AddKeyComb(const KeyCombInput& input, F&& function, std::tuple<Args...> args)
-	{
-		using Func = std::function<bool(Args...)>; 
-		AddKeyCombT<Func, Args...>(input, std::forward<F>(function), std::forward<Args>(args)...); 
-	}
-
-	template<class F, class ...Args>
-	inline void WindowT::AddAABButton(const AABButtonInput& input, F&& function, std::string_view str, std::tuple<Args...> args)
-	{
-		using Func = std::function<bool(Args...)>; 
-		AddAABButtonT<Func, Args...>(input, std::forward<F>(function), str, std::forward<Args>(args)...); 
-	}
-
+		template<class F, class ... Args>
+		void WindowT::AddAABButton(const AABButtonInput& input, F&& function, std::string_view str, Args&&... args) 
+		{
+			_AABButtons[SIZET(input.action)].emplace(
+				str, std::make_unique<AABButton<Args...>>(input, std::forward<F>(function), std::forward<Args>(args)...)
+			);
+		}
 }
-
 
 namespace vkType
 {

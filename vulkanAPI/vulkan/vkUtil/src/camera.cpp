@@ -9,7 +9,7 @@ namespace vkUtil
 	CameraT::CameraT() = default;
 
 
-	CameraT::CamraT(CameraT&& other) = default;
+	CameraT::CameraT(CameraT&& other) = default;
 
 
 	CameraT::CameraT(vkUtil::CameraBundlePerspective bundle)
@@ -101,7 +101,7 @@ namespace vkUtil
 				_position += _front * _speed * deltaTime;
 				return true;
 			},
-			std::make_tuple(0.0f));
+			0.0f);
 
 
 		input.number = Keys::S;
@@ -112,7 +112,7 @@ namespace vkUtil
 				_position -= _front * _speed * deltaTime;
 				return true;
 			},
-			std::make_tuple(0.0f));
+			0.0f);
 
 
 		input.number = Keys::A;
@@ -123,7 +123,7 @@ namespace vkUtil
 				_position -= _right * _speed * deltaTime;
 				return true;
 			},
-			std::make_tuple(0.0f));
+			0.0f);
 
 		input.number = Keys::D;
 		window.AddKeyComb(
@@ -133,7 +133,7 @@ namespace vkUtil
 				_position += _right * _speed * deltaTime;
 				return true;
 			},
-			std::make_tuple(0.0f));
+			0.0f);
 
 
 		input.number = Keys::Q;
@@ -144,7 +144,7 @@ namespace vkUtil
 				_position -= _up * _speed * deltaTime;
 				return true;
 			},
-			std::make_tuple(0.0f));
+			0.0f);
 
 		input.number = Keys::S;
 		window.AddKeyComb(
@@ -154,7 +154,7 @@ namespace vkUtil
 				_position += _up * _speed * deltaTime;
 				return true;
 			},
-			std::make_tuple(0.0f));
+			0.0f);
 
 		input.number = Keys::Up;
 		window.AddKeyComb(
@@ -164,7 +164,7 @@ namespace vkUtil
 				_rotation.x += _turnSpeed * deltaTime;
 				return true;
 			},
-			std::make_tuple(0.0f));
+			0.0f);
 
 		input.number = Keys::Down;
 		window.AddKeyComb(
@@ -174,7 +174,7 @@ namespace vkUtil
 				_rotation.x -= _turnSpeed * deltaTime;
 				return true;
 			},
-			std::make_tuple(0.0f));
+			0.0f);
 
 		input.number = Keys::Left;
 		window.AddKeyComb(
@@ -184,7 +184,7 @@ namespace vkUtil
 				_rotation.y -= _turnSpeed * deltaTime;
 				return true;
 			},
-			std::make_tuple(0.0f));
+			0.0f);
 
 		input.number = Keys::Right;
 		window.AddKeyComb(
@@ -194,7 +194,7 @@ namespace vkUtil
 				_rotation.y += _turnSpeed * deltaTime;
 				return true;
 			},
-			std::make_tuple(0.0f));
+			0.0f);
 	}
 
 	CameraT::~CameraT() = default;

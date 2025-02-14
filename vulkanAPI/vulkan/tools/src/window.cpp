@@ -34,7 +34,7 @@ namespace vkUtil {
 	
 	}
 
-	WindowT::WindowT(GLint windowWidth, GLint windowHeight, const std::string& name, bool isOrtho)
+	WindowT::WindowT(int windowWidth, int windowHeight, const std::string& name, bool isOrtho)
 	{
 		
 		_name = name;
@@ -57,8 +57,8 @@ namespace vkUtil {
 		{
 			if (_aspectRatio >= 1.0f)
 			{
-				_leftOrtho = -1.0f * aspectRatio;
-				_rightOrtho = 1.0f * aspectRatio;
+				_leftOrtho = -1.0f * _aspectRatio;
+				_rightOrtho = 1.0f * _aspectRatio;
 				_topOrtho = 1.0f;
 				_bottomOrtho = -1.0f;
 			}
@@ -333,7 +333,7 @@ namespace vkUtil {
 
 	void WindowT::m_HandleKeys(GLFWwindow* window, int key, int code, int action, int mode)
 	{
-		Window* instance = static_cast<Window*>(glfwGetWindowUserPointer(window));
+		WindowT* instance = static_cast<WindowT*>(glfwGetWindowUserPointer(window));
 
 		instance->HandleKeys(key, code, action, mode);
 	}
@@ -341,7 +341,7 @@ namespace vkUtil {
 
 	void WindowT::m_HandleMouseCursor(GLFWwindow* window, double posX, double posY)
 	{
-		Window* instance = static_cast<Window*>(glfwGetWindowUserPointer(window));
+		WindowT* instance = static_cast<WindowT*>(glfwGetWindowUserPointer(window));
 
 		instance->HandleMouseCursor(posX, posY);
 	}
@@ -349,7 +349,7 @@ namespace vkUtil {
 
 	void WindowT::m_HandleMouseButtons(GLFWwindow* window, int button, int action, int mods)
 	{
-		Window* instance = static_cast<Window*>(glfwGetWindowUserPointer(window));
+		WindowT* instance = static_cast<WindowT*>(glfwGetWindowUserPointer(window));
 
 		instance->HandleMouseButtons(button, action, mods);
 	}

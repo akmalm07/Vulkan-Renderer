@@ -97,10 +97,49 @@ protected:
 
 	const std::filesystem::path _shaderVertPath = UserInput::v_shader_path;  
 	const std::filesystem::path _shaderFragPath = UserInput::f_shader_path; 
+	const std::filesystem::path _jsonFileDescriptorSets = "descriptor_sets.json";
+
+	std::string rawJson = R"({
+  "descriptor_sets": [
+    {
+      "bindings": [
+        {
+          "binding": 0,
+          "descriptor_type": "uniform_buffer",
+          "descriptor_count": 1,
+          "stage_flags": "vertex"
+        }
+      ]
+
+    }
+
+
+  ],
+  "layouts": [
+
+    {
+      "bindings": [
+        {
+          "binding": 0,
+          "descriptor_type": "uniform_buffer",
+          "descriptor_count": 1,
+          "stage_flags": "vertex"
+        }
+      ]
+
+    }
+  ] 
+ 
+})";
 
 	//Descriptor Sets
 	std::vector<vk::DescriptorSet> _vkDescriptorSets;
+	std::vector<vk::DescriptorSetLayout> _vkDescriptorSetLayouts;
 	vk::DescriptorPool _vkDescriptorPool;
+
+	//Push Consts
+	std::vector<vkType::PushConst> _vkPushConsts;
+
 
 	//Syncronization variubles
 	size_t _maxFramesInFlight, _frameNum;
@@ -117,6 +156,8 @@ protected:
 	//debug messenger	
 	void make_debug_messenger();
 
+	void read_json_files();
+
 	void make_physical_device();
 
 	void make_swapchain();
@@ -125,9 +166,9 @@ protected:
 
 	void destroy_swapchain();
 
-	void make_pipeline();
+	void make_descriptor_sets_and_push_consts();
 
-	void make_descriptor_sets();
+	void make_pipeline();
 
 	void create_command_pool_and_command_buffers();
 
