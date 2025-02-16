@@ -2,13 +2,13 @@
 
 
 #include "config.h"
-#include "vkUtil\include\descriptor_set_bundles.h"
+#include "vkInit\include\descriptor_set_bundles.h"
 
 
-namespace vkUtil
+namespace vkInit
 {
 
-	DescriptorSetOutBundle create_descriptor_set(const vk::Device& device, const std::vector<DescriptorSetInBundle>& input, std::vector<DescriptorLayoutBundle> layouts, bool debug);
+	DescriptorSetOutBundle create_descriptor_set(const vk::Device& device, const std::vector<std::vector<DescriptorSetBindingBundle>>& input, std::vector<std::vector<DescriptorSetBindingBundle>> layouts, bool debug);
 	 
 	vk::DescriptorSetLayoutBinding create_descriptor_set_layout_binding(const DescriptorSetBindingBundle& input, bool debug);
 
@@ -22,5 +22,5 @@ namespace vkUtil
 	
 	//Helper Functions
 
-	bool already_exists(const vk::DescriptorSetLayoutCreateInfo& check, const DescriptorLayoutBundle& toCheck);
+	bool already_exists(const vk::DescriptorSetLayoutCreateInfo& check, const vk::DescriptorSetLayoutCreateInfo& toCheck);
 }

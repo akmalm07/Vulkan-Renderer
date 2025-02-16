@@ -20,8 +20,8 @@ namespace vkUtil {
 
 		_mainWindow = nullptr;
 
-		_width = 800;
-		_height = 800;
+		_width = 800.0f;
+		_height = 800.0f;
 
 		_leftOrtho = 0.0f;
 		_rightOrtho = 0.0f;
@@ -34,7 +34,7 @@ namespace vkUtil {
 	
 	}
 
-	WindowT::WindowT(int windowWidth, int windowHeight, const std::string& name, bool isOrtho)
+	WindowT::WindowT(float windowWidth, float windowHeight, const std::string& name, bool isOrtho)
 	{
 		
 		_name = name;
@@ -112,9 +112,13 @@ namespace vkUtil {
 
 		glfwGetFramebufferSize(_mainWindow, &_bufferWidth, &_bufferHeight);
 		
-		glfwGetWindowSize(_mainWindow, &_width, &_height);
 
-		glfwSetCursorPos(_mainWindow, _width / 2, _height / 2);
+		int thewidth = (int)_width;
+		int theheight = (int)_height;
+
+		glfwGetWindowSize(_mainWindow, &thewidth, &theheight); 
+
+		glfwSetCursorPos(_mainWindow, thewidth / 2, theheight / 2);
 
 		glfwMakeContextCurrent(_mainWindow);
 
@@ -207,9 +211,12 @@ namespace vkUtil {
 
 		glfwGetFramebufferSize(_mainWindow, &_bufferWidth, &_bufferHeight); 
 
-		glfwGetWindowSize(_mainWindow, &_width, &_height); 
+		int width = (int)_width;
+		int height = (int)_height;
 
-		glfwSetCursorPos(_mainWindow, _width / 2, _height / 2); 
+		glfwGetWindowSize(_mainWindow, &width, &height); 
+
+		glfwSetCursorPos(_mainWindow, width / 2, height / 2); 
 
 		glfwMakeContextCurrent(_mainWindow); 
 		  

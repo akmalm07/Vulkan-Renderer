@@ -44,6 +44,9 @@ public:
 
 	void draw(vk::CommandBuffer& commandBuffer) const override; 
 
+	void update_sets(vk::CommandBuffer& commandBuffer) const override;
+
+
 	template<vkType::ValidObj T>
 	void send_as_push_const(T& data, vk::CommandBuffer& cmdBuffer, vkUtil::ShaderStage shader, uint32_t offset) const;
 

@@ -15,7 +15,7 @@ namespace vkUtil {
 	public:
 		WindowT();
 
-		WindowT(int windowWidth, int windowHeight, const std::string& name, bool isOrtho);
+		WindowT(float windowWidth, float windowHeight, const std::string& name, bool isOrtho);
 
 		bool CreateWindow(const std::string& name, int width, int height);
 
@@ -54,8 +54,8 @@ namespace vkUtil {
 
 		bool SetWindow(GLFWwindow* window);
 
-		inline int GetWidth() const { return _width; }
-		inline int GetHeight() const { return _height; }
+		inline float GetWidth() const { return _width; }
+		inline float GetHeight() const { return _height; }
 
 
 		float GetLeftOrtho() const;
@@ -107,7 +107,7 @@ namespace vkUtil {
 
 		GLFWwindow* _mainWindow = nullptr;
 
-		int _width = 0, _height = 0;
+		float _width = 0.0f, _height = 0.0f;
 		int _bufferWidth = 0, _bufferHeight = 0;
 
 		std::optional<float> _leftOrtho, _rightOrtho, _topOrtho, _bottomOrtho;

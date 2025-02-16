@@ -13,19 +13,19 @@ namespace tools
 		return instance;
 	}
 
-	void DescriptorSetRegistry::intialize(std::vector<vkUtil::DescriptorSetInBundle> input, std::vector<vkUtil::DescriptorLayoutBundle> layouts)
+	void DescriptorSetRegistry::intialize(std::vector<std::vector<vkInit::DescriptorSetBindingBundle>> input, std::vector<std::vector<vkInit::DescriptorSetBindingBundle>> layouts)
 	{
 		m_createDescriptors = std::move(input);
 		m_layouts = std::move(layouts);
 	}
 
 
-	std::vector<vkUtil::DescriptorSetInBundle> DescriptorSetRegistry::get_descriptor_sets() const
+	std::vector<std::vector<vkInit::DescriptorSetBindingBundle>> DescriptorSetRegistry::get_descriptor_sets() const
 	{
 		return m_createDescriptors;
 	}
 
-	std::vector<vkUtil::DescriptorLayoutBundle> DescriptorSetRegistry::get_descriptor_set_layouts() const
+	std::vector<std::vector<vkInit::DescriptorSetBindingBundle>> DescriptorSetRegistry::get_descriptor_set_layouts() const
 	{
 		return m_layouts;
 	}

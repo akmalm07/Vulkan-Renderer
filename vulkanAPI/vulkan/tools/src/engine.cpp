@@ -212,6 +212,11 @@ void Engine::draw(vk::CommandBuffer& commandBuffer) const
 
 }
 
+void Engine::update_sets(vk::CommandBuffer& commandBuffer) const
+{
+}
+
+
 void Engine::call_push_consts() const
 {
 	for (const auto& pushConst : _pushConstCalls)

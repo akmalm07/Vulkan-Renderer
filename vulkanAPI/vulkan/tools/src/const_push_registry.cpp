@@ -6,40 +6,19 @@ namespace tools
 
 	PushConstRegistery::PushConstRegistery() = default;
 
-	std::vector<vkType::PushConst> PushConstRegistery::_pushConsts;
-
 	PushConstRegistery& PushConstRegistery::get_instance()
 	{
 		static PushConstRegistery instance;
 		return instance;
 	}
 
-	void PushConstRegistery::add_push_const(const vkType::PushConst& pushConst)
+	void PushConstRegistery::initalize(std::vector<vkType::PushConst>& pushConst)
 	{
-		_pushConsts.push_back(pushConst);
+		_pushConsts = std::move(pushConst);
 	}
 
 	std::vector<vkType::PushConst> PushConstRegistery::get_push_consts() const
 	{
 		return _pushConsts;
 	}
-
-
-	[[nodiscard]] uint32_t evaluate_offset_push_const(size_t size)
-	{
-		static uint32_t s_offset = 0;
-		static uint32_t s_size = 0;
-
-		s_offset += s_size;
-
-		s_size = size;
-
-		if (s_offset == 0)
-		{
-			return 0;
-		}
-
-		return s_offset;
-	}
-
 }

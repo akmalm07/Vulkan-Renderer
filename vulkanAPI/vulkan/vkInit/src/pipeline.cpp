@@ -5,38 +5,12 @@
 #include "vkUtil\include\vertex.h"
 #include "vkUtil\include\shader.h"
 #include "vkUtil\include\render_structs.h"
-#include "tools\include\const_push_registry.h"
+#include "vkInit\include\push_constants.h"
 
 
 namespace vkInit
 {
-	std::vector<vk::PushConstantRange> evaluate_push_constants(const std::vector<vkType::PushConst>& pushConsts, bool debug)
-	{
 
-		std::vector<vk::PushConstantRange> pushConstants;
-
-		for (const auto& push : pushConsts)
-		{
-			std::cout << "Push constant offset: " << push._offset << " size: " << push._size << " shader: " << UINT32(push._shader) << "\n";
-			pushConstants.emplace_back(create_push_constant(push._offset, push._size, push._shader, debug));
-		}
-
-		return pushConstants;
-	}
-
-	vk::PushConstantRange create_push_constant(uint32_t offset, uint32_t size, vk::ShaderStageFlagBits shader, bool debug)
-	{
-		vk::PushConstantRange pushConstantInfo = {};
-
-		pushConstantInfo.offset = offset;
-
-		pushConstantInfo.size = size;
-
-		pushConstantInfo.stageFlags = shader;
-
-		return pushConstantInfo;
-
-	}
 
 	[[nodiscard]] GraphicsPipelineOutBundle create_pipeline(GraphicsPipelineInBundle& spesifications, bool debug)
 	{

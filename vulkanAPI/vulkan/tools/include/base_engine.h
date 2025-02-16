@@ -28,8 +28,10 @@ public:
 	void render();
 
 	virtual void draw(vk::CommandBuffer& commandBuffer) const = 0;
+	
+	virtual void update_sets(vk::CommandBuffer& commandBuffer) const = 0;
 
-	void updateFPS();
+	void update_FPS();
 
 	vk::Device get_logical_device() const;
 
@@ -97,40 +99,10 @@ protected:
 
 	const std::filesystem::path _shaderVertPath = UserInput::v_shader_path;  
 	const std::filesystem::path _shaderFragPath = UserInput::f_shader_path; 
+	const std::filesystem::path _jsonDescriptorSetsFilePath = UserInput::desc_set_json_path;
+	const std::filesystem::path _jsonPushCosntantsFilePath = UserInput::push_const_json_path;
+
 	const std::filesystem::path _jsonFileDescriptorSets = "descriptor_sets.json";
-
-	std::string rawJson = R"({
-  "descriptor_sets": [
-    {
-      "bindings": [
-        {
-          "binding": 0,
-          "descriptor_type": "uniform_buffer",
-          "descriptor_count": 1,
-          "stage_flags": "vertex"
-        }
-      ]
-
-    }
-
-
-  ],
-  "layouts": [
-
-    {
-      "bindings": [
-        {
-          "binding": 0,
-          "descriptor_type": "uniform_buffer",
-          "descriptor_count": 1,
-          "stage_flags": "vertex"
-        }
-      ]
-
-    }
-  ] 
- 
-})";
 
 	//Descriptor Sets
 	std::vector<vk::DescriptorSet> _vkDescriptorSets;

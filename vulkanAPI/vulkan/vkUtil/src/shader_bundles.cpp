@@ -41,5 +41,32 @@ namespace vkUtil
 		}
 	}
 
+	vk::ShaderStageFlags mix_shader_flags_of_vector(const std::vector<ShaderStage>& flags)
+	{
+		if (flags.empty())
+		{
+			return vk::ShaderStageFlags();
+		}
+
+		std::vector<vk::ShaderStageFlagBits> output = to_vk_shader_flags(flags);
+
+
+		vk::ShaderStageFlags theoutput;
+		for (const auto& flag : output)
+		{
+			theoutput |= flag;
+		}
+		return theoutput;
+	}
+
+	std::vector<vk::ShaderStageFlagBits> to_vk_shader_flags(const std::vector<ShaderStage>& flags)
+	{
+		std::vector<vk::ShaderStageFlagBits> output(flags.size());
+		for (const auto& [i, flag] : flags | std::views::enumerate)
+		{
+			output[i] = enum_to_vk(flag);
+		}
+		return output;
+	}
 
 }

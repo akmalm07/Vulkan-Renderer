@@ -15,8 +15,8 @@
 #include "vkUtil\include\render_structs.h"
 #include "tools\include\const_push_registry.h"
 #include "tools\include\descriptor_set_registry.h"
-#include "vkUtil\include\descriptor_set.h"
-#include "vkUtil\include\descriptor_set_bundles.h"
+#include "vkInit\include\descriptor_set.h"
+#include "vkInit\include\descriptor_set_bundles.h"
 #include "vkUtil\include\pipeline_bundles.h"
 #include "vkUtil\include\camera.h"
 #include "tools\include\timer.h"
@@ -166,7 +166,7 @@ BaseEngine::BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool
 
 
 
-void BaseEngine::updateFPS()
+void BaseEngine::update_FPS()
 {
 	static double previousTime = glfwGetTime();
 	static int frameCount = 0;
@@ -235,43 +235,103 @@ void BaseEngine::make_debug_messenger()
 	_debugMessenger = vkInit::make_debug_messenger(_instance, _dldi);
 }
 
-void BaseEngine::read_json_files() //MODIFY THIS TO MAKE IT COMPATIBLE WITH THE NEW JSON UPDATES FOR LAYOUTS
+void BaseEngine::read_json_files() 
 {
-	JsonReader decriptorSet(rawJson);
+	JsonReader decriptorSet(_jsonDescriptorSetsFilePath);
 
-	std::vector<vkUtil::DescriptorSetInBundle> descriptorSets;
+	std::vector<std::vector<vkInit::DescriptorSetBindingBundle>> descriptorSets;
 
 	for (const auto& set : decriptorSet["descriptor_sets"])
 	{
-		vkUtil::DescriptorSetInBundle bundle;
-
+		std::vector<vkInit::DescriptorSetBindingBundle> descriptorSet;
 		for (const auto& binding : set["bindings"])
 		{
-			bundle.bindings.emplace_back
-			(
-				vkUtil::to_descriptor_type(binding["descriptor_type"]),
-				vkUtil::to_shader_stage(binding["stage_flags"]),
-				binding["descriptor_count"],
-				binding["binding"]
-			);
-
+			if (binding["stage_flags"].is_array())
+			{
+				std::vector<vkUtil::ShaderStage> stages;
+				for (const auto& stage : binding["stage_flags"])
+				{
+					stages.emplace_back(vkUtil::to_shader_stage(stage.get<std::string_view>()));
+				}
+				descriptorSet.emplace_back
+				(
+					vkInit::to_descriptor_type(binding["descriptor_type"]),
+					stages,
+					binding["descriptor_count"].get<uint32_t>(),
+					binding["binding"].get<uint32_t>()
+				);
+			}
+			else
+			{
+				descriptorSet.emplace_back
+				(
+					vkInit::to_descriptor_type(binding["descriptor_type"]),
+					vkUtil::to_shader_stage(binding["stage_flags"]),
+					binding["descriptor_count"].get<uint32_t>(),// MAKE SURE YOU MODIFY THE DESCRIPTOR SETS.CPP TO HANDLE THIS
+					binding["binding"].get<uint32_t>()
+				);
+			}
 		}
-
-		descriptorSets.push_back(bundle);
-
+		descriptorSets.push_back(std::move(descriptorSet));
 	}
 
-	std::vector<uint32_t> layouts;
-
-	for (const auto& layout : decriptorSet["layouts"])
+	std::vector<std::vector<vkInit::DescriptorSetBindingBundle>> layoutBindings;
+	for (const auto& layouts : decriptorSet["layouts"])
 	{
-		std::vector<vk::DescriptorSetLayoutBinding> layoutBindings;
+		std::vector<vkInit::DescriptorSetBindingBundle> layoutBinding;
+		for (const auto& layout : layouts["bindings"])
+		{
+			if (layout["stage_flags"].is_array())
+			{
+				std::vector<vkUtil::ShaderStage> stages;
+				for (const auto& stage : layout["stage_flags"])
+				{
+					stages.emplace_back(vkUtil::to_shader_stage(stage.get<std::string_view>()));
+				}
+				layoutBinding.emplace_back
+				(
+					vkInit::to_descriptor_type(layout["descriptor_type"]),
+					stages,
+					layout["descriptor_count"].get<uint32_t>(),
+					layout["binding"].get<uint32_t>()
+				);
+			}
+			else
+			{
+				layoutBinding.emplace_back
+				(
+					vkInit::to_descriptor_type(layout["descriptor_type"]),
+					vkUtil::to_shader_stage(layout["stage_flags"]),
+					layout["descriptor_count"].get<uint32_t>(),
+					layout["binding"].get<uint32_t>()
+				);
+			}
+			layoutBindings.push_back(std::move(layoutBinding));
+		}			
+	}
+	
+	tools::DescriptorSetRegistry::get_instance().intialize(descriptorSets, layoutBindings);
 
-		layouts.emplace_back(layout["binding_count"]);
+
+	JsonReader pushConst(_jsonPushCosntantsFilePath);
+
+	std::vector<vkType::PushConst> pushConsts;
+
+	uint32_t offset = 0;
+	for (const auto& push : pushConst["push_consts"])
+	{
+		pushConsts.emplace_back
+		(
+			push["size"].get<uint32_t>(),
+			offset,
+			vkUtil::enum_to_vk(vkUtil::to_shader_stage(push["shader"].get<std::string_view>()))
+			
+		);
+
+		offset += push["size"].get<uint32_t>();
 	}
 
-
-	tools::DescriptorSetRegistry::get_instance().intialize(descriptorSets, layouts);
+	tools::PushConstRegistery::get_instance().initalize(pushConsts);
 }
 
 
@@ -399,13 +459,15 @@ void BaseEngine::make_descriptor_sets_and_push_consts()
 	tools::DescriptorSetRegistry& descReg = tools::DescriptorSetRegistry::get_instance();
 	tools::PushConstRegistery& pushReg = tools::PushConstRegistery::get_instance();
 
-	vkUtil::DescriptorSetOutBundle out = vkUtil::create_descriptor_set(
+	vkInit::DescriptorSetOutBundle out = vkInit::create_descriptor_set(
 		_vkLogicalDevice,
 		descReg.get_descriptor_sets(),
 		descReg.get_descriptor_set_layouts(),
 		_debugMode);
 
 	_vkDescriptorSets = out.descriptorSets;
+
+	std::cout << "Descriptor Set Size: " << _vkDescriptorSets.size() << std::endl;
 
 	_vkDescriptorPool = out.pool;
 
@@ -539,7 +601,7 @@ void BaseEngine::is_ortho(bool orthoOrPerpective)
 
 void BaseEngine::render()
 {
-	updateFPS();
+	update_FPS();
 	
 	_window.pollEvents();
 
