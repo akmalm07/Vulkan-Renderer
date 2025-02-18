@@ -21,10 +21,12 @@
 #include "vkUtil\include\camera.h"
 #include "tools\include\timer.h"
 #include "tools\include\json_reader.h"
+#include "vkUtil\include\memory.h"
 
 
 
-BaseEngine::BaseEngine()
+BaseEngine::BaseEngine() :
+	_modelMat(glm::mat4(1.0f))
 {
 
 
@@ -71,7 +73,8 @@ BaseEngine::BaseEngine()
 
 
 
-BaseEngine::BaseEngine(vkVert::StrideBundle stride, int width, int height, bool orthoOrPerpective, bool debug)
+BaseEngine::BaseEngine(vkVert::StrideBundle stride, int width, int height, bool orthoOrPerpective, bool debug) :
+	_modelMat(glm::mat4(1.0f))
 {
 
 	_debugMode = debug;
@@ -118,7 +121,8 @@ BaseEngine::BaseEngine(vkVert::StrideBundle stride, int width, int height, bool 
 
 
 
-BaseEngine::BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool orthoOrPerpective, bool debug)
+BaseEngine::BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool orthoOrPerpective, bool debug) :
+_modelMat(glm::mat4(1.0f))
 {
 	is_ortho(orthoOrPerpective);
 
@@ -465,15 +469,29 @@ void BaseEngine::make_descriptor_sets_and_push_consts()
 		descReg.get_descriptor_set_layouts(),
 		_debugMode);
 
-	_vkDescriptorSets = out.descriptorSets;
 
-	std::cout << "Descriptor Set Size: " << _vkDescriptorSets.size() << std::endl;
+	std::move(out.descriptorSets.begin(), out.descriptorSets.end(), _vkDescriptorSets.sets.begin());
+
+	_vkDescriptorSets.updated.assign(_vkDescriptorSets.sets.size(), true);
+
 
 	_vkDescriptorPool = out.pool;
 
 	_vkDescriptorSetLayouts = out.descriptorSetLayouts;
 
 	_vkPushConsts = pushReg.get_push_consts();
+
+
+	vkUtil::BufferInput bufferInfo;
+
+	bufferInfo.logicalDevice = _vkLogicalDevice;
+	bufferInfo.device = _vkPhysicalDevice;
+	bufferInfo.size = sizeof(_modelMat);
+	bufferInfo.usage = vk::BufferUsageFlagBits::eUniformBuffer;
+
+	_modelMat = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.0f, 0.0f));
+
+	_vkDescriptorSetBuffers[SIZET(Buffer1)] = std::move(vkUtil::create_vk_util_buffer(bufferInfo, _modelMat, _debugMode));
 
 }
 
@@ -541,6 +559,9 @@ void BaseEngine::record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t
 
 	vk::Rect2D vkScissor = vk::Rect2D({ 0, 0 }, { static_cast<uint32_t>(_window.GetBufferWidth()), static_cast<uint32_t>(_window.GetBufferHeight()) }); 
 	commandBuffer.setScissor(0, vkScissor);
+
+
+	update_sets(commandBuffer);
 
 	draw(commandBuffer);
 
@@ -785,6 +806,12 @@ BaseEngine::~BaseEngine()
 
 	_vkLogicalDevice.destroyCommandPool(_vkCommandPool);
 
+	_vkLogicalDevice.destroyDescriptorPool(_vkDescriptorPool);
+
+	for (const auto& layout : _vkDescriptorSetLayouts)
+	{
+		_vkLogicalDevice.destroyDescriptorSetLayout(layout);
+	}
 
 	_vkLogicalDevice.destroyPipeline(_vkPipeline);
 
@@ -792,6 +819,10 @@ BaseEngine::~BaseEngine()
 
 	_vkLogicalDevice.destroyRenderPass(_vkRenderpass);
 
+	for (const auto& item : _vkDescriptorSetBuffers)
+	{
+		vkUtil::destroy_vk_util_buffer(_vkLogicalDevice, item);
+	}
 
 	_instance.destroySurfaceKHR(_vkPresentSurface);
 
@@ -805,7 +836,6 @@ BaseEngine::~BaseEngine()
 
 	_instance.destroy();
 
-	//terminate glfw
 	glfwTerminate();
 }
 

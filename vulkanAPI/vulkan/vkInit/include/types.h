@@ -35,6 +35,28 @@ namespace vkType
 	};
 
 
+	template <typename T, size_t S = 0>
+	struct ArrOrVec 
+	{
+		static constexpr bool value = false;
+	};
+
+	template <typename T>
+	struct ArrOrVec<std::vector<T>, 0> 
+	{
+		static constexpr bool value = true;
+	};
+
+	template <typename T, size_t S>
+	struct ArrOrVec<std::array<T, S>, S> 
+	{
+		static constexpr bool value = true;
+	};
+
+
+	template<class T, size_t S = 0>
+	concept IsArrOrVec = ArrOrVec<T, S>::value;
+
 
 	template<class Func, class ... Args>
 	concept BoolLambdaVardic = std::same_as<Func, std::function<bool(Args...)>>;

@@ -1,4 +1,20 @@
 {
+
+  "buffers": [ // COMPLETE THIS!!!
+    {
+      "buffer": "uniform_buffer",
+      "size": 64
+    },
+    {
+      "buffer": "uniform_buffer",
+      "size": 64
+    },
+    {
+      "buffer": "uniform_buffer",
+      "size": 64
+    }
+  ],
+
   "descriptor_sets": [
     {
       "bindings": [
@@ -7,7 +23,21 @@
           "descriptor_type": "uniform_buffer",
           "descriptor_count": 1,
           "stage_flags": "vertex"
+        },
+        {
+          "binding": 1,
+          "descriptor_type": "uniform_buffer",
+          "descriptor_count": 1,
+          "stage_flags": "vertex"
+        },
+
+        {
+          "binding": 2,
+          "descriptor_type": "uniform_buffer",
+          "descriptor_count": 1,
+          "stage_flags": "vertex"
         }
+
       ]
     }
   ],
@@ -18,6 +48,19 @@
       "bindings": [
         {
           "binding": 0,
+          "descriptor_type": "uniform_buffer",
+          "descriptor_count": 1,
+          "stage_flags": "vertex"
+        },
+        {
+          "binding": 1,
+          "descriptor_type": "uniform_buffer",
+          "descriptor_count": 1,
+          "stage_flags": "vertex"
+        },
+
+        {
+          "binding": 2,
           "descriptor_type": "uniform_buffer",
           "descriptor_count": 1,
           "stage_flags": "vertex"

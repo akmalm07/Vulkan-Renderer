@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "tools\include\engine.h"
+#include "tools\include\descriptor_set_registry.h"
 
 
 Engine::Engine() : 
@@ -9,13 +10,13 @@ Engine::Engine() :
 
 
 Engine::Engine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool orthoOrperspective, bool debug) :
-	BaseEngine(glfwWindow, stride, orthoOrperspective, debug)
+	BaseEngine(glfwWindow, stride, orthoOrperspective, debug), _scene(nullptr)
 {}
 
 
 
 Engine::Engine(vkVert::StrideBundle stride, int width, int height, bool orthoOrperspective, bool debug) :
-	BaseEngine(stride, width, height, orthoOrperspective, debug)
+	BaseEngine(stride, width, height, orthoOrperspective, debug), _scene(nullptr)
 {}
 
 
@@ -212,8 +213,60 @@ void Engine::draw(vk::CommandBuffer& commandBuffer) const
 
 }
 
-void Engine::update_sets(vk::CommandBuffer& commandBuffer) const
+void Engine::update_sets(vk::CommandBuffer& cmdBuff) 
+{ 
+	//Binding the descriptor set
+
+	cmdBuff.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _vkPipelineLayout, 0, 1, _vkDescriptorSets.sets.data(), 0, nullptr);
+
+
+
+	if(_scene)
+	{
+		_scene->update_sets(cmdBuff);
+	}
+
+
+
+	for (auto&& [i, set] : _vkDescriptorSets.updated | std::views::enumerate)
+	{
+		if (set)
+		{
+			_vkDescriptorSets.updated[i] = false;
+
+			vk::DescriptorBufferInfo bufferInfo;
+			bufferInfo.buffer = _vkDescriptorSetBuffers[SIZET(Buffer1)].buffer;
+			bufferInfo.offset = 0;
+			bufferInfo.range = sizeof(_modelMat);
+
+			vk::WriteDescriptorSet writeDescriptorSet;
+
+			writeDescriptorSet.descriptorType = vk::DescriptorType::eUniformBuffer;
+			writeDescriptorSet.descriptorCount = 1;
+			writeDescriptorSet.dstBinding = 0;
+			writeDescriptorSet.dstArrayElement = 0;
+			writeDescriptorSet.dstSet = _vkDescriptorSets.sets[SIZET(Set1)];
+			writeDescriptorSet.pBufferInfo = &bufferInfo;
+			writeDescriptorSet.pImageInfo = nullptr;
+			writeDescriptorSet.pTexelBufferView = nullptr;
+
+			_vkLogicalDevice.updateDescriptorSets(1, &writeDescriptorSet, 0, nullptr);
+
+		}
+	}
+}
+
+Engine::~Engine()
+
 {
+	_vkLogicalDevice.waitIdle();
+
+	_vkGraphicsQueue.waitIdle();
+
+	_vertexBuffer.reset();
+	_indexBuffer.reset();
+	_scene.reset();
+	
 }
 
 

@@ -28,5 +28,4 @@ namespace UserInput
 	const vk::ClearValue clear_color = { std::array<float, 4>{1.0f, 5.0f, 0.0f, 0.3f} };
 
 
-
 } // namespace UserInput

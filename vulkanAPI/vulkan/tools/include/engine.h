@@ -44,18 +44,13 @@ public:
 
 	void draw(vk::CommandBuffer& commandBuffer) const override; 
 
-	void update_sets(vk::CommandBuffer& commandBuffer) const override;
+	void update_sets(vk::CommandBuffer& cmdBuffer) override;
 
 
 	template<vkType::ValidObj T>
 	void send_as_push_const(T& data, vk::CommandBuffer& cmdBuffer, vkUtil::ShaderStage shader, uint32_t offset) const;
 
-	~Engine() override
-	{
-		_vertexBuffer.reset();
-		_indexBuffer.reset();
-		_scene.reset();
-	}
+	~Engine() override;
 
 
 private:
@@ -66,6 +61,7 @@ private:
 
 	mutable std::unique_ptr<VertexBufferT> _vertexBuffer;    
 	mutable std::unique_ptr<IndexBufferT> _indexBuffer;
+
 
 private:
 	void call_push_consts() const;

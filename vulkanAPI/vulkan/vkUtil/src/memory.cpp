@@ -74,7 +74,6 @@ namespace vkUtil
 
 		if (memReq.size == 0)
 		{
-			std::cout << "\n\nError! Alloaction size cannot be 0, must be greater then 0\n";
 			throw std::runtime_error("Allocation size set to 0");
 		}
 
@@ -105,6 +104,20 @@ namespace vkUtil
 		}
 
 		return bufferMemory;
+	}
+
+	void copy_buffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, vk::DeviceSize size, vk::CommandBuffer& commandBuffer)
+	{
+		vk::BufferCopy copyRegion = {};
+		copyRegion.size = size;
+		commandBuffer.copyBuffer(srcBuffer, dstBuffer, 1, &copyRegion);
+	}
+
+
+	void destroy_vk_util_buffer(const vk::Device& dev, Buffer buffer)
+	{
+		dev.freeMemory(buffer.bufferMemory);
+		dev.destroyBuffer(buffer.buffer);
 	}
 
 }

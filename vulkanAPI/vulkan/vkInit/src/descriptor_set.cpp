@@ -137,7 +137,7 @@ namespace vkInit
 
 		if (debug)
 		{
-			std::cout << "Creating Descriptor Set Layout with bindings: " << std::endl;
+			std::cout << "Creating Descriptor Set Layout with Bindings: " << std::endl;
 			for (const auto& binding : input)
 			{
 				std::cout << "\tBinding: " << binding.binding << " Type: " << vk::to_string(binding.descriptorType) << " Count: " << binding.descriptorCount << std::endl;

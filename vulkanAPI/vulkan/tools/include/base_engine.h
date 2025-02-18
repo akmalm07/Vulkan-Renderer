@@ -2,6 +2,7 @@
 
 #include "config.h"
 
+#include "vkUtil\include\buffers.h"
 #include "vkUtil\include\vertex.h"
 #include "tools\include\stride.h"
 
@@ -29,7 +30,7 @@ public:
 
 	virtual void draw(vk::CommandBuffer& commandBuffer) const = 0;
 	
-	virtual void update_sets(vk::CommandBuffer& commandBuffer) const = 0;
+	virtual void update_sets(vk::CommandBuffer& commandBuffer) = 0;
 
 	void update_FPS();
 
@@ -42,6 +43,20 @@ public:
 	virtual ~BaseEngine(); 
 
 protected: 
+
+protected:
+
+	enum DescriptorSetBuffers : size_t 
+	{
+		Buffer1,
+		BufferCount
+	};
+
+	enum DescriptorSets : size_t 
+	{
+		Set1,
+		SetCount
+	};
 
 	bool _debugMode = true;
 
@@ -105,9 +120,15 @@ protected:
 	const std::filesystem::path _jsonFileDescriptorSets = "descriptor_sets.json";
 
 	//Descriptor Sets
-	std::vector<vk::DescriptorSet> _vkDescriptorSets;
+	struct 
+	{
+		std::array<vk::DescriptorSet, SIZET(SetCount)> sets;
+		std::vector<bool> updated;
+	}_vkDescriptorSets;
 	std::vector<vk::DescriptorSetLayout> _vkDescriptorSetLayouts;
 	vk::DescriptorPool _vkDescriptorPool;
+	std::array<vkUtil::Buffer, SIZET(BufferCount)> _vkDescriptorSetBuffers;
+
 
 	//Push Consts
 	std::vector<vkType::PushConst> _vkPushConsts;
@@ -115,7 +136,12 @@ protected:
 
 	//Syncronization variubles
 	size_t _maxFramesInFlight, _frameNum;
+	
+	//Matrices
+	alignas(16) glm::mat4 _modelMat;
 
+
+	protected:
 
 	//glfw setup
 	void build_glfw_window();
@@ -152,4 +178,7 @@ protected:
 
 
 	void is_ortho(bool orthoOrPerpective);
+
+
+
 };

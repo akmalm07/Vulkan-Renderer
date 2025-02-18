@@ -41,6 +41,11 @@ std::vector <UserInput::pos> SceneT::get_triangles_pos()
 	return positions; 
 }
 
+void SceneT::update_sets(vk::CommandBuffer& cmdBuff) const
+{
+	//IF I HAVE SETS I WILL UPDATE THEM
+}
+
 SceneT::~SceneT() = default;
 
 

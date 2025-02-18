@@ -16,12 +16,11 @@ public:
 
 	SceneT& operator=(SceneT&& other) noexcept;
 
-	
 	std::vector <MeshT> get_triangles();
-	
 
 	std::vector <UserInput::pos> get_triangles_pos();
 
+	void update_sets(vk::CommandBuffer& cmdBuff) const;
 
 	~SceneT();
 

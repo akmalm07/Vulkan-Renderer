@@ -306,6 +306,8 @@ namespace vkInit
 
 		layoutInfo.setLayoutCount = UINT32(layouts.size());
 
+		std::cout << "Layouts size: " << layouts.size() << std::endl;
+
 		layoutInfo.pSetLayouts = layouts.data();
 
 
