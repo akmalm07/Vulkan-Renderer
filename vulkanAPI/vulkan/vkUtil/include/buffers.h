@@ -18,8 +18,6 @@ namespace vkUtil {
 	struct BufferInput
 	{
 	public:
-		vk::Device logicalDevice;
-		vk::PhysicalDevice device;
 		size_t size;
 		vk::BufferUsageFlags usage;
 

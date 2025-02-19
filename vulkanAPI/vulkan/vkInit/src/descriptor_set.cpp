@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "vkInit\include\descriptor_set.h"
+#include "vkUtil\include\memory.h"
 
 
 namespace
@@ -27,7 +28,9 @@ namespace
 namespace vkInit
 {
 
-	DescriptorSetOutBundle create_descriptor_set(const vk::Device& device, const std::vector<std::vector<DescriptorSetBindingBundle>>& input, std::vector<std::vector<DescriptorSetBindingBundle>> layouts, bool debug)
+	DescriptorSetOutBundle create_descriptor_set(const vk::Device& device, const vk::PhysicalDevice& logicalDevice,
+		const std::vector<std::vector<DescriptorSetBindingBundle>>& input, std::vector<std::vector<DescriptorSetBindingBundle>> layouts,
+		std::vector<DescriptorBuffer*> buffers, bool debug)
 	{
 		if (debug)
 		{
@@ -106,8 +109,22 @@ namespace vkInit
 				throw std::runtime_error("Layout count does not match binding count!");
 			}
 		}
+
+		std::vector<vkUtil::Buffer> descriptorBuffer;
+		for (auto& buffer : buffers)
+		{
+			vkUtil::BufferInput bufferInfo;
+			bufferInfo.size = buffer->maxSize;
+			bufferInfo.usage = buffer->bufferType;
+			if (!buffer->get_data_ptr())
+			{
+				throw std::runtime_error("Buffer Data is not initialized!");
+			}
+			descriptorBuffer.emplace_back(vkUtil::create_vk_util_buffer(logicalDevice, device, bufferInfo, buffer->get_data_ptr(), debug));
+		}
+
 		std::vector<vk::DescriptorSet> descriptorSets = create_descriptor_sets(device, pool, allLayout, input.size(), debug);
-		return { descriptorSets, allLayout, pool };
+		return { descriptorSets, allLayout, descriptorBuffer, pool };
 	}
 
 	vk::DescriptorSetLayoutBinding create_descriptor_set_layout_binding(const DescriptorSetBindingBundle& input, bool debug)
@@ -283,6 +300,32 @@ namespace vkInit
 			throw std::runtime_error("Descriptor Type not found");
 		}
 	}
+
+	vk::BufferUsageFlags to_buffer_type(const std::string_view& type)
+	{
+		if (type == "uniform")
+		{
+			return vk::BufferUsageFlagBits::eUniformBuffer;
+		}
+		else if (type == "storage")
+		{
+			return vk::BufferUsageFlagBits::eStorageBuffer;
+		}
+		else if (type == "vertex")
+		{
+			return vk::BufferUsageFlagBits::eVertexBuffer;
+		}
+		else if (type == "index")
+		{
+			return vk::BufferUsageFlagBits::eIndexBuffer;
+		}
+		else
+		{
+			throw std::runtime_error("Buffer Type not found");
+		}
+	}
+
+
 
 
 	bool already_exists(const vk::DescriptorSetLayoutCreateInfo& check, const vk::DescriptorSetLayoutCreateInfo& toCheck)

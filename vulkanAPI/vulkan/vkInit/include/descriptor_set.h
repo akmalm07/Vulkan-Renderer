@@ -8,7 +8,7 @@
 namespace vkInit
 {
 
-	DescriptorSetOutBundle create_descriptor_set(const vk::Device& device, const std::vector<std::vector<DescriptorSetBindingBundle>>& input, std::vector<std::vector<DescriptorSetBindingBundle>> layouts, bool debug);
+	DescriptorSetOutBundle create_descriptor_set(const vk::Device& device, const vk::PhysicalDevice& logicalDevice, const std::vector<std::vector<DescriptorSetBindingBundle>>& input, std::vector<std::vector<DescriptorSetBindingBundle>> layouts, std::vector<DescriptorBuffer*> buffers, bool debug);
 	 
 	vk::DescriptorSetLayoutBinding create_descriptor_set_layout_binding(const DescriptorSetBindingBundle& input, bool debug);
 
@@ -19,6 +19,8 @@ namespace vkInit
 	std::vector<vk::DescriptorSet> create_descriptor_sets(const vk::Device& device, const vk::DescriptorPool& pool, const std::vector<vk::DescriptorSetLayout>& layout, uint32_t descriptorSetCount, bool debug);
 	
 	vk::DescriptorType to_descriptor_type(const std::string_view& type);
+	
+	vk::BufferUsageFlags to_buffer_type(const std::string_view& type);
 	
 	//Helper Functions
 

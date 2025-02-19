@@ -22,14 +22,16 @@
 #include "tools\include\timer.h"
 #include "tools\include\json_reader.h"
 #include "vkUtil\include\memory.h"
+#include "tools\include\memory_pool.h"
 
 
 
-BaseEngine::BaseEngine() :
-	_modelMat(glm::mat4(1.0f))
+BaseEngine::BaseEngine()
 {
-
-
+	_MVPMats._modelMat = glm::mat4(1.0f);
+	_MVPMats._viewMat = glm::mat4(1.0f);
+	_MVPMats._projMat = glm::mat4(1.0f);
+	
 	_debugMode = true;
 
 	_stride.pos = vkVert::PosStride::STRIDE_2D;
@@ -60,8 +62,10 @@ BaseEngine::BaseEngine() :
 	make_swapchain();
 
 	read_json_files();
+	
+	make_push_consts();
 
-	make_descriptor_sets_and_push_consts();
+	make_descriptor_sets();
 
 	make_pipeline();
 
@@ -73,9 +77,12 @@ BaseEngine::BaseEngine() :
 
 
 
-BaseEngine::BaseEngine(vkVert::StrideBundle stride, int width, int height, bool orthoOrPerpective, bool debug) :
-	_modelMat(glm::mat4(1.0f))
+BaseEngine::BaseEngine(vkVert::StrideBundle stride, int width, int height, bool orthoOrPerpective, bool debug) 
 {
+
+	_MVPMats._modelMat = glm::mat4(1.0f);
+	_MVPMats._viewMat = glm::mat4(1.0f);
+	_MVPMats._projMat = glm::mat4(1.0f);
 
 	_debugMode = debug;
 
@@ -108,7 +115,9 @@ BaseEngine::BaseEngine(vkVert::StrideBundle stride, int width, int height, bool 
 
 	read_json_files();
 
-	make_descriptor_sets_and_push_consts();
+	make_push_consts();
+
+	make_descriptor_sets();
 
 	make_pipeline();
 
@@ -121,10 +130,14 @@ BaseEngine::BaseEngine(vkVert::StrideBundle stride, int width, int height, bool 
 
 
 
-BaseEngine::BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool orthoOrPerpective, bool debug) :
-_modelMat(glm::mat4(1.0f))
+BaseEngine::BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool orthoOrPerpective, bool debug) 
 {
+
 	is_ortho(orthoOrPerpective);
+
+	_MVPMats._modelMat = glm::mat4(1.0f);
+	_MVPMats._viewMat = _camera.getView();
+	_MVPMats._projMat = _camera.getProjection();
 
 	_debugMode = debug;
 
@@ -159,7 +172,9 @@ _modelMat(glm::mat4(1.0f))
 
 	read_json_files();
 
-	make_descriptor_sets_and_push_consts();
+	make_push_consts();
+
+	make_descriptor_sets();
 
 	make_pipeline();
 
@@ -243,11 +258,11 @@ void BaseEngine::read_json_files()
 {
 	JsonReader decriptorSet(_jsonDescriptorSetsFilePath);
 
-	std::vector<std::vector<vkInit::DescriptorSetBindingBundle>> descriptorSets;
+	std::vector<vkInit::DescriptorSetBindings> descriptorSets;
 
 	for (const auto& set : decriptorSet["descriptor_sets"])
 	{
-		std::vector<vkInit::DescriptorSetBindingBundle> descriptorSet;
+		vkInit::DescriptorSetBindings descriptorSet;
 		for (const auto& binding : set["bindings"])
 		{
 			if (binding["stage_flags"].is_array())
@@ -271,18 +286,19 @@ void BaseEngine::read_json_files()
 				(
 					vkInit::to_descriptor_type(binding["descriptor_type"]),
 					vkUtil::to_shader_stage(binding["stage_flags"]),
-					binding["descriptor_count"].get<uint32_t>(),// MAKE SURE YOU MODIFY THE DESCRIPTOR SETS.CPP TO HANDLE THIS
+					binding["descriptor_count"].get<uint32_t>(),
 					binding["binding"].get<uint32_t>()
+
 				);
 			}
 		}
 		descriptorSets.push_back(std::move(descriptorSet));
 	}
 
-	std::vector<std::vector<vkInit::DescriptorSetBindingBundle>> layoutBindings;
+	std::vector<vkInit::DescriptorSetBindings> layoutBindings;
 	for (const auto& layouts : decriptorSet["layouts"])
 	{
-		std::vector<vkInit::DescriptorSetBindingBundle> layoutBinding;
+		vkInit::DescriptorSetBindings layoutBinding;
 		for (const auto& layout : layouts["bindings"])
 		{
 			if (layout["stage_flags"].is_array())
@@ -298,6 +314,7 @@ void BaseEngine::read_json_files()
 					stages,
 					layout["descriptor_count"].get<uint32_t>(),
 					layout["binding"].get<uint32_t>()
+					//layout["buffer"].get<uint16_t>()
 				);
 			}
 			else
@@ -314,7 +331,18 @@ void BaseEngine::read_json_files()
 		}			
 	}
 	
-	tools::DescriptorSetRegistry::get_instance().intialize(descriptorSets, layoutBindings);
+
+	std::vector<vkUtil::BufferInput> bufferInfo;
+	for (const auto& info : decriptorSet["descriptor_buffers"])
+	{
+		bufferInfo.emplace_back
+		(
+			info["size_max"].get<uint32_t>(),
+			vkInit::to_buffer_type(info["type"].get<std::string_view>())
+		);
+	}
+
+	tools::DescriptorSetRegistry::get_instance().intialize(descriptorSets, layoutBindings, bufferInfo);
 
 
 	JsonReader pushConst(_jsonPushCosntantsFilePath);
@@ -457,42 +485,63 @@ void BaseEngine::make_pipeline()
 
 
 
-void BaseEngine::make_descriptor_sets_and_push_consts()
+void BaseEngine::make_descriptor_sets()
 {
 
 	tools::DescriptorSetRegistry& descReg = tools::DescriptorSetRegistry::get_instance();
-	tools::PushConstRegistery& pushReg = tools::PushConstRegistery::get_instance();
+	const std::vector<vkInit::DescriptorSetBindings>& allDescriptorSets = descReg.get_descriptor_sets();
+
+	size_t count = 0;
+	for (const auto& size : descReg.get_descriptor_buffers())
+	{
+		count += size.size; 
+	}
+
+	std::cout << "Count: " << count << std::endl;
+
+	tools::MemoryPool memoryPool(count);
 
 	vkInit::DescriptorSetOutBundle out = vkInit::create_descriptor_set(
 		_vkLogicalDevice,
-		descReg.get_descriptor_sets(),
+		_vkPhysicalDevice,
+		allDescriptorSets,
 		descReg.get_descriptor_set_layouts(),
-		_debugMode);
-
-
+		initalize_descriptor_buffers(descReg.get_descriptor_buffers(), memoryPool),
+		_debugMode
+	);
+	
+	if (out.descriptorSets.size() != SIZET(SetCount))
+	{
+		throw std::runtime_error("Descriptor Set Count does not match the Set Count! Set Count Enum must be update it!");
+	}
 	std::move(out.descriptorSets.begin(), out.descriptorSets.end(), _vkDescriptorSets.sets.begin());
 
-	_vkDescriptorSets.updated.assign(_vkDescriptorSets.sets.size(), true);
 
+	if (out.descriptorSetBuffers.size() != SIZET(BufferCount))
+	{
+		throw std::runtime_error("Descriptor Set Buffer Count does not match the Set Count! Buffer Count Enum must be update it!");
+	}
+	std::move(out.descriptorSetBuffers.begin(), out.descriptorSetBuffers.end(), _vkDescriptorSetBuffers.begin());
+
+	for (size_t i = 0; i < allDescriptorSets.size(); i++)
+	{
+		_vkDescriptorSets.updated[i].resize(allDescriptorSets[i].size());
+		for (const auto& [j, set] : allDescriptorSets[i] | std::views::enumerate)
+		{
+			_vkDescriptorSets.updated[i][j] = std::move(std::pair(set.type, true));
+		} 
+	}
 
 	_vkDescriptorPool = out.pool;
 
 	_vkDescriptorSetLayouts = out.descriptorSetLayouts;
 
+}
+
+void BaseEngine::make_push_consts()
+{
+	tools::PushConstRegistery& pushReg = tools::PushConstRegistery::get_instance();
 	_vkPushConsts = pushReg.get_push_consts();
-
-
-	vkUtil::BufferInput bufferInfo;
-
-	bufferInfo.logicalDevice = _vkLogicalDevice;
-	bufferInfo.device = _vkPhysicalDevice;
-	bufferInfo.size = sizeof(_modelMat);
-	bufferInfo.usage = vk::BufferUsageFlagBits::eUniformBuffer;
-
-	_modelMat = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.0f, 0.0f));
-
-	_vkDescriptorSetBuffers[SIZET(Buffer1)] = std::move(vkUtil::create_vk_util_buffer(bufferInfo, _modelMat, _debugMode));
-
 }
 
 

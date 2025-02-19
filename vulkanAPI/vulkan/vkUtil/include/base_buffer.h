@@ -48,13 +48,11 @@ protected:
 
 
 		vkUtil::BufferInput input = {};
-		input.device = physicalDevice;
-		input.logicalDevice = device;
 		input.size = data.size() * sizeof(data[0]);// FIX THE SIZE!!!!
 		input.usage = usage;
 
 
-		buffer = vkUtil::create_buffer(input, debug);
+		buffer = vkUtil::create_buffer(device, input, debug);
 		if (debug)
 		{
 			std::cout << "Creating the " << bufferStr << " buffer...\n";
@@ -65,7 +63,7 @@ protected:
 		}
 
 
-		bufferMemory = vkUtil::alloc_buffer_memory(buffer, input);
+		bufferMemory = vkUtil::alloc_buffer_memory(buffer, physicalDevice, device, input);
 		if (debug)
 		{
 			std::cout << "Allocating the " << bufferStr << " buffer...\n";

@@ -9,6 +9,8 @@
 #include "vkUtil\include\IndexBuffer.h"
 #include "tools\include\scene.h"
 #include "vkUtil\include\shader_bundles.h"
+#include "vkInit\include\descriptor_set_bundles.h"
+#include "tools\include\memory_pool.h"
 
 #include <queue>
 
@@ -62,9 +64,26 @@ private:
 	mutable std::unique_ptr<VertexBufferT> _vertexBuffer;    
 	mutable std::unique_ptr<IndexBufferT> _indexBuffer;
 
+	struct BufferDescs
+	{
+	public:
 
-private:
+		BufferDescs(const std::vector<vkUtil::BufferInput>& descriptorBuffer) : descriptorBuffer(descriptorBuffer) {}
+
+		template <typename T>
+		inline void add_buffer(size_t bufferNum, tools::MemoryPool& mem, T& data);
+
+		std::vector<vkInit::DescriptorBuffer*> get_buffers() const { return buffers; }
+
+	private:
+		std::vector<vkInit::DescriptorBuffer*> buffers;
+		const std::vector<vkUtil::BufferInput>& descriptorBuffer;
+	};
+
+protected:
 	void call_push_consts() const;
+
+	std::vector<vkInit::DescriptorBuffer*> initalize_descriptor_buffers(const std::vector<vkUtil::BufferInput>& descriptorBuffer, tools::MemoryPool& memPool) override;
 
 
 };
@@ -84,3 +103,8 @@ inline void Engine::send_as_push_const(T& data, vk::CommandBuffer& cmdBuffer, vk
 		{ cmdBuffer.pushConstants(_vkPipelineLayout, vkUtil::enum_to_vk(shader), offset, sizeof(data), &data); });  
 }
 
+template<typename T>
+inline void Engine::BufferDescs::add_buffer(size_t bufferNum, tools::MemoryPool& mem, T& data)
+{
+	buffers.emplace_back(mem.allocate<vkInit::DescriptorBufferData<T>>(descriptorBuffer[bufferNum].usage, descriptorBuffer[bufferNum].size, data)); 
+}

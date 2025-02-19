@@ -15,20 +15,22 @@ namespace tools
 
 		static DescriptorSetRegistry& get_instance();
 
-		void intialize(std::vector<std::vector<vkInit::DescriptorSetBindingBundle>> input, std::vector< std::vector<vkInit::DescriptorSetBindingBundle>> layouts);
+		void intialize(std::vector<vkInit::DescriptorSetBindings>& input, std::vector<vkInit::DescriptorSetBindings>& layouts, std::vector<vkUtil::BufferInput>& buffers);
 
-		std::vector< std::vector<vkInit::DescriptorSetBindingBundle>> get_descriptor_set_layouts() const;
+		std::vector<vkInit::DescriptorSetBindings> get_descriptor_set_layouts() const;
 
-		std::vector<std::vector<vkInit::DescriptorSetBindingBundle>> get_descriptor_sets() const;
+		std::vector<vkInit::DescriptorSetBindings> get_descriptor_sets() const;
+
+		std::vector<vkUtil::BufferInput> get_descriptor_buffers() const;
 
 		~DescriptorSetRegistry();
 
 	private:
 
 		DescriptorSetRegistry();
-		std::vector<std::vector<vkInit::DescriptorSetBindingBundle>> m_createDescriptors;
-		std::vector<std::vector<vkInit::DescriptorSetBindingBundle>> m_layouts;
-
+		std::vector<vkInit::DescriptorSetBindings> m_createDescriptors;
+		std::vector<vkInit::DescriptorSetBindings> m_layouts;
+		std::vector<vkUtil::BufferInput> m_buffers;
 	};
 
 }

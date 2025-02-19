@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "tools\include\descriptor_set_registry.h"
+#include "vkInit\include\descriptor_set_bundles.h"
 
 
 namespace tools
@@ -13,19 +14,25 @@ namespace tools
 		return instance;
 	}
 
-	void DescriptorSetRegistry::intialize(std::vector<std::vector<vkInit::DescriptorSetBindingBundle>> input, std::vector<std::vector<vkInit::DescriptorSetBindingBundle>> layouts)
+	void DescriptorSetRegistry::intialize(std::vector<vkInit::DescriptorSetBindings>& input, std::vector<vkInit::DescriptorSetBindings>& layouts, std::vector<vkUtil::BufferInput>& buffers)
 	{
 		m_createDescriptors = std::move(input);
 		m_layouts = std::move(layouts);
+		m_buffers = std::move(buffers);
 	}
 
 
-	std::vector<std::vector<vkInit::DescriptorSetBindingBundle>> DescriptorSetRegistry::get_descriptor_sets() const
+	std::vector<vkInit::DescriptorSetBindings> DescriptorSetRegistry::get_descriptor_sets() const
 	{
 		return m_createDescriptors;
 	}
+	
+	std::vector<vkUtil::BufferInput> DescriptorSetRegistry::get_descriptor_buffers() const
+	{
+		return m_buffers;
+	}
 
-	std::vector<std::vector<vkInit::DescriptorSetBindingBundle>> DescriptorSetRegistry::get_descriptor_set_layouts() const
+	std::vector<vkInit::DescriptorSetBindings> DescriptorSetRegistry::get_descriptor_set_layouts() const
 	{
 		return m_layouts;
 	}

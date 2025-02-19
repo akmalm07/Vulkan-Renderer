@@ -9,6 +9,9 @@
 #include "vkUtil\include\render_structs.h"
 #include "vkUtil\include\swapchain_frames.h"
 #include "vkUtil\include\camera.h"
+#include "vkInit\include\descriptor_set_bundles.h"
+#include "tools\include\memory_pool.h"
+
 
 
 #include "tools\include\window.h"
@@ -41,8 +44,6 @@ public:
 	inline bool running() const{ return !_window.GetShouldClose(); }
 
 	virtual ~BaseEngine(); 
-
-protected: 
 
 protected:
 
@@ -123,7 +124,7 @@ protected:
 	struct 
 	{
 		std::array<vk::DescriptorSet, SIZET(SetCount)> sets;
-		std::vector<bool> updated;
+		std::vector<std::vector<std::pair<vk::DescriptorType, bool>>> updated;
 	}_vkDescriptorSets;
 	std::vector<vk::DescriptorSetLayout> _vkDescriptorSetLayouts;
 	vk::DescriptorPool _vkDescriptorPool;
@@ -137,9 +138,15 @@ protected:
 	//Syncronization variubles
 	size_t _maxFramesInFlight, _frameNum;
 	
-	//Matrices
-	alignas(16) glm::mat4 _modelMat;
 
+	//Matrices
+
+	alignas(16) struct
+	{
+		glm::mat4 _modelMat;
+		glm::mat4 _viewMat;
+		glm::mat4 _projMat;
+	} _MVPMats;
 
 	protected:
 
@@ -164,7 +171,11 @@ protected:
 
 	void destroy_swapchain();
 
-	void make_descriptor_sets_and_push_consts();
+	void make_descriptor_sets();
+
+	virtual std::vector<vkInit::DescriptorBuffer*> initalize_descriptor_buffers(const std::vector<vkUtil::BufferInput>& descriptorBuffer, tools::MemoryPool& memPool) = 0;
+
+	void make_push_consts();
 
 	void make_pipeline();
 
@@ -175,7 +186,6 @@ protected:
 	void make_frame_sync_objects();
 
 	void record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t imageIndex);
-
 
 	void is_ortho(bool orthoOrPerpective);
 

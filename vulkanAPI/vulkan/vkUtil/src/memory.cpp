@@ -9,7 +9,7 @@ namespace vkUtil
 
 
 
-	vk::Buffer create_buffer(BufferInput& input, bool debug)
+	vk::Buffer create_buffer(const vk::Device& logicalDevice, BufferInput& input, bool debug)
 	{
 
 		vk::BufferCreateInfo bufferInfo = {};
@@ -25,7 +25,7 @@ namespace vkUtil
 		vk::Buffer buffer;
 		try
 		{
-			buffer = input.logicalDevice.createBuffer(bufferInfo);
+			buffer = logicalDevice.createBuffer(bufferInfo);
 		}
 		catch (vk::SystemError& err)
 		{
@@ -42,7 +42,7 @@ namespace vkUtil
 
 	}
 
-	uint32_t find_memory_type_index(vk::PhysicalDevice& physicalDevice, uint32_t supportedMemoryIndex, vk::MemoryPropertyFlags requestedProperties)
+	uint32_t find_memory_type_index(const vk::PhysicalDevice& physicalDevice, uint32_t supportedMemoryIndex, vk::MemoryPropertyFlags requestedProperties)
 	{
 
 		vk::PhysicalDeviceMemoryProperties memProperties = physicalDevice.getMemoryProperties();
@@ -63,10 +63,10 @@ namespace vkUtil
 	}
 
 
-	vk::DeviceMemory alloc_buffer_memory(vk::Buffer& buffer, vkUtil::BufferInput& input)
+	vk::DeviceMemory alloc_buffer_memory(vk::Buffer& buffer, const vk::PhysicalDevice& device, const vk::Device& logicalDevice, vkUtil::BufferInput& input)
 	{
 
-		vk::MemoryRequirements memReq = input.logicalDevice.getBufferMemoryRequirements(buffer);
+		vk::MemoryRequirements memReq = logicalDevice.getBufferMemoryRequirements(buffer);
 
 		vk::MemoryAllocateInfo allocInfo = {};
 
@@ -80,14 +80,14 @@ namespace vkUtil
 		allocInfo.allocationSize = memReq.size;
 
 		allocInfo.memoryTypeIndex = find_memory_type_index(
-			input.device,
+			device,
 			memReq.memoryTypeBits,
 			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
 		);
 
 		try
 		{
-			bufferMemory = input.logicalDevice.allocateMemory(allocInfo);
+			bufferMemory = logicalDevice.allocateMemory(allocInfo);
 		}
 		catch (vk::SystemError& err)
 		{
@@ -96,7 +96,7 @@ namespace vkUtil
 
 		try
 		{
-			input.logicalDevice.bindBufferMemory(buffer, bufferMemory, 0);
+			logicalDevice.bindBufferMemory(buffer, bufferMemory, 0);
 		}
 		catch (vk::SystemError& err)
 		{
@@ -106,11 +106,39 @@ namespace vkUtil
 		return bufferMemory;
 	}
 
+
 	void copy_buffer(vk::Buffer& srcBuffer, vk::Buffer& dstBuffer, vk::DeviceSize size, vk::CommandBuffer& commandBuffer)
 	{
 		vk::BufferCopy copyRegion = {};
 		copyRegion.size = size;
 		commandBuffer.copyBuffer(srcBuffer, dstBuffer, 1, &copyRegion);
+	}
+
+
+	Buffer create_vk_util_buffer(const vk::PhysicalDevice& device, const vk::Device& logicalDevice, BufferInput& input, void* data, bool debug)
+	{
+
+		vk::Buffer buff = create_buffer(logicalDevice, input, debug);
+		vk::DeviceMemory mem = alloc_buffer_memory(buff, device, logicalDevice, input);
+
+		void* memLocation = logicalDevice.mapMemory(mem, 0, input.size);
+
+		if (!memLocation)
+		{
+			throw std::runtime_error("Failed to map memory!");
+		}
+
+		if (!data)
+		{
+			throw std::runtime_error("Data is null!");
+		}
+		memcpy(memLocation, data, input.size);
+
+		logicalDevice.unmapMemory(mem);
+
+
+		return { buff, mem };
+
 	}
 
 

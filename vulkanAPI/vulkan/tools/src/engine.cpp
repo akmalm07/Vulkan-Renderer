@@ -230,28 +230,31 @@ void Engine::update_sets(vk::CommandBuffer& cmdBuff)
 
 	for (auto&& [i, set] : _vkDescriptorSets.updated | std::views::enumerate)
 	{
-		if (set)
+		for (auto&& [j, updated] : set | std::views::enumerate)
 		{
-			_vkDescriptorSets.updated[i] = false;
+			if (updated.second)
+			{
+				_vkDescriptorSets.updated[i][j].second = false;
 
-			vk::DescriptorBufferInfo bufferInfo;
-			bufferInfo.buffer = _vkDescriptorSetBuffers[SIZET(Buffer1)].buffer;
-			bufferInfo.offset = 0;
-			bufferInfo.range = sizeof(_modelMat);
+				vk::DescriptorBufferInfo bufferInfo;
+				bufferInfo.buffer = _vkDescriptorSetBuffers[SIZET(Buffer1)].buffer;
+				bufferInfo.offset = 0;
+				bufferInfo.range = sizeof(_MVPMats);
 
-			vk::WriteDescriptorSet writeDescriptorSet;
+				vk::WriteDescriptorSet writeDescriptorSet;
 
-			writeDescriptorSet.descriptorType = vk::DescriptorType::eUniformBuffer;
-			writeDescriptorSet.descriptorCount = 1;
-			writeDescriptorSet.dstBinding = 0;
-			writeDescriptorSet.dstArrayElement = 0;
-			writeDescriptorSet.dstSet = _vkDescriptorSets.sets[SIZET(Set1)];
-			writeDescriptorSet.pBufferInfo = &bufferInfo;
-			writeDescriptorSet.pImageInfo = nullptr;
-			writeDescriptorSet.pTexelBufferView = nullptr;
+				writeDescriptorSet.descriptorType = vk::DescriptorType::eUniformBuffer;
+				writeDescriptorSet.descriptorCount = 1;
+				writeDescriptorSet.dstBinding = 0;
+				writeDescriptorSet.dstArrayElement = 0;
+				writeDescriptorSet.dstSet = _vkDescriptorSets.sets[SIZET(Set1)];
+				writeDescriptorSet.pBufferInfo = &bufferInfo;
+				writeDescriptorSet.pImageInfo = nullptr;
+				writeDescriptorSet.pTexelBufferView = nullptr;
 
-			_vkLogicalDevice.updateDescriptorSets(1, &writeDescriptorSet, 0, nullptr);
+				_vkLogicalDevice.updateDescriptorSets(1, &writeDescriptorSet, 0, nullptr);
 
+			}
 		}
 	}
 }
@@ -277,6 +280,15 @@ void Engine::call_push_consts() const
 		pushConst();
 	}
 	_pushConstCalls.clear();
+}
+
+std::vector <vkInit::DescriptorBuffer*> Engine::initalize_descriptor_buffers(const std::vector<vkUtil::BufferInput>& descriptorBuffer, tools::MemoryPool& memPool)
+{
+	BufferDescs buffers(descriptorBuffer);
+
+	buffers.add_buffer(SIZET(Buffer1), memPool, _MVPMats);
+
+	return buffers.get_buffers();
 }
 
 
