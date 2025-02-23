@@ -29,23 +29,23 @@ namespace vkInit
 {
 
 	DescriptorSetOutBundle create_descriptor_set(const vk::Device& device, const vk::PhysicalDevice& logicalDevice,
-		const std::vector<std::vector<DescriptorSetBindingBundle>>& input, std::vector<std::vector<DescriptorSetBindingBundle>> layouts,
-		std::vector<DescriptorBuffer*> buffers, bool debug)
+		const std::vector<DescriptorSetBindings>& descriptors, const std::vector<DescriptorSetBindings>& layouts,
+		std::vector<std::shared_ptr<vkInit::DescriptorBuffer>> buffers, bool debug)
 	{
 		if (debug)
 		{
-			std::cout << "Creating Descriptor Set with " << input.size() << " Descriptor Set Bundles" << std::endl;
+			std::cout << "Creating Descriptor Set with " << descriptors.size() << " Descriptor Set Bundles" << std::endl;
 		}
 
 		std::vector<std::vector<vk::DescriptorSetLayoutBinding>> layoutBindings;
 
 		IdentifierArray arr;
-		for (const auto& layout : input)
+		for (const auto& layout : layouts)
 		{
 			std::vector<vk::DescriptorSetLayoutBinding> layoutBinding;
 			for (const auto& binding : layout)
 			{
-				layoutBinding.push_back(create_descriptor_set_layout_binding(binding, debug));
+				layoutBinding.emplace_back(create_descriptor_set_layout_binding(binding, debug));
 
 				auto it = std::find(arr.types.begin(), arr.types.end(), binding.type);
 				if (it != arr.types.end())
@@ -73,25 +73,26 @@ namespace vkInit
 			}
 		}
 
-		vk::DescriptorPool pool = create_descriptor_pool(device, poolSizes, input.size(), debug);
+		vk::DescriptorPool pool = create_descriptor_pool(device, poolSizes, descriptors.size(), debug);
 
 		std::vector<vk::DescriptorSetLayout> allLayout;
 
-		for (const std::vector<DescriptorSetBindingBundle>& layout : layouts)
+		for (const auto& descBindings : descriptors)
 		{
-
 			bool notexecuted = true;
-			for (const auto& bindings : layoutBindings) // check if the layout matches the bindings
+
+			for (const auto& [i, layBindings] : layouts | std::views::enumerate)
 			{
-				if (layout.size() != layoutBindings.size())
+				//std::cout << "Desc: " << descBindings.size() << " == Lay: " << layBindings.size() << std::endl;
+				if (descBindings.size() != layBindings.size())
 				{
 					continue;
 				}
 
 				bool allTrue = true;
-				for (auto [binding, layoutBinding] : std::views::zip(bindings, layout))
-				{					
-					if (!(binding.descriptorType == layoutBinding.type && layoutBinding.count == binding.descriptorCount))
+				for (auto [descBinding, layoutBinding] : std::views::zip(descBindings, layBindings))
+				{
+					if (!(descBinding.type == layoutBinding.type && layoutBinding.count == descBinding.count))
 					{
 						allTrue = false;
 						break;
@@ -100,72 +101,83 @@ namespace vkInit
 
 				if (allTrue)
 				{
-					allLayout.emplace_back(create_descriptor_set_layout(device, bindings, debug));
+					if (debug)
+					{
+						std::cout << "Creating Descriptor Set Layout with Bindings: " << std::endl;
+						for (const auto& binding : layBindings)
+						{
+							std::cout << "\tBinding: " << binding.binding << " Type: " << vk::to_string(binding.type) << " Count: " << binding.count << std::endl;
+						}
+					}
+					allLayout.emplace_back(create_descriptor_set_layout(device, layoutBindings[i], debug));
 					notexecuted = false;
 				}
 			}
 			if (notexecuted)
 			{
-				throw std::runtime_error("Layout count does not match binding count!");
+				throw std::runtime_error("Layout count does not match binding count!"); // fix the binding count
 			}
 		}
+
+		
 
 		std::vector<vkUtil::Buffer> descriptorBuffer;
-		for (auto& buffer : buffers)
+		for (size_t i = 0; i < buffers.size(); i++)
 		{
 			vkUtil::BufferInput bufferInfo;
-			bufferInfo.size = buffer->maxSize;
-			bufferInfo.usage = buffer->bufferType;
-			if (!buffer->get_data_ptr())
-			{
-				throw std::runtime_error("Buffer Data is not initialized!");
-			}
-			descriptorBuffer.emplace_back(vkUtil::create_vk_util_buffer(logicalDevice, device, bufferInfo, buffer->get_data_ptr(), debug));
+			bufferInfo.size = buffers[i]->maxSize;
+			bufferInfo.usage = buffers[i]->bufferType;
+
+			descriptorBuffer.emplace_back(vkUtil::create_vk_util_buffer(logicalDevice, device, bufferInfo, 
+				buffers[i]->get_data_ptr(), debug));
 		}
 
-		std::vector<vk::DescriptorSet> descriptorSets = create_descriptor_sets(device, pool, allLayout, input.size(), debug);
+		std::vector<vk::DescriptorSet> descriptorSets = create_descriptor_sets(device, pool, allLayout, descriptors.size(), debug);
+
 		return { descriptorSets, allLayout, descriptorBuffer, pool };
 	}
 
-	vk::DescriptorSetLayoutBinding create_descriptor_set_layout_binding(const DescriptorSetBindingBundle& input, bool debug)
+	vk::DescriptorSetLayoutBinding create_descriptor_set_layout_binding(const DescriptorSetBindingBundle& descriptors, bool debug)
 	{
 		if (debug) 
 		{
-			std::cout << "Creating Descriptor Set Layout Binding with binding: " << input.binding << " Type: " << vk::to_string(input.type) << " Count: " << input.count << std::endl;
+			std::cout << "Creating Descriptor Set Layout Binding with binding: " << descriptors.binding << " Type: " << vk::to_string(descriptors.type) << " Count: " << descriptors.count << std::endl;
 		}
 
 		vk::DescriptorSetLayoutBinding layoutBinding;
-		layoutBinding.binding = input.binding;
-		layoutBinding.descriptorType = input.type; 
-		layoutBinding.descriptorCount = input.count;
-		layoutBinding.stageFlags = vkUtil::mix_shader_flags_of_vector(input.stage);
+		layoutBinding.binding = descriptors.binding;
+		layoutBinding.descriptorType = descriptors.type; 
+		layoutBinding.descriptorCount = descriptors.count;
+		layoutBinding.stageFlags = vkUtil::mix_shader_flags_of_vector(descriptors.stage);
 
-		layoutBinding.pImmutableSamplers = input.sampler;
+		layoutBinding.pImmutableSamplers = descriptors.sampler;
 
 		return layoutBinding;
 	}
 
 
-	vk::DescriptorSetLayout create_descriptor_set_layout(const vk::Device& device, const std::vector<vk::DescriptorSetLayoutBinding>& input, bool debug)
+	vk::DescriptorSetLayout create_descriptor_set_layout(const vk::Device& device, const std::vector<vk::DescriptorSetLayoutBinding>& layoutBindings, bool debug)
 	{
 		static std::vector<vk::DescriptorSetLayoutCreateInfo> check;
 		static std::vector<vk::DescriptorSetLayout> allItems;
 
-
-		if (debug)
+		vk::DescriptorSetLayoutBindingFlagsCreateInfo bindingFlagsCreateInfo = {};
+		bindingFlagsCreateInfo.bindingCount = layoutBindings.size();
+		
+		vk::DescriptorBindingFlags* nextValues = new vk::DescriptorBindingFlags[layoutBindings.size()];
+		for (size_t i = 0; i < layoutBindings.size(); i++)
 		{
-			std::cout << "Creating Descriptor Set Layout with Bindings: " << std::endl;
-			for (const auto& binding : input)
-			{
-				std::cout << "\tBinding: " << binding.binding << " Type: " << vk::to_string(binding.descriptorType) << " Count: " << binding.descriptorCount << std::endl;
-			}
+			nextValues[i] = vk::DescriptorBindingFlagBits::eUpdateAfterBind;
 		}
+
+		bindingFlagsCreateInfo.pBindingFlags = nextValues;
+
 
 		vk::DescriptorSetLayoutCreateInfo layoutInfo;
 		layoutInfo.flags = vk::DescriptorSetLayoutCreateFlagBits();
-		layoutInfo.bindingCount = input.size();
-		layoutInfo.pBindings = input.data();
-
+		layoutInfo.bindingCount = layoutBindings.size();
+		layoutInfo.pBindings = layoutBindings.data();
+		layoutInfo.pNext = &bindingFlagsCreateInfo;
 
 		for (const auto& [i, checkLayout] : check | std::views::enumerate)
 		{
@@ -230,14 +242,13 @@ namespace vkInit
 		}
 		if (debug)
 		{
-			std::cout << "Creating " << descriptorSetCount << " Descriptor Sets" << std::endl;
+			std::cout << "Creating " << descriptorSetCount << " Descriptor Sets" << " with " << layout.size() << " Layouts" << std::endl;
 		}
 
 		vk::DescriptorSetAllocateInfo allocInfo; 
 		allocInfo.descriptorPool = pool; 
 		allocInfo.descriptorSetCount = descriptorSetCount; 
 		allocInfo.pSetLayouts = layout.data(); 
-
 
 		try
 		{
@@ -248,6 +259,7 @@ namespace vkInit
 			throw std::runtime_error("failed to allocate descriptor sets!");
 		}
 	}
+
 
 	vk::DescriptorType to_descriptor_type(const std::string_view& type)
 	{

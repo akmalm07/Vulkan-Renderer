@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "descriptor_set_bundles.h"
+#include "vkInit\include\descriptor_set_bundles.h"
 
 
 namespace vkInit
@@ -22,6 +22,11 @@ namespace vkInit
 
 	DescriptorBuffer::DescriptorBuffer(vk::BufferUsageFlags bufferType, uint32_t maxSize)
 		: bufferType(bufferType), maxSize(maxSize)
+	{
+	}
+
+	DescriptorBuffer::DescriptorBuffer()
+		: bufferType(0), maxSize(0)
 	{
 	}
 }

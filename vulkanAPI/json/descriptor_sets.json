@@ -15,24 +15,9 @@
           "binding": 0,
           "descriptor_type": "uniform_buffer",
           "descriptor_count": 1,
-          "stage_flags": "vertex",
-          "buffer": 0
-        },
-        {
-          "binding": 1,
-          "descriptor_type": "uniform_buffer",
-          "descriptor_count": 1,
-          "stage_flags": "vertex",
-          "buffer": 1
-        },
-
-        {
-          "binding": 2,
-          "descriptor_type": "uniform_buffer",
-          "descriptor_count": 1,
-          "stage_flags": "vertex",
-          "buffer": 2
+          "stage_flags": "vertex"
         }
+
 
       ]
     }
@@ -44,19 +29,6 @@
       "bindings": [
         {
           "binding": 0,
-          "descriptor_type": "uniform_buffer",
-          "descriptor_count": 1,
-          "stage_flags": "vertex"
-        },
-        {
-          "binding": 1,
-          "descriptor_type": "uniform_buffer",
-          "descriptor_count": 1,
-          "stage_flags": "vertex"
-        },
-
-        {
-          "binding": 2,
           "descriptor_type": "uniform_buffer",
           "descriptor_count": 1,
           "stage_flags": "vertex"

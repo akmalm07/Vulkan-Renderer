@@ -3,12 +3,16 @@
 
 #include "config.h"
 #include "vkInit\include\descriptor_set_bundles.h"
+#include "tools\include\memory_pool_container.h"
 
 
 namespace vkInit
 {
 
-	DescriptorSetOutBundle create_descriptor_set(const vk::Device& device, const vk::PhysicalDevice& logicalDevice, const std::vector<std::vector<DescriptorSetBindingBundle>>& input, std::vector<std::vector<DescriptorSetBindingBundle>> layouts, std::vector<DescriptorBuffer*> buffers, bool debug);
+	DescriptorSetOutBundle create_descriptor_set(const vk::Device& device, const vk::PhysicalDevice& logicalDevice, 
+		const std::vector<DescriptorSetBindings>& discriptor,
+		const std::vector<DescriptorSetBindings>& layouts,
+		std::vector<std::shared_ptr<vkInit::DescriptorBuffer>> buffers, bool debug);
 	 
 	vk::DescriptorSetLayoutBinding create_descriptor_set_layout_binding(const DescriptorSetBindingBundle& input, bool debug);
 

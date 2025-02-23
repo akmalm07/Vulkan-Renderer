@@ -3,12 +3,17 @@
 #include "config.h"
 
 #include "vkUtil\include\camera_bundle.h"
-#include "tools\include\window.h"
+#include "tools\include\keys.h"
 
 
-namespace vkUtil
+namespace tools
 {
+	class WindowT;
+}
 
+namespace tools
+
+{
 	class CameraT
 	{
 	public:
@@ -16,31 +21,45 @@ namespace vkUtil
 		
 		CameraT(CameraT&& other);
 
-		CameraT(vkUtil::CameraBundlePerspective bundle);
-
-		CameraT(vkUtil::CameraBundleOrthographic bundle);
-
 		CameraT& operator=(CameraT&& other);
 
-		void update();
+		CameraT(CameraBundlePerspective bundle);
 
-		void setSpeed(float speed);
-		float getSpeed() const;
+		CameraT(CameraBundleOrthographic bundle);
 
-		void setPosition(const glm::vec3& position);
+		void update(const glm::vec3& position);
+		
+		void update(Direction dir, double deltaTime);
+		
+		void update(double xMove, double yMove, double deltaTime);
+		
+		void update(Direction dir, double xMove, double yMove, double deltaTime);
+		
+		void debug_position();
 
-		glm::mat4 getView() const;
+		void set_speed(float speed);
+		float get_speed() const;
 
-		glm::mat4 getProjection() const;
+		void set_position(const glm::vec3& position);
 
-		void setCommandsToWindow(vkUtil::WindowT& window);
+		glm::mat4 get_view() ;
 
+		glm::mat4 get_projection() const;
+
+		void set_commands_to_window(tools::WindowT& window);
+
+		void move_dir(Direction dir, double deltaTime);
+		
+		void move_and_turn_dir(Direction dir, double pitch, double yaw, double deltaTime);
+
+		void turn_dir(Direction dir, double pitch, double yaw, double deltaTime);
 
 		~CameraT();
 
 	private:
 
 		glm::mat4 _projection;
+		glm::mat4 _view;
 
 		glm::vec3 _position;
 		glm::vec3 _rotation;
@@ -49,6 +68,8 @@ namespace vkUtil
 		glm::vec3 _up;
 		glm::vec3 _right;
 		glm::vec3 _worldUp;
+		glm::vec3 _direction;
+		glm::vec3 _target;
 
 		float _speed;
 		float _turnSpeed;
@@ -56,11 +77,19 @@ namespace vkUtil
 
 	private:
 		void initalize(glm::vec3 worldUp, glm::vec3 startPYR, glm::vec3 position, glm::vec3 front, float speed, float turnSpeed);
+
+		void move_forward(double deltaTime, bool forwardOrBack);
+		void move_up(double deltaTime, bool upOrDown);
+		void move_right(double deltaTime, bool rightOrLeft);
+
+		bool event_key(Direction dir, glm::mat4& view, double deltaTime);
+		bool event_key(double xMove, double yMove, glm::mat4& view, double deltaTime);
+
 	};
 
 }
 
 namespace vkType
 {
-	using Camera = vkUtil::CameraT;
+	using Camera = tools::CameraT;
 }

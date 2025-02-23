@@ -19,13 +19,13 @@ namespace UserInput
 
 	using AttributeDescription = AllInOneVertBuffer; 
 
-	const char v_shader_path[] = "..\\shaders\\vertex.spv";
-	const char f_shader_path[] = "..\\shaders\\fragment.spv";
-	const char desc_set_json_path[] = "json\\descriptor_sets.json";
-	const char push_const_json_path[] = "json\\push_const.json";
+	constexpr char v_shader_path[] = "..\\shaders\\vertex.spv";
+	constexpr char f_shader_path[] = "..\\shaders\\fragment.spv";
+	constexpr char desc_set_json_path[] = "json\\descriptor_sets.json";
+	constexpr char push_const_json_path[] = "json\\push_const.json";
 
 
-	const vk::ClearValue clear_color = { std::array<float, 4>{1.0f, 5.0f, 0.0f, 0.3f} };
+	constexpr vk::ClearValue clear_color = { std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} };
 
 
 } // namespace UserInput

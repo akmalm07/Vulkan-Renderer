@@ -52,6 +52,13 @@ void Engine::load_mesh(MeshT& mesh) const
 
 
 
+void Engine::game_logic(double deltaTime)
+{
+	camera_logic(deltaTime);
+}
+
+
+
 void Engine::load_meshes(std::vector<MeshT>& meshes) const
 {
 	size_t indicesSize = 0, verticesSize = 0;
@@ -228,13 +235,13 @@ void Engine::update_sets(vk::CommandBuffer& cmdBuff)
 
 
 
-	for (auto&& [i, set] : _vkDescriptorSets.updated | std::views::enumerate)
+	for (const auto& [i, set] : _vkDescriptorSets.updated | std::views::enumerate)
 	{
-		for (auto&& [j, updated] : set | std::views::enumerate)
+		for (const auto& [j, updated] : set | std::views::enumerate)
 		{
-			if (updated.second)
+			if (updated.status)
 			{
-				_vkDescriptorSets.updated[i][j].second = false;
+				_vkDescriptorSets.updated[i][j].status = false;
 
 				vk::DescriptorBufferInfo bufferInfo;
 				bufferInfo.buffer = _vkDescriptorSetBuffers[SIZET(Buffer1)].buffer;
@@ -282,18 +289,73 @@ void Engine::call_push_consts() const
 	_pushConstCalls.clear();
 }
 
-std::vector <vkInit::DescriptorBuffer*> Engine::initalize_descriptor_buffers(const std::vector<vkUtil::BufferInput>& descriptorBuffer, tools::MemoryPool& memPool)
+
+void Engine::camera_logic(double deltaTime)
 {
-	BufferDescs buffers(descriptorBuffer);
+	// move this in its own thread!!!
+	if (_window.IsKeyPressed())
+	{
+		using tools::Keys;
+		using tools::Mods;
 
-	buffers.add_buffer(SIZET(Buffer1), memPool, _MVPMats);
 
-	return buffers.get_buffers();
+		std::array<bool, 1024> keys = _window.GetKeys();
+
+		Keys movekey;
+
+		if (keys[SIZET(Keys::W)])
+		{
+			movekey = Keys::W;
+		}
+		else if (keys[SIZET(Keys::S)])
+		{
+			movekey = Keys::S;
+		}
+		else if (keys[SIZET(Keys::A)])
+		{
+			movekey = Keys::A;
+		}
+		else if (keys[SIZET(Keys::D)])
+		{
+			movekey = Keys::D;
+		}
+		else if (keys[SIZET(Keys::Q)])
+		{
+			movekey = Keys::Q;
+		}
+		else if (keys[SIZET(Keys::E)])
+		{
+			movekey = Keys::E;
+		}
+		else
+		{
+			return;
+		}
+		_window.FindKeyComb(movekey)->change_parameters(vkType::ref(_MVPMats._viewMat), vkType::val(deltaTime));
+		_vkDescriptorSets.updated[SIZET(Set1)][SIZET(Set1::Binding1)].status = true;
+
+
+		Keys turnkey;
+		if (keys[SIZET(Keys::Up)])
+		{
+			turnkey = Keys::Up;
+		}
+		else if (keys[SIZET(Keys::Down)])
+		{
+			turnkey = Keys::Down;
+		}
+		else if (keys[SIZET(Keys::Right)])
+		{
+			turnkey = Keys::Right;
+		}
+		else if (keys[SIZET(Keys::Left)])
+		{
+			turnkey = Keys::Left;
+		}
+		else
+		{
+			return;
+		}
+		_window.FindKeyComb(turnkey)->change_parameters(vkType::val(0.3), vkType::val(0.3), vkType::ref(_MVPMats._viewMat), vkType::val(deltaTime));
+	}
 }
-
-
-
-
-//template class Engine <glm::vec2, glm::vec3, nullptr_t, nullptr_t>;  
-//template class Engine <glm::vec3, glm::vec3, nullptr_t, nullptr_t>;  
-//template class Engine <glm::vec3, glm::vec4, nullptr_t, nullptr_t>;  

@@ -22,7 +22,7 @@ for (const auto& item : vec) \
 std::cout << "\n"; 
 
 
-inline void CheckVkResult(vk::Result result) 
+inline void check_vk_result(vk::Result result) 
 {
 	if (result != vk::Result::eSuccess)
 	{

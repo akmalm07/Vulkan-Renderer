@@ -3,11 +3,10 @@
 #include "config.h"
 #include "tools\include\keys.h"
 
-#include "tools\include\keys.h"
 #include "tools\include\window_input.h"
 
 
-namespace vkUtil {
+namespace tools {
 
 
 	class WindowT
@@ -24,6 +23,12 @@ namespace vkUtil {
 		void DelKeyComb(Keys key, Mods mod);
 		void DelKeyComb(Keys key);
 
+		std::shared_ptr<AABButtonB>& FindAABButton(std::string_view name);
+		
+		std::shared_ptr<KeyCombB>& FindKeyComb(Keys key, Mods mod);
+		
+		std::shared_ptr<KeyCombB>& FindKeyComb(Keys key);
+
 		void DelAABButton(std::string_view name);
 
 		void SetWidth(int width) { _width = width; }
@@ -33,13 +38,51 @@ namespace vkUtil {
 		//template<class ... Args>
 		//void AddMouseClick(Mouse mouse, std::function<bool(Args...)> function);
 		//void DelMouseClick(Mouse mouse);
-
+		//MouseButton& FindMouseButtonName(Mouse mouse);
+		//Planning to add a function to find the mouse button soon...
 
 		template<class F, class ... Args>
 		void AddAABButton(const AABButtonInput& input, F&& function, std::string_view str, Args&&... args);
 
+		template<vkType::IsClass T, class ... Args>
+		void AddAABButton(const AABButtonInput& input, bool(T::*func)(Args...), std::string_view str, std::tuple<Args...>&& args);
+
+		template<class ... Args>
+		void AddAABButton(const AABButtonInput& input, std::function<bool(Args...)> func, std::string_view str, Args&&... args);
+
+		template<vkType::IsClass T, class ...Args>
+		void AddAABButton(const AABButtonInput& input, bool(T::* func)(Args...), std::string_view str, Args&&... args);
+
+
+
+
 		template<class F, class ... Args>
-		void AddKeyComb(const KeyCombInput& input, F&& function, Args&&... args);
+		void AddKeyComb(const KeyCombInputOne& input, F&& function, Args&&... args);
+		
+		template<vkType::IsClass T, class ... Args>
+		void AddKeyComb(const KeyCombInputOne& input, bool(T::*func)(Args...), std::tuple<Args...>&& args);
+
+		template<class ... Args>
+		void AddKeyComb(const KeyCombInputOne& input, std::function<bool(Args...)> func, Args&&... args);
+
+		template<vkType::IsClass T, class ... Args>
+		void AddKeyComb(const KeyCombInputOne& input, bool(T::* func)(Args...), Args&&... args);
+
+
+
+		template<class F, class ... Args>
+		void AddKeyComb(const KeyCombInputPoly &input, F&& function, Args&&... args);
+
+		template<vkType::IsClass T, class ... Args>
+		void AddKeyComb(const KeyCombInputPoly& input, bool(T::* func)(Args...), Args&&... args);
+
+		template<vkType::IsClass T, class ... Args>
+		void AddKeyComb(const KeyCombInputPoly& input, bool(T::*func)(Args...), std::tuple<Args...>&& args);
+
+		template<class ... Args>
+		void AddKeyComb(const KeyCombInputPoly& input, std::function<bool(Args...)> func, Args&&... args);
+
+
 
 		void SetOrtho(float left, float right, float top, float bottom);
 
@@ -63,6 +106,7 @@ namespace vkUtil {
 		float GetTopOrtho() const;
 		float GetRightOrtho() const;
 
+		bool IsKeyActive(Keys key, Action act) const;
 
 		bool IsMouseButtonPressed() const;
 
@@ -83,6 +127,8 @@ namespace vkUtil {
 
 
 		std::array<bool, 1024> GetKeys() { return _keys; }
+
+		bool IsKeyPressed() const { return _keyPressed; }
 
 		void SwapBuffers() const { glfwSwapBuffers(_mainWindow); }
 
@@ -132,12 +178,15 @@ namespace vkUtil {
 
 		std::array<bool, KEY_CONST> _keys{ false };
 
+		bool _keyPressed = false;
 
 		std::string _name = "";
 
-		std::array<std::unordered_map <std::pair<Keys, Mods>, std::unique_ptr<KeyCombB>>, SIZET(Action::Count)> _keyCombs;
+		std::array<std::unordered_map <std::pair<Keys, Mods>, std::shared_ptr<KeyCombB>>, SIZET(Action::Count)> _keyCombs;
 
-		std::array <std::unordered_map <std::string_view, std::unique_ptr<AABButtonB>>, SIZET(Action::Count)> _AABButtons;
+		std::unordered_map <std::pair<std::array<Keys, KEY_MAX>, Mods>, std::shared_ptr<KeyCombB>> _keyCombsPoly;
+
+		std::array <std::unordered_map <std::string_view, std::shared_ptr<AABButtonB>>, SIZET(Action::Count)> _AABButtons;
 
 		//std::array<MouseButtonB, SIZET(Mouse::Count)> _mouseButtons; 
 
@@ -162,15 +211,132 @@ namespace vkUtil {
 		static void m_HandleKeys(GLFWwindow* window, int key, int code, int action, int mode);
 		static void m_HandleMouseCursor(GLFWwindow* window, double posX, double posY);
 		static void m_HandleMouseButtons(GLFWwindow* window, int button, int action, int mods);
+
 	};
 
 		template<class F, class ... Args>
-		void WindowT::AddKeyComb(const KeyCombInput& input, F&& function, Args&&... args)
+		void WindowT::AddKeyComb(const KeyCombInputPoly& input, F&& function, Args&&... args)
 		{
-			Mods val = (input.mod != Mods::None) ? input.mod : Mods::None;
+			Mods val = ((input.mod != Mods::None) ? input.mod : Mods::None);
+			_keyCombsPoly.emplace(
+				std::pair(input.number, val),
+				std::make_shared<KeyComb<Args...>>(input, std::forward<F>(function), std::forward<Args>(args)...)
+			);
+		}
+
+		template<vkType::IsClass T, class ...Args>
+		inline void WindowT::AddKeyComb(const KeyCombInputPoly& input, bool(T::* func)(Args...), std::tuple<Args...>&& args)
+		{
+			Mods val = ((input.mod != Mods::None) ? input.mod : Mods::None);
+			std::function<bool(Args...)> function = [this](Args&&... args)
+				{
+					return (this->*func)(std::forward<Args>(args)...);
+				};
+			_keyCombsPoly.emplace(
+				std::pair(input.number, val),
+				std::make_shared<KeyComb<Args...>>(input, std::forward<std::function<bool(Args...)>>(function), std::forward<std::tuple<Args...>>(args))
+			);
+		}
+
+		template<vkType::IsClass T, class ...Args>
+		inline void WindowT::AddKeyComb(const KeyCombInputPoly& input, bool(T::* func)(Args...), Args&&... args)
+		{
+			Mods val = ((input.mod != Mods::None) ? input.mod : Mods::None);
+			std::function<bool(Args...)> function = [this](Args&&... args)
+				{
+					return (this->*func)(std::forward<Args>(args)...);
+				};
+			_keyCombsPoly.emplace(
+				std::pair(input.number, val),
+				std::make_shared<KeyComb<Args...>>(input, std::forward<std::function<bool(Args...)>>(function), std::forward<Args>(args)...)
+			);
+		}
+
+		template<class ...Args>
+		inline void WindowT::AddKeyComb(const KeyCombInputPoly& input, std::function<bool(Args...)> func, Args && ...args)
+		{
+			Mods val = ((input.mod != Mods::None) ? input.mod : Mods::None);
+			_keyCombsPoly.emplace(
+				std::pair(input.number, val),
+				std::make_shared<KeyComb<Args...>>(input, std::forward<std::function<bool(Args...)>>(func), std::forward<Args>(args)...)
+			);
+
+		}
+
+	//----------------------------------------------//
+
+		template<class F, class ... Args>
+		void WindowT::AddKeyComb(const KeyCombInputOne& input, F&& function, Args&&... args)
+		{
+			Mods val = ((input.mod != Mods::None) ? input.mod : Mods::None); 
 			_keyCombs[SIZET(input.action)].emplace(
 				std::pair(input.number, val),
-				std::make_unique<KeyComb<Args...>>(input, std::forward<F>(function), std::forward<Args>(args)...)
+				std::make_shared<KeyComb<Args...>>(input, std::forward<F>(function), std::forward<Args>(args)...)
+			);
+		}
+
+		template<vkType::IsClass T, class ...Args>
+		inline void WindowT::AddKeyComb(const KeyCombInputOne& input, bool(T::*func)(Args...), std::tuple<Args...>&& args)
+		{
+			Mods val = ((input.mod != Mods::None) ? input.mod : Mods::None);
+			std::function<bool(Args...)> function = [this](Args&&... args) 
+				{
+					return (this->*func)(std::forward<Args>(args)...);
+				};
+			_keyCombs[SIZET(input.action)].emplace(
+				std::pair(input.number, val),
+				std::make_shared<KeyComb<Args...>>(input, std::forward<std::function<bool(Args...)>>(function), std::forward<std::tuple<Args...>>(args))
+			);
+		}
+
+		template<vkType::IsClass T, class ...Args>
+		inline void WindowT::AddKeyComb(const KeyCombInputOne& input, bool(T::*func)(Args...), Args&&... args)
+		{
+			Mods val = ((input.mod != Mods::None) ? input.mod : Mods::None);
+			std::function<bool(Args...)> function = [this](Args&&... args) 
+				{
+					return (this->*func)(std::forward<Args>(args)...);
+				};
+			_keyCombs[SIZET(input.action)].emplace(
+				std::pair(input.number, val),
+				std::make_shared<KeyComb<Args...>>(input, std::forward<std::function<bool(Args...)>>(function), std::forward<Args>(args)...)
+			);
+		}
+
+		template<class ...Args>
+		inline void WindowT::AddKeyComb(const KeyCombInputOne& input, std::function<bool(Args...)> func, Args && ...args)
+		{
+			Mods val = ((input.mod != Mods::None) ? input.mod : Mods::None);
+			_keyCombs[SIZET(input.action)].emplace(
+				std::pair(input.number, val),
+				std::make_shared<KeyComb<Args...>>(input, std::forward<std::function<bool(Args...)>>(func), std::forward<Args>(args)...)
+			);
+
+		}
+
+
+
+		template<vkType::IsClass T, class ...Args>
+		inline void WindowT::AddAABButton(const AABButtonInput& input, bool(T::*func)(Args...), std::string_view str, std::tuple<Args...>&& args)
+		{
+			std::function<bool(Args...)> function = [this](Args&&... args) 
+				{
+					return (this->*func)(std::forward<Args>(args)...);
+				};
+			_AABButtons[SIZET(input.action)].emplace(
+				str, std::make_shared<AABButton<Args...>>(input, std::forward<std::function<bool(Args...)>>(function), std::forward<std::tuple<Args...>>(args))
+			);
+		}
+
+		template<vkType::IsClass T, class ...Args>
+		inline void WindowT::AddAABButton(const AABButtonInput& input, bool(T::*func)(Args...), std::string_view str, Args&&... args)
+		{
+			std::function<bool(Args...)> function = [this](Args&&... args) 
+				{
+					return (this->*func)(std::forward<Args>(args)...);
+				};
+			_AABButtons[SIZET(input.action)].emplace(
+				str, std::make_shared<AABButton<Args...>>(input, std::forward<std::function<bool(Args...)>>(function), std::forward<Args>(args)...)
 			);
 		}
 
@@ -178,12 +344,21 @@ namespace vkUtil {
 		void WindowT::AddAABButton(const AABButtonInput& input, F&& function, std::string_view str, Args&&... args) 
 		{
 			_AABButtons[SIZET(input.action)].emplace(
-				str, std::make_unique<AABButton<Args...>>(input, std::forward<F>(function), std::forward<Args>(args)...)
+				str, std::make_shared<AABButton<Args...>>(input, std::forward<F>(function), std::forward<Args>(args)...)
 			);
 		}
+
+		template<class ...Args>
+		inline void WindowT::AddAABButton(const AABButtonInput& input, std::function<bool(Args...)> func, std::string_view str, Args && ...args)
+		{
+			_AABButtons[SIZET(input.action)].emplace(
+				str, std::make_shared<AABButton<Args...>>(input, std::forward<std::function<bool(Args...)>>(func), std::forward<Args>(args)...)
+			);
+		}
+
 }
 
 namespace vkType
 {
-	using Window = vkUtil::WindowT;
+	using Window = tools::WindowT;
 }

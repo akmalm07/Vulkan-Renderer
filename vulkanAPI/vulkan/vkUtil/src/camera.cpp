@@ -1,18 +1,20 @@
 #include "pch.h"
 
 #include "vkUtil\include\camera.h"
+#include "tools\include\window.h"
 #include "tools\include\keys.h"
 
 
-namespace vkUtil
+namespace tools
 {
 	CameraT::CameraT() = default;
 
 
 	CameraT::CameraT(CameraT&& other) = default;
 
+	CameraT& CameraT::operator=(CameraT&& other) = default;
 
-	CameraT::CameraT(vkUtil::CameraBundlePerspective bundle)
+	CameraT::CameraT(CameraBundlePerspective bundle)
 	{
 		_projection = glm::perspective(glm::radians(bundle.fov), bundle.aspectRatio, bundle.nearZ, bundle.farZ);
 
@@ -21,16 +23,13 @@ namespace vkUtil
 	}
 
 
-	CameraT::CameraT(vkUtil::CameraBundleOrthographic bundle)
+	CameraT::CameraT(CameraBundleOrthographic bundle)
 	{
 		_projection = glm::ortho(bundle.left, bundle.right, bundle.bottom, bundle.top, bundle.nearZ, bundle.farZ);
 
 		initalize(bundle.worldUp, bundle.startPYR, bundle.position, bundle.front, bundle.speed, bundle.turnSpeed);
 
 	}
-
-	CameraT& CameraT::operator=(CameraT&& other) = default;
-
 
 	void CameraT::initalize(glm::vec3 worldUp, glm::vec3 startPYR, glm::vec3 position, glm::vec3 front, float speed, float turnSpeed)
 	{
@@ -40,12 +39,56 @@ namespace vkUtil
 		_speed = speed;
 		_front = front;
 		_turnSpeed = turnSpeed;
+		_target = _position + _front;
 
-		update();
+		update(position);
+	}
+
+	void CameraT::move_forward(double deltaTime, bool forwardOrBack)
+	{
+		if (forwardOrBack)
+		{
+			_position += _front * _speed * (float)deltaTime;
+		}
+		else
+		{
+			_position -= _front * _speed * (float)deltaTime;
+		}
+		_target = _position + _front;
+	}
+
+	void CameraT::move_up(double deltaTime, bool upOrDown)
+	{
+		if (upOrDown)
+		{
+			PRINT_VEC3("Up vec", _up);
+			PRINT_VEC3("Pos vec", _position);
+			std::cout << "Speed: " << _speed << std::endl;
+			std::cout << "Delta: " << std::fixed << deltaTime<< std::endl;
+			_position += _up * _speed * (float)deltaTime;
+		}
+		else
+		{
+			_position -= _up * _speed * (float)deltaTime;
+		}
+		_target = _position + _front;
+	}
+
+	void CameraT::move_right(double deltaTime, bool rightOrLeft)
+	{
+		if (rightOrLeft)
+		{
+			_position += _right * _speed * (float)deltaTime;
+		}
+		else
+		{
+			_position -= _right * _speed * (float)deltaTime;
+		}
+		_target = _position + _front;
 	}
 
 
-	void CameraT::update()
+	void CameraT::update(const glm::vec3& position)
 	{
 		_front.x = cos(glm::radians(_rotation.y)) * cos(glm::radians(_rotation.x));
 		_front.y = sin(glm::radians(_rotation.x));
@@ -54,148 +97,376 @@ namespace vkUtil
 
 		_right = glm::normalize(glm::cross(_front, _worldUp));
 		_up = glm::normalize(glm::cross(_right, _front));
+
+		_position =	position;
+
+		_view = std::move(glm::lookAt(_position, _target, _up));
+
+	}
+
+	void CameraT::update(Direction dir, double deltaTime)
+	{
+		move_dir(dir, deltaTime);
+
+		_view = std::move(glm::lookAt(_position, _target, _up));
+
+		debug_position(); ///////////////////////////
+	}
+
+	void CameraT::update(double xMove, double yMove, double deltaTime)// parameters are NOT being updated!! REVIEW THIS ERROR
+	{
+		_rotation.x += xMove * _turnSpeed * deltaTime;
+		_rotation.y += yMove * _turnSpeed * deltaTime;
+
+		glm::clamp(_rotation.y, -180.0f, 180.0f);
+		glm::clamp(_rotation.x, -89.0f, 89.0f);
+
+		_front.x = cos(glm::radians(_rotation.y)) * cos(glm::radians(_rotation.x));
+		_front.y = sin(glm::radians(_rotation.x));
+		_front.z = sin(glm::radians(_rotation.y)) * cos(glm::radians(_rotation.x));
+		_front = glm::normalize(_front);
+
+		_right = glm::normalize(glm::cross(_front, _worldUp));
+		_up = glm::normalize(glm::cross(_right, _front));
+
+		_target = _position + _front;
+
+		_view = std::move(glm::lookAt(_position, _target, _up));
+
+		debug_position();///////////////////////////
+	}
+
+	void CameraT::update(Direction dir, double xMove, double yMove, double deltaTime)
+	{
+		_rotation.x += xMove * _turnSpeed * deltaTime;
+		_rotation.y += yMove * _turnSpeed * deltaTime;
+
+		glm::clamp(_rotation.y, -180.0f, 180.0f);
+		glm::clamp(_rotation.x, -89.0f, 89.0f);
+
+		_front.x = cos(glm::radians(_rotation.y)) * cos(glm::radians(_rotation.x));
+		_front.y = sin(glm::radians(_rotation.x));
+		_front.z = sin(glm::radians(_rotation.y)) * cos(glm::radians(_rotation.x));
+		_front = glm::normalize(_front);
+
+		_right = glm::normalize(glm::cross(_front, _worldUp));
+		_up = glm::normalize(glm::cross(_right, _front));
+
+		move_dir(dir, deltaTime);
+
+		_view = std::move(glm::lookAt(_position, _target, _up));
+	}
+
+	void CameraT::debug_position()
+	{
+		std::cout << "Camera Position: (" << _position.x << ", " << _position.y << ", " << _position.z << ")\n";
 	}
 
 
-	void CameraT::setSpeed(float speed)
+	bool CameraT::event_key(Direction dir, glm::mat4& view, double deltaTime)
+	{
+		update(dir, deltaTime);
+		return true;
+	}
+
+	bool CameraT::event_key(double xMove, double yMove, glm::mat4& view, double deltaTime)
+	{
+		update(xMove, yMove, deltaTime);
+		return true;
+	}
+
+
+	void CameraT::set_speed(float speed)
 	{
 		_speed = speed;
 	}
 
 
-	float CameraT::getSpeed() const
+	float CameraT::get_speed() const
 	{
 		return _speed;
 	}
 
 
-	void CameraT::setPosition(const glm::vec3& position)
+	void CameraT::set_position(const glm::vec3& position)
 	{
 		_position = position;
 	}
 
 
-	glm::mat4 CameraT::getView() const
+	glm::mat4 CameraT::get_view() 
 	{
-		return glm::lookAt(_position, _position + _front, _up);
+		return _view;
 	}
 
 
-	glm::mat4 CameraT::getProjection() const
+	glm::mat4 CameraT::get_projection() const
 	{
 		return _projection;
 	}
+	
 
-	void CameraT::setCommandsToWindow(vkUtil::WindowT& window)
+	void CameraT::set_commands_to_window(tools::WindowT& window)
 	{
-		using namespace vkUtil;
 
-		KeyCombInput input;
-		input.number = Keys::W;
-		input.action = Action::Press;
+		std::array<KeyCombInputOne, 10> input = 
+		{
+		KeyCombInputOne(Keys::W, Action::Press),
+		KeyCombInputOne(Keys::S, Action::Press),
+		KeyCombInputOne(Keys::A, Action::Press),
+		KeyCombInputOne(Keys::D, Action::Press),
+		KeyCombInputOne(Keys::Q, Action::Press),
+		KeyCombInputOne(Keys::E, Action::Press),
+		KeyCombInputOne(Keys::Up, Action::Press),
+		KeyCombInputOne(Keys::Down, Action::Press),
+		KeyCombInputOne(Keys::Right, Action::Press),
+		KeyCombInputOne(Keys::Left, Action::Press)
 
-		window.AddKeyComb(
-			input,
-			[this](float deltaTime) -> bool
+		};
+		std::array<Direction, 10> dirs = 
+		{
+		Direction::Up,
+		Direction::Down,
+		Direction::Left,
+		Direction::Right,
+		Direction::Forward,
+		Direction::Backward,
+		Direction::TurnUp,
+		Direction::TurnDown,
+		Direction::TurnRight,
+		Direction::TurnLeft
+		};
+
+		glm::mat4& matrix = _view;
+		std::array<std::function<bool(glm::mat4&, float)>, 6> moveFuncs;
+		std::array<std::function<bool(double, double, glm::mat4&, float)>, 4> turnFuncs;
+
+		for (size_t i = 0; i < moveFuncs.size(); i++)
+		{
+			moveFuncs[i] = [this, dir = dirs[i] ](glm::mat4& view, double deltaTime) -> bool
 			{
-				_position += _front * _speed * deltaTime;
-				return true;
-			},
-			0.0f);
+				if (dir == Direction::Up)
+					std::cout << "Up\n";
+				else if (dir == Direction::Down)
+					std::cout << "Down\n";
+				else if (dir == Direction::Left)
+					std::cout << "Left\n";
+				else if (dir == Direction::Right)
+					std::cout << "Right\n";
+				else if (dir == Direction::Forward)
+					std::cout << "Forward\n";
+				else if (dir == Direction::Backward)
+					std::cout << "Backward\n";
 
-
-		input.number = Keys::S;
-		window.AddKeyComb(
-			input,
-			[this](float deltaTime)
+				return this->event_key(dir, view, deltaTime);
+			};
+		}
+		for (size_t i = 0; i < turnFuncs.size(); i++)
+		{
+			turnFuncs[i] = [this, dir = dirs[i+6] ](double xMove, double yMove, glm::mat4& view, double deltaTime) -> bool
 			{
-				_position -= _front * _speed * deltaTime;
-				return true;
-			},
-			0.0f);
+					if (dir == Direction::TurnUp)
+						std::cout << "TurnUp\n";
+					else if (dir == Direction::TurnDown)
+						std::cout << "TurnDown\n";
+					else if (dir == Direction::TurnLeft)
+						std::cout << "TurnLeft\n";
+					else if (dir == Direction::TurnRight)
+						std::cout << "TurnRight\n";
 
+				return this->event_key(xMove, yMove, view, deltaTime);
+			};
+		}
+			
+			
+		for (size_t i = 0; i < moveFuncs.size(); i++)
+		{
+			window.AddKeyComb
+			(
+				input[i],
+				moveFuncs[i],
+				matrix, 0.0f
+			);
+		}
+		
 
-		input.number = Keys::A;
-		window.AddKeyComb(
-			input,
-			[this](float deltaTime)
-			{
-				_position -= _right * _speed * deltaTime;
-				return true;
-			},
-			0.0f);
+		for (size_t i = 0; i < turnFuncs.size(); i++)
+		{
+			window.AddKeyComb
+			(
+				input[i+6],
+				turnFuncs[i],
+				0.0, 0.0, matrix, 0.0f
+			);
+		}
 
-		input.number = Keys::D;
-		window.AddKeyComb(
-			input,
-			[this](float deltaTime)
-			{
-				_position += _right * _speed * deltaTime;
-				return true;
-			},
-			0.0f);
-
-
-		input.number = Keys::Q;
-		window.AddKeyComb(
-			input,
-			[this](float deltaTime)
-			{
-				_position -= _up * _speed * deltaTime;
-				return true;
-			},
-			0.0f);
-
-		input.number = Keys::S;
-		window.AddKeyComb(
-			input,
-			[this](float deltaTime)
-			{
-				_position += _up * _speed * deltaTime;
-				return true;
-			},
-			0.0f);
-
-		input.number = Keys::Up;
-		window.AddKeyComb(
-			input,
-			[this](float deltaTime)
-			{
-				_rotation.x += _turnSpeed * deltaTime;
-				return true;
-			},
-			0.0f);
-
-		input.number = Keys::Down;
-		window.AddKeyComb(
-			input,
-			[this](float deltaTime)
-			{
-				_rotation.x -= _turnSpeed * deltaTime;
-				return true;
-			},
-			0.0f);
-
-		input.number = Keys::Left;
-		window.AddKeyComb(
-			input,
-			[this](float deltaTime)
-			{
-				_rotation.y -= _turnSpeed * deltaTime;
-				return true;
-			},
-			0.0f);
-
-		input.number = Keys::Right;
-		window.AddKeyComb(
-			input,
-			[this](float deltaTime)
-			{
-				_rotation.y += _turnSpeed * deltaTime;
-				return true;
-			},
-			0.0f);
 	}
+
+	void CameraT::move_dir(Direction dir, double deltaTime)
+	{
+		switch (dir)
+		{
+		case Direction::Forward:
+			move_forward(deltaTime, true);
+			break;
+		case Direction::Backward:
+			move_forward(deltaTime, false);
+			break;
+		case Direction::Left:
+			move_right(deltaTime, false);
+			break;
+		case Direction::Right:
+			move_right(deltaTime, true);
+			break;
+		case Direction::Up:
+			move_up(deltaTime, true);
+			break;
+		case Direction::Down:
+			move_up(deltaTime, false);
+			break;
+		case Direction::Down | Direction::Forward:
+			move_forward(deltaTime, true);
+			move_up(deltaTime, false);
+			break;
+		case Direction::Down | Direction::Backward:
+			move_forward(deltaTime, false);
+			move_up(deltaTime, false);
+			break;
+		case Direction::Up | Direction::Forward:
+			move_forward(deltaTime, true);
+			move_up(deltaTime, true);
+			break;
+		case Direction::Up | Direction::Backward:
+			move_forward(deltaTime, false);
+			move_up(deltaTime, true);
+			break;
+		case Direction::Up | Direction::Left:
+			move_right(deltaTime, false);
+			move_up(deltaTime, true);
+			break;
+		case Direction::Up | Direction::Right:
+			move_right(deltaTime, true);
+			move_up(deltaTime, true);
+			break;
+		case Direction::Down | Direction::Left:
+			move_right(deltaTime, false);
+			move_up(deltaTime, false);
+			break;
+		case Direction::Down | Direction::Right:
+			move_right(deltaTime, true);
+			move_up(deltaTime, false);
+			break;
+		case Direction::Backward | Direction::Left:
+			move_right(deltaTime, false);
+			move_forward(deltaTime, false);
+			break;
+		case Direction::Backward | Direction::Right:
+			move_forward(deltaTime, false);
+			move_right(deltaTime, true);
+			break;
+		case Direction::Forward | Direction::Left:
+			move_right(deltaTime, false);
+			move_forward(deltaTime, true);
+			break;
+		case Direction::Forward | Direction::Right:
+			move_right(deltaTime, true);
+			move_forward(deltaTime, true);
+			break;
+		case Direction::None:
+			break;
+		}
+	}
+
+	void CameraT::move_and_turn_dir(Direction dir, double pitch, double yaw, double deltaTime)
+	{
+		switch (dir)
+		{
+		case Direction::Forward | Direction::TurnUp:
+			move_forward(deltaTime, true);
+			_rotation.x += pitch * _turnSpeed * deltaTime;
+			break;
+		case Direction::Forward | Direction::TurnDown:
+			move_forward(deltaTime, true);
+			_rotation.x -= pitch * _turnSpeed * deltaTime;
+			break;
+		case Direction::Forward | Direction::TurnLeft:
+			move_forward(deltaTime, true);
+			_rotation.y -= yaw * _turnSpeed * deltaTime;
+			break;
+		case Direction::Forward | Direction::TurnRight:
+			move_forward(deltaTime, true);
+			_rotation.y += yaw * _turnSpeed * deltaTime;
+			break;
+		case Direction::Backward | Direction::TurnUp:
+			move_forward(deltaTime, false);
+			_rotation.x += pitch * _turnSpeed * deltaTime;
+			break;
+		case Direction::Backward | Direction::TurnDown:
+			move_forward(deltaTime, false);
+			_rotation.x -= pitch * _turnSpeed * deltaTime;
+			break;
+		case Direction::Backward | Direction::TurnLeft:
+			move_forward(deltaTime, false);
+			_rotation.y -= yaw * _turnSpeed * deltaTime;
+			break;
+		case Direction::Backward | Direction::TurnRight:
+			move_forward(deltaTime, false);
+			_rotation.y += yaw * _turnSpeed * deltaTime;
+			break;
+		case Direction::Left | Direction::TurnUp:
+			move_right(deltaTime, false);
+			_rotation.x += pitch * _turnSpeed * deltaTime;
+			break;
+		case Direction::Left | Direction::TurnDown:
+			move_right(deltaTime, false);
+			_rotation.x -= pitch * _turnSpeed * deltaTime;
+			break;
+		case Direction::Left | Direction::TurnLeft:
+			move_right(deltaTime, false);
+			_rotation.y -= yaw * _turnSpeed * deltaTime;
+			break;
+		case Direction::Left | Direction::TurnRight:
+			move_right(deltaTime, false);
+			_rotation.y += yaw * _turnSpeed * deltaTime;
+			break;
+		case Direction::Right | Direction::TurnUp:
+			move_right(deltaTime, true);
+			_rotation.x += pitch * _turnSpeed * deltaTime;
+			break;
+		case Direction::Right | Direction::TurnDown:
+			move_right(deltaTime, true);
+			_rotation.x -= pitch * _turnSpeed * deltaTime;
+			break;
+		case Direction::Right | Direction::TurnLeft:
+			move_right(deltaTime, true);
+			_rotation.y -= yaw * _turnSpeed * deltaTime;
+			break;
+		case Direction::Right | Direction::TurnRight:
+			move_right(deltaTime, true);
+			_rotation.y += yaw * _turnSpeed * deltaTime;
+			break;
+		}
+	}
+
+	void CameraT::turn_dir(Direction dir, double pitch, double yaw, double deltaTime)
+	{
+		switch (dir)
+		{
+		case Direction::TurnUp:
+			_rotation.x += pitch * _turnSpeed * deltaTime;
+			break;
+		case Direction::TurnDown:
+			_rotation.x -= pitch * _turnSpeed * deltaTime;
+			break;
+		case Direction::TurnLeft:
+			_rotation.y -= yaw * _turnSpeed * deltaTime;
+			break;
+		case Direction::TurnRight:
+			_rotation.y += yaw * _turnSpeed * deltaTime;
+			break;
+		}
+	}
+
 
 	CameraT::~CameraT() = default;
 

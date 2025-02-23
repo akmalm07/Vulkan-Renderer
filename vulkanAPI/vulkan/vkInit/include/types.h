@@ -54,12 +54,27 @@ namespace vkType
 	};
 
 
+	template <class T>
+	concept IsNull = std::is_same_v<T, NULLOBJ>;
+
+	template <class T>
+	concept IsDrawable = std::is_base_of_v<Drawable, T>;
+
+
+	template <class T>
+	concept IsPushConst = std::is_base_of_v<PushConst, T>;
+
+	template <class T>
+	concept IsClass = std::is_class_v<T>; 
+
+	template <class T>
+	concept Callible = std::is_invocable_v<T>;
+
 	template<class T, size_t S = 0>
 	concept IsArrOrVec = ArrOrVec<T, S>::value;
 
-
 	template<class Func, class ... Args>
-	concept BoolLambdaVardic = std::same_as<Func, std::function<bool(Args...)>>;
+	concept BoolLambdaVardic = std::invocable<Func, Args...>&& std::convertible_to<std::invoke_result_t<Func, Args...>, bool>;
 
 
 	template <class T>
@@ -104,7 +119,25 @@ namespace vkType
 
 	template <class T>
 	concept Struct = std::is_class_v<T> && requires { typename T::Position; typename T::Color; typename T::Normal; typename T::Texture; };
+	
+	template <class T>
+	decltype(auto) ref(T&& t)
+	{
+		if constexpr (std::is_lvalue_reference_v<T>) 
+		{
+			return t;
+		}
+		else 
+		{
+			return std::forward<T>(t);
+		}
+	}
 
+	template <class T>
+	decltype(auto) val(T&& t)
+	{
+		return std::decay_t<T>(std::forward<T>(t));
+	}
 
 
 	template<IndexType T>

@@ -2,7 +2,7 @@
 
 #include "config.h"
 
-namespace vkUtil
+namespace tools
 {
 
 	struct _COMMON_FATHER_CAMERA_

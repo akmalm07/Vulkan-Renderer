@@ -11,11 +11,14 @@
 #include "vkUtil\include\camera.h"
 #include "vkInit\include\descriptor_set_bundles.h"
 #include "tools\include\memory_pool.h"
-
+#include "tools\include\memory_pool_container.h"
+#include "tools\include\timer.h"
 
 
 #include "tools\include\window.h"
 
+
+#include <memory>
 
 
 class BaseEngine 
@@ -32,6 +35,8 @@ public:
 	void render();
 
 	virtual void draw(vk::CommandBuffer& commandBuffer) const = 0;
+	
+	virtual void game_logic(double deltaTime) = 0;
 	
 	virtual void update_sets(vk::CommandBuffer& commandBuffer) = 0;
 
@@ -59,12 +64,19 @@ protected:
 		SetCount
 	};
 
+	enum class Set1: size_t
+	{
+		Binding1,
+		BindingCount
+	};
+
+
 	bool _debugMode = true;
 
 	//glfw window parameters
-	vkUtil::WindowT _window;
+	tools::WindowT _window;
 
-	vkUtil::CameraT _camera;
+	tools::CameraT _camera;
 
 	//vulkan instance
 	vk::Instance _instance = nullptr;
@@ -120,11 +132,26 @@ protected:
 
 	const std::filesystem::path _jsonFileDescriptorSets = "descriptor_sets.json";
 
+	double _deltaTime = 0.0;
+
+	tools::Timer _timer = false;
+
 	//Descriptor Sets
-	struct 
+	struct DescriptorSetsStruct
 	{
+		struct Update
+		{
+		public:
+			Update(size_t id, bool status) : id(id), status(status) {}
+			size_t get_id() const { return id; }
+			bool status;
+		private:
+			const size_t id;
+		};
+
 		std::array<vk::DescriptorSet, SIZET(SetCount)> sets;
-		std::vector<std::vector<std::pair<vk::DescriptorType, bool>>> updated;
+		std::array<std::vector<Update>, SIZET(SetCount)> updated;
+
 	}_vkDescriptorSets;
 	std::vector<vk::DescriptorSetLayout> _vkDescriptorSetLayouts;
 	vk::DescriptorPool _vkDescriptorPool;
@@ -141,7 +168,7 @@ protected:
 
 	//Matrices
 
-	alignas(16) struct
+	alignas(16) struct Matrices
 	{
 		glm::mat4 _modelMat;
 		glm::mat4 _viewMat;
@@ -160,6 +187,8 @@ protected:
 
 	//debug messenger	
 	void make_debug_messenger();
+	
+	void camera_init(bool orthoOrPerpective);
 
 	void read_json_files();
 
@@ -173,7 +202,7 @@ protected:
 
 	void make_descriptor_sets();
 
-	virtual std::vector<vkInit::DescriptorBuffer*> initalize_descriptor_buffers(const std::vector<vkUtil::BufferInput>& descriptorBuffer, tools::MemoryPool& memPool) = 0;
+	std::vector <std::shared_ptr< vkInit::DescriptorBuffer >> initalize_descriptor_buffers(const std::vector<vkUtil::BufferInput>&descriptorBuffer);
 
 	void make_push_consts();
 
@@ -187,8 +216,8 @@ protected:
 
 	void record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t imageIndex);
 
-	void is_ortho(bool orthoOrPerpective);
 
 
 
 };
+

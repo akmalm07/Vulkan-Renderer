@@ -2,7 +2,7 @@
 #include "config.h"
 
 
-namespace vkUtil {
+namespace tools {
 
 	enum class Mods
 	{
@@ -91,6 +91,46 @@ namespace vkUtil {
 		Repeat = GLFW_REPEAT,
 		Count = 3
 	};
+
+	enum class Direction
+	{
+		None = 0,
+		Up = 1 << 0,
+		Down = 1 << 1,
+		Right = 1 << 2,
+		Left = 1 << 3,
+		Forward = 1 << 4,
+		Backward = 1 << 5,
+		TurnRight = 1 << 6,
+		TurnLeft = 1 << 7,
+		TurnUp = 1 << 8,
+		TurnDown = 1 << 9,
+		Count = 10
+	};
+
+	constexpr Direction operator|(Direction a, Direction b) {
+		return static_cast<Direction>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
+	}
+
+	constexpr Direction operator&(Direction a, Direction b) {
+		return static_cast<Direction>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
+	}
+
+	constexpr Direction operator^(Direction a, Direction b) {
+		return static_cast<Direction>(static_cast<uint32_t>(a) ^ static_cast<uint32_t>(b));
+	}
+
+	constexpr Direction operator~(Direction a) {
+		return static_cast<Direction>(~static_cast<uint32_t>(a));
+	}
+
+	constexpr Direction& operator|=(Direction& a, Direction b) {
+		return a = a | b;
+	}
+
+	constexpr Direction& operator&=(Direction& a, Direction b) {
+		return a = a & b;
+	}
 
 
 	template<class T> 

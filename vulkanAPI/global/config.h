@@ -19,6 +19,9 @@
 #include "vkInit\include\types.h"
 
 
+#if KEY_MAX < 2
+#error "KEY_MAX CANNOT BE LESS THEN 2!!" 
+#endif
 
 
 

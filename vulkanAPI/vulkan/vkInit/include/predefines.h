@@ -21,7 +21,19 @@ namespace vk
 
 #define VERTEX_TYPE float 
 
+#define SEND_REF(x) x
+
+#define PRES_TY(x) std::forward<decltype(x)>(x) 
+
 #define MOVE_ITR(x) std::make_move_iterator(x)
+
+#define KEY_MAX 2 // CANNOT BE LESS THEN 2!!
+
+#define PRINT_VEC3(str, v) std::cout << str << ": " << v.x << " " << v.y << " " << v.z << std::endl;
+
+#define UINT(x) static_cast<unsigned int>(x)
+
+#define INT(x) static_cast<int>(x)
 
 using OncePerVertBuffer = vk::VertexInputAttributeDescription; 
 using AllInOneVertBuffer = std::vector<vk::VertexInputAttributeDescription>; 

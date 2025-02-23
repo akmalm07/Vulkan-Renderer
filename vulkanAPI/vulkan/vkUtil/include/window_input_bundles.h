@@ -2,11 +2,24 @@
 
 #include "tools\include\keys.h"
 
-namespace vkUtil
+namespace tools
 {
-    struct KeyCombInput
+    struct KeyCombInputOne
     {
+		KeyCombInputOne(Keys key, Action action)
+			: number(key), action(action), mod(Mods::None) {
+		}
         Keys number; 
+        Action action; 
+        Mods mod = Mods::None;
+    };
+    
+    struct KeyCombInputPoly
+    {
+		KeyCombInputPoly(std::array<Keys, KEY_MAX> key, Action action)
+			: number(key), action(action), mod(Mods::None) {
+		}
+        std::array<Keys, KEY_MAX> number;
         Action action; 
         Mods mod = Mods::None;
     };

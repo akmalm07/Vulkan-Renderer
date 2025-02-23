@@ -5,23 +5,33 @@
 #include <chrono>
 
 
-class Timer
+namespace tools
 {
+	class Timer
+	{
 
-public:
+	public:
 
-	Timer(); 
+		Timer();
 
-	void StopTime(); 
+		Timer(bool start);
 
-	~Timer(); 
+		double stop_time(bool debug);
 
-private:
+		double reset(bool debug);
 
-	std::chrono::steady_clock::time_point timeStarted;
-	std::chrono::steady_clock::time_point timeEnded;
+		double get_delta_time(bool debug);
 
-	bool isStopped;
+		~Timer();
 
-};
+	private:
+
+		std::chrono::high_resolution_clock::time_point _timeStarted;
+		std::chrono::high_resolution_clock::time_point _timeEnded;
+
+		bool _isStopped;
+
+	};
+
+}
 

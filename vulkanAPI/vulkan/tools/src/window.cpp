@@ -7,7 +7,7 @@
 #include "tools\include\window.h"
 
 
-namespace vkUtil {
+namespace tools {
 
 	uint32_t WindowT::g_numOfWindows = 0;
 
@@ -163,6 +163,15 @@ namespace vkUtil {
 		return (_rightOrtho.has_value() ? _rightOrtho.value() : throw std::runtime_error("_rightOrtho has not VALUE!")); 
 	}
 
+	bool WindowT::IsKeyActive(Keys key, Action action) const
+	{
+		if (glfwGetKey(_mainWindow, INT(key)) == INT(action))
+		{
+			return true;
+		}
+		return false;
+	}
+
 
 	void WindowT::SetCursorLocked()
 	{
@@ -274,6 +283,50 @@ namespace vkUtil {
 		}
 	}
 
+	std::shared_ptr<AABButtonB>& WindowT::FindAABButton(std::string_view name)
+	{
+		for (auto& item : _AABButtons)
+		{
+			for (auto& [key, val] : item)
+			{
+				if (key == name)
+				{
+					return val;
+				}
+			}
+		}
+		throw std::runtime_error("Could not find the AABButton with the name: " + std::string(name));
+	}
+
+	std::shared_ptr<KeyCombB>& WindowT::FindKeyComb(Keys key, Mods mod)
+	{		
+		for (auto& keys : _keyCombs)
+		{
+			for (auto& [ky, val] : keys)
+			{
+				if (ky.first == key && ky.second == mod)
+				{
+					return val;
+				}
+			}
+		}
+	}
+	
+
+	std::shared_ptr<KeyCombB>& WindowT::FindKeyComb(Keys key)
+	{		
+		for (auto& keys : _keyCombs)
+		{
+			for (auto& [ky, val] : keys)
+			{
+				if (ky.first == key && ky.second == Mods::None)
+				{
+					return val;
+				}
+			}
+		}
+	}
+
 
 	void WindowT::SetOrtho(float left, float right, float top, float bottom)
 	{
@@ -364,72 +417,79 @@ namespace vkUtil {
 
 	void WindowT::HandleKeys(int key, int code, int action, int mode)
 	{
+
 		switch (action)
 		{
 		case GLFW_PRESS:
 		{
+			_keyPressed = false;
 			auto& act = _keyCombs[SIZET(Action::Press)];
 
-			for (int i = 0; i < KEY_CONST; i++)
+			for (const auto& [ky, val] : act)
 			{
-				if (key == i)
+
+				if (val->is_pressed(INT(key), INT(mode)))
 				{
-					for (const auto& [ky, val] : act)
-					{
-						if (val->isPressed(ky.first, Action::Press, ky.second))
-						{
-							val->execute();
-						}
-					}
-
+					_keyPressed = true;
+					val->execute();
 				}
-
 			}
+			
 		}
+		break;
 		case GLFW_RELEASE:
 		{
+			_keyPressed = false;
 			auto& act = _keyCombs[SIZET(Action::Release)];
 
-			for (int i = 0; i < KEY_CONST; i++)
+
+			for (const auto& [ky, val] : act)
 			{
-				if (key == i)
+				if (val->is_pressed(INT(key), INT(mode)))
 				{
-					for (const auto& [ky, val] : act)
-					{
-						if (val->isPressed(ky.first, Action::Release, ky.second)) 
-						{
-							val->execute();
-						}
-					}
-
+					_keyPressed = true;
+					val->execute();
 				}
-
 			}
+			
 		}
+		break;
 		case GLFW_REPEAT:
 		{
+			_keyPressed = true;
 			auto& act = _keyCombs[SIZET(Action::Repeat)];
 
-			for (int i = 0; i < KEY_CONST; i++)
+			for (const auto& [ky, val] : act)
 			{
-				if (key == i)
+
+				if (val->is_pressed(INT(key), INT(mode)))
 				{
-					for (const auto& [ky, val] : act) 
-					{
-						if (val->isPressed(ky.first, Action::Press, ky.second)) 
-						{
-							val->execute(); 
-						}
-					}
-
+					_keyPressed = true;
+					val->execute();
 				}
+			}
+		
+		}
+		break;
+		}//switch statement
 
+
+		//Poly
+		if (!_keyCombsPoly.empty())
+		{
+
+			for (const auto& [ky, val] : _keyCombsPoly)
+			{
+				if (val->is_pressed(_mainWindow, mode))
+				{
+					val->execute();
+				}
 			}
 		}
-
-		}
-
 	}
+
+	
+
 
 	void WindowT::HandleMouseCursor(double posX, double posY)
 	{
@@ -438,6 +498,8 @@ namespace vkUtil {
 
 		_mouseCurrentX = posX;
 		_mouseCurrentY = posY;
+
+
 	}
 
 	void WindowT::HandleMouseButtons(int mouseButton, int action, int mods)
@@ -451,7 +513,7 @@ namespace vkUtil {
 
 			for (const auto& [key, val] : act)
 			{
-				if (val->isClicked(_mouseCurrentX, _mouseCurrentY, Action::Press, mouse))
+				if (val->is_clicked(_mouseCurrentX, _mouseCurrentY, Action::Press, mouse))
 				{
 					val->execute();
 				}
@@ -470,7 +532,7 @@ namespace vkUtil {
 
 			for (const auto& [key, val] : act)
 			{
-				if (val->isClicked(_mouseCurrentX, _mouseCurrentY, Action::Release, mouse))
+				if (val->is_clicked(_mouseCurrentX, _mouseCurrentY, Action::Release, mouse))
 				{
 					val->execute();
 				}
@@ -488,7 +550,7 @@ namespace vkUtil {
 
 			for (const auto& [key, val] : act)
 			{
-				if (val->isClicked(_mouseCurrentX, _mouseCurrentY, Action::Repeat, mouse))
+				if (val->is_clicked(_mouseCurrentX, _mouseCurrentY, Action::Repeat, mouse))
 				{
 					val->execute();
 				}
@@ -501,4 +563,4 @@ namespace vkUtil {
 	}
 
 
-} //Namespace vkUtil
+} //Namespace tools

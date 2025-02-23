@@ -23,6 +23,7 @@
 #include "tools\include\json_reader.h"
 #include "vkUtil\include\memory.h"
 #include "tools\include\memory_pool.h"
+#include "tools\include\memory_pool_container.h"
 
 
 
@@ -51,7 +52,7 @@ BaseEngine::BaseEngine()
 
 	build_glfw_window();
 
-	is_ortho(true);
+	camera_init(true);
 
 	make_instance();
 
@@ -103,7 +104,7 @@ BaseEngine::BaseEngine(vkVert::StrideBundle stride, int width, int height, bool 
 
 	build_glfw_window(width, height);  
 
-	is_ortho(orthoOrPerpective); 
+	camera_init(orthoOrPerpective); 
 
 	make_instance(); 
 
@@ -133,11 +134,8 @@ BaseEngine::BaseEngine(vkVert::StrideBundle stride, int width, int height, bool 
 BaseEngine::BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool orthoOrPerpective, bool debug) 
 {
 
-	is_ortho(orthoOrPerpective);
+	camera_init(orthoOrPerpective);
 
-	_MVPMats._modelMat = glm::mat4(1.0f);
-	_MVPMats._viewMat = _camera.getView();
-	_MVPMats._projMat = _camera.getProjection();
 
 	_debugMode = debug;
 
@@ -187,21 +185,20 @@ BaseEngine::BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool
 
 void BaseEngine::update_FPS()
 {
-	static double previousTime = glfwGetTime();
-	static int frameCount = 0;
+	static double time = 0;
+	static uint32_t frameCount = 0;
 
-	double currentTime = glfwGetTime();
+	time += _deltaTime;
 	frameCount++;
 	
-	if (currentTime - previousTime >= 1.0)
+	if (time >= 1.0) 
 	{
 		std::stringstream title;
 		title << _window.GetName() << " - FPS: " << frameCount;
-
 		_window.SetName(title.str().c_str());
 
 		frameCount = 0;
-		previousTime = currentTime;
+		time = 0;
 	}
 }
 
@@ -291,6 +288,7 @@ void BaseEngine::read_json_files()
 
 				);
 			}
+
 		}
 		descriptorSets.push_back(std::move(descriptorSet));
 	}
@@ -327,8 +325,8 @@ void BaseEngine::read_json_files()
 					layout["binding"].get<uint32_t>()
 				);
 			}
-			layoutBindings.push_back(std::move(layoutBinding));
 		}			
+		layoutBindings.push_back(std::move(layoutBinding));
 	}
 	
 
@@ -483,6 +481,14 @@ void BaseEngine::make_pipeline()
 
 }
 
+std::vector <std::shared_ptr< vkInit::DescriptorBuffer >> BaseEngine::initalize_descriptor_buffers(const std::vector<vkUtil::BufferInput>& descriptorBuffer)
+{
+	std::vector<std::shared_ptr<vkInit::DescriptorBuffer>> buffer;
+
+	buffer.emplace_back(std::make_shared<vkInit::DescriptorBufferData<Matrices>>(descriptorBuffer[SIZET(Buffer1)], _MVPMats));
+
+	return buffer;
+}
 
 
 void BaseEngine::make_descriptor_sets()
@@ -497,16 +503,14 @@ void BaseEngine::make_descriptor_sets()
 		count += size.size; 
 	}
 
-	std::cout << "Count: " << count << std::endl;
-
-	tools::MemoryPool memoryPool(count);
+	std::cout << "Count: " << descReg.get_descriptor_set_layouts().size() << std::endl;
 
 	vkInit::DescriptorSetOutBundle out = vkInit::create_descriptor_set(
 		_vkLogicalDevice,
 		_vkPhysicalDevice,
 		allDescriptorSets,
 		descReg.get_descriptor_set_layouts(),
-		initalize_descriptor_buffers(descReg.get_descriptor_buffers(), memoryPool),
+		initalize_descriptor_buffers(descReg.get_descriptor_buffers()),
 		_debugMode
 	);
 	
@@ -525,10 +529,45 @@ void BaseEngine::make_descriptor_sets()
 
 	for (size_t i = 0; i < allDescriptorSets.size(); i++)
 	{
-		_vkDescriptorSets.updated[i].resize(allDescriptorSets[i].size());
+		_vkDescriptorSets.updated[i].reserve(allDescriptorSets[i].size());
 		for (const auto& [j, set] : allDescriptorSets[i] | std::views::enumerate)
 		{
-			_vkDescriptorSets.updated[i][j] = std::move(std::pair(set.type, true));
+			size_t id = j;
+			switch (set.type)
+			{
+			case vk::DescriptorType::eUniformBuffer:
+				id += 0;
+				break;
+			case vk::DescriptorType::eUniformBufferDynamic:
+				id += 1000;
+				break;
+			case vk::DescriptorType::eStorageBuffer:
+				id += 2000;
+				break;
+			case vk::DescriptorType::eStorageBufferDynamic:
+				id += 3000;
+				break;
+			case vk::DescriptorType::eUniformTexelBuffer:
+				id += 4000;
+				break;
+			case vk::DescriptorType::eStorageTexelBuffer:
+				id += 5000;
+				break;
+			case vk::DescriptorType::eStorageImage:
+				id += 6000;
+				break;
+			case vk::DescriptorType::eSampledImage:
+				id += 7000;
+				break;
+			case vk::DescriptorType::eSampler:
+				id += 8000;
+				break;
+			case vk::DescriptorType::eCombinedImageSampler:
+				id += 9000;
+				break;
+
+			}
+			_vkDescriptorSets.updated[i].emplace_back(id, true);
 		} 
 	}
 
@@ -629,11 +668,11 @@ void BaseEngine::record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t
 
 }
 
-void BaseEngine::is_ortho(bool orthoOrPerpective)
+void BaseEngine::camera_init(bool orthoOrPerpective)
 {
 	if (orthoOrPerpective)
 	{
-		vkUtil::CameraBundleOrthographic bundle; 
+		tools::CameraBundleOrthographic bundle; 
 		bundle.bottom = _window.GetBottomOrtho();
 		bundle.left = _window.GetLeftOrtho();
 		bundle.right = _window.GetWidth();
@@ -645,12 +684,12 @@ void BaseEngine::is_ortho(bool orthoOrPerpective)
 		bundle.position = glm::vec3(0.0f, 0.0f, 0.0f);
 		bundle.startPYR = glm::vec3(0.0f, 0.0f, 0.0f);
 		bundle.front = glm::vec3(0.0f, 0.0f, -1.0f);
-		
-		_camera = std::move(vkUtil::CameraT(bundle));
+		//bundle.direction = tools::Direction::Forward;
+		_camera = std::move(tools::CameraT(bundle));
 	}
 	else
 	{
-		vkUtil::CameraBundlePerspective bundle; 
+		tools::CameraBundlePerspective bundle; 
 		bundle.fov = 45.0f;
 		bundle.aspectRatio = _window.GetAspectRatio();
 		bundle.nearZ = 0.1f;
@@ -661,9 +700,13 @@ void BaseEngine::is_ortho(bool orthoOrPerpective)
 		bundle.startPYR = glm::vec3(0.0f, 0.0f, 0.0f);
 		bundle.front = glm::vec3(0.0f, 0.0f, -1.0f);
 		
-		_camera = std::move(vkUtil::CameraT(bundle)); 
-
+		_camera = std::move(tools::CameraT(bundle)); 
 	}
+	_camera.set_commands_to_window(_window);
+
+	_MVPMats._viewMat = _camera.get_view();
+	_MVPMats._projMat = _camera.get_projection();
+	_MVPMats._modelMat = glm::mat4(1.0f);
 
 }
 
@@ -671,11 +714,15 @@ void BaseEngine::is_ortho(bool orthoOrPerpective)
 
 void BaseEngine::render()
 {
+	_deltaTime = _timer.get_delta_time(false);
+
 	update_FPS();
 	
 	_window.pollEvents();
 
-	CheckVkResult(_vkLogicalDevice.waitForFences(1, &_vkSwapchainFrames[_frameNum].vkFenceInFlight, VK_TRUE, UINT64_MAX));
+	game_logic(_deltaTime);
+
+	check_vk_result(_vkLogicalDevice.waitForFences(1, &_vkSwapchainFrames[_frameNum].vkFenceInFlight, VK_TRUE, UINT64_MAX));
 
 
 	uint32_t imageIndex{};

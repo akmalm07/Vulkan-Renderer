@@ -117,6 +117,10 @@ namespace vkUtil
 
 	Buffer create_vk_util_buffer(const vk::PhysicalDevice& device, const vk::Device& logicalDevice, BufferInput& input, void* data, bool debug)
 	{
+		if (debug)
+		{
+			std::cout << "Creating Descritor Buffer with size: " << input.size << " with usage: " << vk::to_string(input.usage) << std::endl;
+		}
 
 		vk::Buffer buff = create_buffer(logicalDevice, input, debug);
 		vk::DeviceMemory mem = alloc_buffer_memory(buff, device, logicalDevice, input);

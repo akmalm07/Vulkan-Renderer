@@ -6,6 +6,7 @@
 #include "vkUtil\include\shader_bundles.h"
 #include "vkUtil\include\buffers.h"
 
+
 namespace vkInit
 {
 
@@ -42,6 +43,7 @@ namespace vkInit
 		vk::BufferUsageFlags bufferType;
 		uint32_t maxSize;
 
+		DescriptorBuffer();
 		DescriptorBuffer(vk::BufferUsageFlags bufferType, uint32_t maxSize);
 	public:
 		virtual void* get_data_ptr() = 0;
@@ -55,6 +57,7 @@ namespace vkInit
 
 		DescriptorBufferData(vk::BufferUsageFlags bufferType, uint32_t maxSize, T data) : data(data), DescriptorBuffer(bufferType, maxSize ) {}
 		DescriptorBufferData(const DescriptorBuffer& buffer) : DescriptorBuffer(buffer.bufferType, buffer.maxSize ) {}
+		DescriptorBufferData(const vkUtil::BufferInput& buffer, T data) : DescriptorBuffer(buffer.usage, buffer.size ), data(data) {}
 		DescriptorBufferData(const DescriptorBuffer& buffer, T data) : DescriptorBuffer(buffer.bufferType, buffer.maxSize ), data(data) {}
 
 	public:
