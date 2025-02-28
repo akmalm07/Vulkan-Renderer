@@ -13,6 +13,7 @@
 #include "tools\include\memory_pool.h"
 #include "tools\include\memory_pool_container.h"
 #include "tools\include\timer.h"
+#include "tools\include\thread.h"
 
 
 #include "tools\include\window.h"
@@ -28,17 +29,21 @@ public:
 
 	BaseEngine();
 
-	BaseEngine(vkVert::StrideBundle stride, int width, int height, bool orthoOrPerpective, bool debug);
+	BaseEngine(int width, int height, bool orthoOrPerpective, bool debug);
 
-	BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool orthoOrPerpective, bool debug);
+	BaseEngine(tools::WindowT& window, bool orthoOrPerpective, bool debug);
+	
+	BaseEngine(GLFWwindow* glfwWindow, bool orthoOrPerpective, bool debug);
 
 	void render();
 
 	virtual void draw(vk::CommandBuffer& commandBuffer) const = 0;
 	
-	virtual void game_logic(double deltaTime) = 0;
+	virtual void game_logic(const double& deltaTime) = 0;
 	
 	virtual void update_sets(vk::CommandBuffer& commandBuffer) = 0;
+	
+	virtual bool camera_logic() = 0;
 
 	void update_FPS();
 
@@ -58,17 +63,19 @@ protected:
 		BufferCount
 	};
 
-	enum DescriptorSets : size_t 
+	enum Sets
 	{
 		Set1,
 		SetCount
-	};
 
-	enum class Set1: size_t
+	};
+	enum class Set1 : size_t
 	{
 		Binding1,
 		BindingCount
 	};
+
+
 
 
 	bool _debugMode = true;
@@ -123,7 +130,6 @@ protected:
 	vk::CommandPool _vkCommandPool;
 	vk::CommandBuffer _vkMainCommandBuffer;
 
-	vkVert::StrideBundle _stride;
 
 	const std::filesystem::path _shaderVertPath = UserInput::v_shader_path;  
 	const std::filesystem::path _shaderFragPath = UserInput::f_shader_path; 
@@ -175,12 +181,22 @@ protected:
 		glm::mat4 _projMat;
 	} _MVPMats;
 
+
+	// Threads
+	struct WindowInputAcync
+	{
+		std::shared_ptr<tools::ConditionalVariuble> windowInput;
+		std::shared_ptr<tools::ConditionalVariuble> updateInputParams;
+		std::shared_ptr<std::mutex> lockMtx;
+		tools::ThreadT<false, false> threadUpdateParams;
+	} _windowInputsAsync;
+
 	protected:
 
 	//glfw setup
 	void build_glfw_window();
 
-	void build_glfw_window(int width, int height);
+	void build_glfw_window(int width, int height, bool orthoOrPerpective);
 
 	//instance setup
 	void make_instance();
@@ -215,6 +231,10 @@ protected:
 	void make_frame_sync_objects();
 
 	void record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t imageIndex);
+
+	void handle_threads();
+
+	uint32_t gen_desc_id(vk::DescriptorType desc);
 
 
 

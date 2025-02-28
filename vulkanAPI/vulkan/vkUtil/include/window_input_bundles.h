@@ -1,6 +1,10 @@
 #pragma once
 
 #include "tools\include\keys.h"
+#include "tools\include\thread.h"
+
+#include <mutex>
+
 
 namespace tools
 {
@@ -36,5 +40,16 @@ namespace tools
         Action action;
         Mouse button;
         std::string_view name;
+    };
+
+    struct ThreadControlInfo
+    {
+    public:
+        ThreadControlInfo(const std::shared_ptr<ConditionalVariuble>& windowInput,
+            const std::shared_ptr<ConditionalVariuble>& changingParams, const std::shared_ptr<std::mutex>& mtx);
+
+        std::shared_ptr<ConditionalVariuble> windowInputWait;
+        std::shared_ptr<ConditionalVariuble> changingParamsWait;
+        std::shared_ptr<std::mutex> lock;
     };
 }

@@ -9,14 +9,18 @@ Engine::Engine() :
 {}
 
 
-Engine::Engine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool orthoOrperspective, bool debug) :
-	BaseEngine(glfwWindow, stride, orthoOrperspective, debug), _scene(nullptr)
+Engine::Engine(GLFWwindow* glfwWindow, bool orthoOrperspective, bool debug) :
+	BaseEngine(glfwWindow, orthoOrperspective, debug), _scene(nullptr)
 {}
 
 
+Engine::Engine(tools::WindowT& window, bool orthoOrperspective, bool debug) :
+	BaseEngine(window, orthoOrperspective, debug), _scene(nullptr)
+{}
 
-Engine::Engine(vkVert::StrideBundle stride, int width, int height, bool orthoOrperspective, bool debug) :
-	BaseEngine(stride, width, height, orthoOrperspective, debug), _scene(nullptr)
+
+Engine::Engine(int width, int height, bool orthoOrperspective, bool debug) :
+	BaseEngine(width, height, orthoOrperspective, debug), _scene(nullptr)
 {}
 
 
@@ -52,9 +56,10 @@ void Engine::load_mesh(MeshT& mesh) const
 
 
 
-void Engine::game_logic(double deltaTime)
+void Engine::game_logic(const double& deltaTime)
 {
-	camera_logic(deltaTime);
+
+	
 }
 
 
@@ -79,14 +84,7 @@ void Engine::load_meshes(std::vector<MeshT>& meshes) const
 	{
 		const auto& verts = mesh.get_vertices_raw();
 		vertices.insert(vertices.end(), MOVE_ITR(verts.begin()), MOVE_ITR(verts.end()));
-
-		/*		for (const auto& vert : vertices)
-				{
-					std::cout << " " << vert << " ";
-				}
-				std::cout << "\n";
-				std::cout << "SIZE: " << vertices.size() << "\n";
-				*/
+		DEBUG_ITERATOR(verts);
 		if (mesh.get_indices().empty())
 		{
 			continue;
@@ -243,18 +241,27 @@ void Engine::update_sets(vk::CommandBuffer& cmdBuff)
 			{
 				_vkDescriptorSets.updated[i][j].status = false;
 
+				if (updated.get_id() == 0)
+				{
+					_vkDescriptorSets.updated[SIZET(Sets::Set1)][SIZET(Set1::Binding1)].status = false;
+					vkUtil::update_buffer(
+						_vkLogicalDevice,
+						_vkDescriptorSetBuffers[SIZET(Buffer1)].bufferMemory,
+						_MVPMats
+					);
+				}
+
 				vk::DescriptorBufferInfo bufferInfo;
 				bufferInfo.buffer = _vkDescriptorSetBuffers[SIZET(Buffer1)].buffer;
 				bufferInfo.offset = 0;
 				bufferInfo.range = sizeof(_MVPMats);
 
 				vk::WriteDescriptorSet writeDescriptorSet;
-
 				writeDescriptorSet.descriptorType = vk::DescriptorType::eUniformBuffer;
 				writeDescriptorSet.descriptorCount = 1;
 				writeDescriptorSet.dstBinding = 0;
 				writeDescriptorSet.dstArrayElement = 0;
-				writeDescriptorSet.dstSet = _vkDescriptorSets.sets[SIZET(Set1)];
+				writeDescriptorSet.dstSet = _vkDescriptorSets.sets[SIZET(Sets::Set1)];
 				writeDescriptorSet.pBufferInfo = &bufferInfo;
 				writeDescriptorSet.pImageInfo = nullptr;
 				writeDescriptorSet.pTexelBufferView = nullptr;
@@ -290,72 +297,112 @@ void Engine::call_push_consts() const
 }
 
 
-void Engine::camera_logic(double deltaTime)
+bool Engine::camera_logic()
 {
-	// move this in its own thread!!!
-	if (_window.IsKeyPressed())
+	_window.WaitInitallyForSignal();
+
+	bool running = !_window.GetShouldClose();
+
+	while (running)
 	{
-		using tools::Keys;
-		using tools::Mods;
+		running = !_window.GetShouldClose();
+
+		if (_window.IsOneInputActive())
+		{
+			std::cout << "Delta Time: " << _deltaTime << std::endl;
+			using tools::Keys;
+			using tools::Mods;
 
 
-		std::array<bool, 1024> keys = _window.GetKeys();
+			const std::array<bool, 1024>& keys = _window.GetKeysConstRef();
 
-		Keys movekey;
+			Keys movekey;
 
-		if (keys[SIZET(Keys::W)])
-		{
-			movekey = Keys::W;
-		}
-		else if (keys[SIZET(Keys::S)])
-		{
-			movekey = Keys::S;
-		}
-		else if (keys[SIZET(Keys::A)])
-		{
-			movekey = Keys::A;
-		}
-		else if (keys[SIZET(Keys::D)])
-		{
-			movekey = Keys::D;
-		}
-		else if (keys[SIZET(Keys::Q)])
-		{
-			movekey = Keys::Q;
-		}
-		else if (keys[SIZET(Keys::E)])
-		{
-			movekey = Keys::E;
-		}
-		else
-		{
-			return;
-		}
-		_window.FindKeyComb(movekey)->change_parameters(vkType::ref(_MVPMats._viewMat), vkType::val(deltaTime));
-		_vkDescriptorSets.updated[SIZET(Set1)][SIZET(Set1::Binding1)].status = true;
+			if (keys[SIZET(Keys::W)])
+			{
+				movekey = Keys::W;
+			}
+			else if (keys[SIZET(Keys::S)])
+			{
+				std::cout << "i CHECKED IT TO FIRST\n";
+				movekey = Keys::S;
+			}
+			else if (keys[SIZET(Keys::A)])
+			{
+				movekey = Keys::A;
+			}
+			else if (keys[SIZET(Keys::D)])
+			{
+				movekey = Keys::D;
+			}
+			else if (keys[SIZET(Keys::Q)])
+			{
+				movekey = Keys::Q;
+			}
+			else if (keys[SIZET(Keys::E)])
+			{
+				movekey = Keys::E;
+			}
+			else
+			{
+				_window.AllowWindowToContinueAndWait();
+				continue;
+			}
 
 
-		Keys turnkey;
-		if (keys[SIZET(Keys::Up)])
-		{
-			turnkey = Keys::Up;
-		}
-		else if (keys[SIZET(Keys::Down)])
-		{
-			turnkey = Keys::Down;
-		}
-		else if (keys[SIZET(Keys::Right)])
-		{
-			turnkey = Keys::Right;
-		}
-		else if (keys[SIZET(Keys::Left)])
-		{
-			turnkey = Keys::Left;
-		}
-		else
-		{
-			return;
-		}
-		_window.FindKeyComb(turnkey)->change_parameters(vkType::val(0.3), vkType::val(0.3), vkType::ref(_MVPMats._viewMat), vkType::val(deltaTime));
+			if (_window.NumOfKeysInList(movekey) == 1)
+			{
+				_window.FindKeyComb(movekey)->change_parameters(_deltaTime);
+
+			}
+			else if (_window.NumOfKeysInList(movekey) > 1)
+			{
+				for (auto& key : _window.FindKeyCombList(movekey))
+				{
+					key->change_parameters(_deltaTime);
+				}
+			}
+				_vkDescriptorSets.updated[SIZET(Sets::Set1)][SIZET(Set1::Binding1)].status = true;
+
+
+
+			Keys turnkey;
+			if (keys[SIZET(Keys::Up)])
+			{
+				turnkey = Keys::Up;
+			}
+			else if (keys[SIZET(Keys::Down)])
+			{
+				turnkey = Keys::Down;
+			}
+			else if (keys[SIZET(Keys::Right)])
+			{
+				turnkey = Keys::Right;
+			}
+			else if (keys[SIZET(Keys::Left)])
+			{
+				turnkey = Keys::Left;
+			}
+			else
+			{
+				_window.AllowWindowToContinueAndWait();
+				continue;
+			}
+			
+			if (_window.NumOfKeysInList(movekey) == 1)
+			{
+				_window.FindKeyComb(movekey)->change_parameters(0.3, 0.3, _deltaTime);
+
+			}
+			else if (_window.NumOfKeysInList(movekey) < 1)
+			{
+				for (auto& key : _window.FindKeyCombList(movekey))
+				{
+					key->change_parameters(0.3, 0.3, _deltaTime);
+				}
+			}
+		}		
 	}
+
+	return true;
 }

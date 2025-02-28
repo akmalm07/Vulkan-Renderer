@@ -119,7 +119,7 @@ namespace vkUtil
 	{
 		if (debug)
 		{
-			std::cout << "Creating Descritor Buffer with size: " << input.size << " with usage: " << vk::to_string(input.usage) << std::endl;
+			std::cout << "Creating Descriptor Buffer with size: " << input.size << " with usage: " << vk::to_string(input.usage) << std::endl;
 		}
 
 		vk::Buffer buff = create_buffer(logicalDevice, input, debug);
@@ -144,6 +144,8 @@ namespace vkUtil
 		return { buff, mem };
 
 	}
+
+
 
 
 	void destroy_vk_util_buffer(const vk::Device& dev, Buffer buffer)

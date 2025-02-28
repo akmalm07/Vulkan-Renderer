@@ -4,7 +4,9 @@
 #include "tools\include\keys.h"
 
 #include "tools\include\window_input.h"
+#include "tools\include\thread.h"
 
+#include <memory>
 
 namespace tools {
 
@@ -12,11 +14,23 @@ namespace tools {
 	class WindowT
 	{
 	public:
+		static constexpr size_t KEY_CONST = 1024;
+	public:
 		WindowT();
 
 		WindowT(float windowWidth, float windowHeight, const std::string& name, bool isOrtho);
 
-		bool CreateWindow(const std::string& name, int width, int height);
+		WindowT(WindowT&& other) noexcept;
+
+		WindowT& operator=(WindowT&& other) noexcept;
+
+		void SetAsyncPollEvents(const ThreadControlInfo& cv);
+
+		bool CreateWindow(bool disableCursor);
+		
+		bool CreateWindow(float windowWidth, float windowHeight, const std::string& name, bool disableCursor);
+
+		void SetDisableCursor(bool disableCursor);
 
 		float GetAspectRatio() const;
 
@@ -25,9 +39,18 @@ namespace tools {
 
 		std::shared_ptr<AABButtonB>& FindAABButton(std::string_view name);
 		
-		std::shared_ptr<KeyCombB>& FindKeyComb(Keys key, Mods mod);
+		std::vector<std::shared_ptr<KeyCombB>> FindKeyCombList(Keys key, Mods mod);
 		
-		std::shared_ptr<KeyCombB>& FindKeyComb(Keys key);
+		std::vector<std::shared_ptr<KeyCombB>> FindKeyCombList(Keys key);
+
+		size_t NumOfKeysInList(Keys key, Mods mod);
+		
+		size_t NumOfKeysInList(Keys key);
+
+		std::shared_ptr<KeyCombB> FindKeyComb(Keys key, Mods mod);
+		
+		std::shared_ptr<KeyCombB> FindKeyComb(Keys key);
+
 
 		void DelAABButton(std::string_view name);
 
@@ -35,6 +58,9 @@ namespace tools {
 
 		void SetHeight(int height) { _height = height; }
 
+		void AllowWindowToContinueAndWait();
+
+		void WaitInitallyForSignal();
 		//template<class ... Args>
 		//void AddMouseClick(Mouse mouse, std::function<bool(Args...)> function);
 		//void DelMouseClick(Mouse mouse);
@@ -57,16 +83,16 @@ namespace tools {
 
 
 		template<class F, class ... Args>
-		void AddKeyComb(const KeyCombInputOne& input, F&& function, Args&&... args);
+		void AddKeyComb(bool repeatAsWell, const KeyCombInputOne& input, F&& function, Args&&... args);
 		
 		template<vkType::IsClass T, class ... Args>
-		void AddKeyComb(const KeyCombInputOne& input, bool(T::*func)(Args...), std::tuple<Args...>&& args);
+		void AddKeyComb(bool repeatAsWell, const KeyCombInputOne& input, bool(T::*func)(Args...), std::tuple<Args...>&& args);
 
 		template<class ... Args>
-		void AddKeyComb(const KeyCombInputOne& input, std::function<bool(Args...)> func, Args&&... args);
+		void AddKeyComb(bool repeatAsWell, const KeyCombInputOne& input, std::function<bool(Args...)> func, Args&&... args);
 
 		template<vkType::IsClass T, class ... Args>
-		void AddKeyComb(const KeyCombInputOne& input, bool(T::* func)(Args...), Args&&... args);
+		void AddKeyComb(bool repeatAsWell, const KeyCombInputOne& input, bool(T::* func)(Args...), Args&&... args);
 
 
 
@@ -95,7 +121,7 @@ namespace tools {
 		int GetBufferHeight();
 		inline GLFWwindow* GetWindow() const { return _mainWindow; }
 
-		bool SetWindow(GLFWwindow* window);
+		bool SetWindow(GLFWwindow* window, bool isOrtho);
 
 		inline float GetWidth() const { return _width; }
 		inline float GetHeight() const { return _height; }
@@ -126,9 +152,11 @@ namespace tools {
 		void SetShouldClose(bool trueOrFalse);
 
 
-		std::array<bool, 1024> GetKeys() { return _keys; }
+		const std::array<bool, KEY_CONST>& GetKeysConstRef() { return _keys; } // make a system of that if the 
+		
+		std::array<bool, KEY_CONST> GetKeys() { return _keys; } // make a system of that if the 
 
-		bool IsKeyPressed() const { return _keyPressed; }
+		bool IsOneInputActive() const { return _oneInputCurentlyActive.get_state(); }
 
 		void SwapBuffers() const { glfwSwapBuffers(_mainWindow); }
 
@@ -142,9 +170,6 @@ namespace tools {
 	private:
 
 		//Window Vars
-
-		static constexpr size_t KEY_CONST = 1024;
-
 		static bool _calledBufferSize;
 
 		static uint32_t g_numOfWindows;
@@ -168,9 +193,6 @@ namespace tools {
 		double _mouseCurrentX = 0.0;
 		double _mouseCurrentY = 0.0;
 
-		//double _mouseAfterX = 0.0;
-		//double _mouseAfterY = 0.0;
-
 		bool _mouseFirstMoved = true;
 
 		bool _isMouseButtonPressed = false;
@@ -178,7 +200,31 @@ namespace tools {
 
 		std::array<bool, KEY_CONST> _keys{ false };
 
-		bool _keyPressed = false;
+		struct Async
+		{
+		public:
+			Async();
+			Async(const ThreadControlInfo& condition);
+			Async(Async&& other) noexcept;
+			Async& operator=(Async&& other) noexcept;
+
+			void notify_window();
+			void notify_change(bool needsChange);
+
+			void wait_for_window();
+			void wait_for_change();
+
+			bool get_state() const;
+
+//			void wait_for_window();
+//			void wait_for_change();
+
+		private:
+			std::shared_ptr <ConditionalVariuble> windowInputWait;
+			std::shared_ptr <ConditionalVariuble> changingParamsWait;
+			std::shared_ptr <std::mutex> lock;
+			bool state;
+		} _oneInputCurentlyActive;
 
 		std::string _name = "";
 
@@ -266,23 +312,41 @@ namespace tools {
 	//----------------------------------------------//
 
 		template<class F, class ... Args>
-		void WindowT::AddKeyComb(const KeyCombInputOne& input, F&& function, Args&&... args)
+		void WindowT::AddKeyComb(bool repeatAsWell, const KeyCombInputOne& input, F&& function, Args&&... args)
 		{
 			Mods val = ((input.mod != Mods::None) ? input.mod : Mods::None); 
+			if (repeatAsWell)
+			{
+				auto func = function;
+				_keyCombs[SIZET(Action::Repeat)].emplace(
+					std::pair(input.number, val),
+					std::make_shared<KeyComb<Args...>>(input, std::forward<F>(func), std::forward<Args>(args)...)
+				);
+			}
 			_keyCombs[SIZET(input.action)].emplace(
 				std::pair(input.number, val),
 				std::make_shared<KeyComb<Args...>>(input, std::forward<F>(function), std::forward<Args>(args)...)
 			);
+
 		}
 
 		template<vkType::IsClass T, class ...Args>
-		inline void WindowT::AddKeyComb(const KeyCombInputOne& input, bool(T::*func)(Args...), std::tuple<Args...>&& args)
+		inline void WindowT::AddKeyComb(bool repeatAsWell, const KeyCombInputOne& input, bool(T::*func)(Args...), std::tuple<Args...>&& args)
 		{
 			Mods val = ((input.mod != Mods::None) ? input.mod : Mods::None);
 			std::function<bool(Args...)> function = [this](Args&&... args) 
 				{
 					return (this->*func)(std::forward<Args>(args)...);
 				};
+			if (repeatAsWell)
+			{
+				auto funct = function; 
+				_keyCombs[SIZET(Action::Repeat)].emplace(
+					std::pair(input.number, val),
+					std::make_shared<KeyComb<Args...>>(input, std::forward<std::function<bool(Args...)>>(funct), std::forward<std::tuple<Args...>>(args))
+				);
+			}
+
 			_keyCombs[SIZET(input.action)].emplace(
 				std::pair(input.number, val),
 				std::make_shared<KeyComb<Args...>>(input, std::forward<std::function<bool(Args...)>>(function), std::forward<std::tuple<Args...>>(args))
@@ -290,13 +354,22 @@ namespace tools {
 		}
 
 		template<vkType::IsClass T, class ...Args>
-		inline void WindowT::AddKeyComb(const KeyCombInputOne& input, bool(T::*func)(Args...), Args&&... args)
+		inline void WindowT::AddKeyComb(bool repeatAsWell, const KeyCombInputOne& input, bool(T::*func)(Args...), Args&&... args)
 		{
 			Mods val = ((input.mod != Mods::None) ? input.mod : Mods::None);
 			std::function<bool(Args...)> function = [this](Args&&... args) 
 				{
 					return (this->*func)(std::forward<Args>(args)...);
 				};
+			if (repeatAsWell)
+			{
+				auto funct = function;
+				_keyCombs[SIZET(Action::Repeat)].emplace(
+					std::pair(input.number, val),
+					std::make_shared<KeyComb<Args...>>(input, std::forward<std::function<bool(Args...)>>(funct), std::forward<Args>(args)...)
+				);
+			}
+
 			_keyCombs[SIZET(input.action)].emplace(
 				std::pair(input.number, val),
 				std::make_shared<KeyComb<Args...>>(input, std::forward<std::function<bool(Args...)>>(function), std::forward<Args>(args)...)
@@ -304,9 +377,18 @@ namespace tools {
 		}
 
 		template<class ...Args>
-		inline void WindowT::AddKeyComb(const KeyCombInputOne& input, std::function<bool(Args...)> func, Args && ...args)
+		inline void WindowT::AddKeyComb(bool repeatAsWell, const KeyCombInputOne& input, std::function<bool(Args...)> func, Args && ...args)
 		{
 			Mods val = ((input.mod != Mods::None) ? input.mod : Mods::None);
+			
+			if (repeatAsWell)
+			{
+				auto function = func;
+				_keyCombs[SIZET(Action::Repeat)].emplace(
+					std::pair(input.number, val),
+					std::make_shared<KeyComb<Args...>>(input, std::forward<std::function<bool(Args...)>>(function), std::forward<Args>(args)...)
+				);
+			}
 			_keyCombs[SIZET(input.action)].emplace(
 				std::pair(input.number, val),
 				std::make_shared<KeyComb<Args...>>(input, std::forward<std::function<bool(Args...)>>(func), std::forward<Args>(args)...)

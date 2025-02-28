@@ -61,7 +61,6 @@ namespace tools
 	{
 		if (upOrDown)
 		{
-			PRINT_VEC3("Up vec", _up);
 			PRINT_VEC3("Pos vec", _position);
 			std::cout << "Speed: " << _speed << std::endl;
 			std::cout << "Delta: " << std::fixed << deltaTime<< std::endl;
@@ -69,6 +68,9 @@ namespace tools
 		}
 		else
 		{
+			PRINT_VEC3("Pos vec", _position);
+			std::cout << "Speed: " << _speed << std::endl;
+			std::cout << "Delta: " << std::fixed << deltaTime << std::endl;
 			_position -= _up * _speed * (float)deltaTime;
 		}
 		_target = _position + _front;
@@ -163,13 +165,13 @@ namespace tools
 	}
 
 
-	bool CameraT::event_key(Direction dir, glm::mat4& view, double deltaTime)
+	bool CameraT::event_key(Direction dir, double deltaTime)
 	{
 		update(dir, deltaTime);
 		return true;
 	}
 
-	bool CameraT::event_key(double xMove, double yMove, glm::mat4& view, double deltaTime)
+	bool CameraT::event_key(double xMove, double yMove, double deltaTime)
 	{
 		update(xMove, yMove, deltaTime);
 		return true;
@@ -238,43 +240,24 @@ namespace tools
 		};
 
 		glm::mat4& matrix = _view;
-		std::array<std::function<bool(glm::mat4&, float)>, 6> moveFuncs;
-		std::array<std::function<bool(double, double, glm::mat4&, float)>, 4> turnFuncs;
+		double doub = 0.0;
+		double& zer0 = doub;
+		std::array<std::function<bool(double)>, 6> moveFuncs;
+		std::array<std::function<bool(double, double, double)>, 4> turnFuncs;
 
 		for (size_t i = 0; i < moveFuncs.size(); i++)
 		{
-			moveFuncs[i] = [this, dir = dirs[i] ](glm::mat4& view, double deltaTime) -> bool
+			moveFuncs[i] = [this, dir = dirs[i] ](double deltaTime) -> bool
 			{
-				if (dir == Direction::Up)
-					std::cout << "Up\n";
-				else if (dir == Direction::Down)
-					std::cout << "Down\n";
-				else if (dir == Direction::Left)
-					std::cout << "Left\n";
-				else if (dir == Direction::Right)
-					std::cout << "Right\n";
-				else if (dir == Direction::Forward)
-					std::cout << "Forward\n";
-				else if (dir == Direction::Backward)
-					std::cout << "Backward\n";
-
-				return this->event_key(dir, view, deltaTime);
+				return this->event_key(dir, deltaTime);
 			};
 		}
+
 		for (size_t i = 0; i < turnFuncs.size(); i++)
 		{
-			turnFuncs[i] = [this, dir = dirs[i+6] ](double xMove, double yMove, glm::mat4& view, double deltaTime) -> bool
+			turnFuncs[i] = [this, dir = dirs[i+6] ](double xMove, double yMove, double deltaTime) -> bool
 			{
-					if (dir == Direction::TurnUp)
-						std::cout << "TurnUp\n";
-					else if (dir == Direction::TurnDown)
-						std::cout << "TurnDown\n";
-					else if (dir == Direction::TurnLeft)
-						std::cout << "TurnLeft\n";
-					else if (dir == Direction::TurnRight)
-						std::cout << "TurnRight\n";
-
-				return this->event_key(xMove, yMove, view, deltaTime);
+				return this->event_key(xMove, yMove, deltaTime);
 			};
 		}
 			
@@ -283,9 +266,10 @@ namespace tools
 		{
 			window.AddKeyComb
 			(
+				true,
 				input[i],
 				moveFuncs[i],
-				matrix, 0.0f
+				0.0
 			);
 		}
 		
@@ -294,9 +278,10 @@ namespace tools
 		{
 			window.AddKeyComb
 			(
+				true,
 				input[i+6],
 				turnFuncs[i],
-				0.0, 0.0, matrix, 0.0f
+				0.0, 0.0, 0.0
 			);
 		}
 

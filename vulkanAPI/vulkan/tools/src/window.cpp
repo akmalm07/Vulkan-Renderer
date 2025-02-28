@@ -15,7 +15,6 @@ namespace tools {
 
 	WindowT::WindowT()
 	{
-
 		_name = "Untitled Window";
 
 		_mainWindow = nullptr;
@@ -36,7 +35,7 @@ namespace tools {
 
 	WindowT::WindowT(float windowWidth, float windowHeight, const std::string& name, bool isOrtho)
 	{
-		
+
 		_name = name;
 
 		_mainWindow = nullptr;
@@ -70,12 +69,22 @@ namespace tools {
 				_bottomOrtho = -1.0f / _aspectRatio;
 			}
 		}
-
 	}
 
+	WindowT::WindowT(WindowT&& other) noexcept = default;
 
-	bool WindowT::CreateWindow(const std::string& name, int width, int height)
+	WindowT& WindowT::operator=(WindowT&& other) noexcept = default;
+
+
+	void WindowT::SetAsyncPollEvents(const ThreadControlInfo& cv)
 	{
+		_oneInputCurentlyActive = cv;
+	}
+
+	bool WindowT::CreateWindow(bool disableCursor)
+	{
+	
+		std::cout << "window count : " << g_numOfWindows <<"\n";
 		if (g_numOfWindows == 0)
 		{
 			if (glfwInit() == GLFW_FALSE)
@@ -88,20 +97,13 @@ namespace tools {
 				});
 		}
 
-		_name = name;
-
-		_width = width;
-
-		_height = height;
-
-
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-		if (_mainWindow = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr)) 
+		if (_mainWindow = glfwCreateWindow(_width, _height, _name.c_str(), nullptr, nullptr)) 
 		{
-			std::cout << "Successfully made a GLFW window called \"" << name << "\", windowWidth: " << width << 
-						 ", windowHeight: " << height << ", name: " << name << '\n';
+			std::cout << "Successfully made a GLFW window called \"" << _name << "\", windowWidth: " << _width << 
+						 ", windowHeight: " << _height << ", name: " << _name << '\n';
 		}
 		else 
 		{
@@ -124,11 +126,83 @@ namespace tools {
 
 		CreateCallbacks();
 
-		//glfwSetInputMode(_mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		if (!disableCursor)
+		{
+			glfwSetInputMode(_mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		}
 
 		glfwSetWindowUserPointer(_mainWindow, this);
 
 		return true;
+	}
+
+	bool WindowT::CreateWindow(float windowWidth, float windowHeight, const std::string& name, bool disableCursor)
+	{
+		if (g_numOfWindows == 0)
+		{
+			if (glfwInit() == GLFW_FALSE)
+			{
+				std::cerr << "Error Initializing GLFW! \n";
+			}
+			glfwSetErrorCallback([](int error, const char* description)
+				{
+					fprintf(stderr, "GLFW Error: %s\n", description);
+				});
+		}
+
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+
+		_name = name;
+		_width = windowWidth;
+		_height = windowHeight;
+
+		if (_mainWindow = glfwCreateWindow(windowWidth, windowHeight, name.c_str(), nullptr, nullptr))
+		{
+			std::cout << "Successfully made a GLFW window called \"" << name << "\", windowWidth: " << windowWidth <<
+				", windowHeight: " << windowHeight << ", name: " << name << '\n';
+		}
+		else
+		{
+			throw std::runtime_error("GLFW window creation failed!");
+		}
+
+		g_numOfWindows++;
+
+		glfwGetFramebufferSize(_mainWindow, &_bufferWidth, &_bufferHeight);
+
+
+		int thewidth = (int)windowWidth;
+		int theheight = (int)windowHeight;
+
+		glfwGetWindowSize(_mainWindow, &thewidth, &theheight);
+
+		glfwSetCursorPos(_mainWindow, thewidth / 2, theheight / 2);
+
+		glfwMakeContextCurrent(_mainWindow);
+
+		CreateCallbacks();
+
+		if (!disableCursor)
+		{
+			glfwSetInputMode(_mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		}
+
+		glfwSetWindowUserPointer(_mainWindow, this);
+
+		return true;
+	}
+
+	void WindowT::SetDisableCursor(bool disableCursor)
+	{
+		if (disableCursor)
+		{
+			glfwSetInputMode(_mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		}
+		else
+		{
+			glfwSetInputMode(_mainWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
 	}
 
 	float WindowT::GetAspectRatio() const
@@ -204,7 +278,7 @@ namespace tools {
 	}
 
 
-	bool WindowT::SetWindow(GLFWwindow* window) 
+	bool WindowT::SetWindow(GLFWwindow* window, bool isOrtho) 
 	{ 
 		if (!window)
 		{
@@ -220,12 +294,15 @@ namespace tools {
 
 		glfwGetFramebufferSize(_mainWindow, &_bufferWidth, &_bufferHeight); 
 
-		int width = (int)_width;
-		int height = (int)_height;
+		int width;
+		int height;
 
 		glfwGetWindowSize(_mainWindow, &width, &height); 
 
 		glfwSetCursorPos(_mainWindow, width / 2, height / 2); 
+
+		_width = (float)width;
+		_height = (float)height;
 
 		glfwMakeContextCurrent(_mainWindow); 
 		  
@@ -234,6 +311,28 @@ namespace tools {
 		//glfwSetInputMode(_mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 		glfwSetWindowUserPointer(_mainWindow, this); 
+
+
+		_aspectRatio = _width / _width;
+
+		if (isOrtho)
+		{
+			if (_aspectRatio >= 1.0f)
+			{
+				_leftOrtho = -1.0f * _aspectRatio;
+				_rightOrtho = 1.0f * _aspectRatio;
+				_topOrtho = 1.0f;
+				_bottomOrtho = -1.0f;
+			}
+			else
+			{
+				_leftOrtho = -1.0f;
+				_rightOrtho = 1.0f;
+				_topOrtho = 1.0f / _aspectRatio;
+				_bottomOrtho = -1.0f / _aspectRatio;
+			}
+		}
+
 
 		return true;
 
@@ -253,6 +352,16 @@ namespace tools {
 			item.erase(it);  
 		}
 
+	}
+
+	void WindowT::AllowWindowToContinueAndWait()
+	{
+		_oneInputCurentlyActive.notify_window();
+	}
+
+	void WindowT::WaitInitallyForSignal()
+	{
+		_oneInputCurentlyActive.wait_for_change();
 	}
 
 	void WindowT::DelKeyComb(Keys name, Mods mod)
@@ -298,8 +407,78 @@ namespace tools {
 		throw std::runtime_error("Could not find the AABButton with the name: " + std::string(name));
 	}
 
-	std::shared_ptr<KeyCombB>& WindowT::FindKeyComb(Keys key, Mods mod)
+	std::vector<std::shared_ptr<KeyCombB>> WindowT::FindKeyCombList(Keys key, Mods mod)
 	{		
+		std::vector<std::shared_ptr<KeyCombB>> thekeys;
+		thekeys.reserve(2);
+
+		for (auto& keys : _keyCombs)
+		{
+			for (auto& [ky, val] : keys)
+			{
+				if (ky.first == key && ky.second == mod)
+				{
+					thekeys.push_back(val);
+				}
+			}
+		}
+		return thekeys;
+	}
+	
+
+	std::vector<std::shared_ptr<KeyCombB>> WindowT::FindKeyCombList(Keys key)
+	{
+		std::vector<std::shared_ptr<KeyCombB>> thekeys;
+		thekeys.reserve(2);
+		for (auto& keys : _keyCombs)
+		{
+			for (auto& [ky, val] : keys)
+			{
+				if (ky.first == key && ky.second == Mods::None)
+				{
+					thekeys.push_back(val);
+				}
+			}
+		}
+		return thekeys;
+	}
+
+	size_t WindowT::NumOfKeysInList(Keys key, Mods mod)
+	{
+		size_t value = 0;
+
+		for (auto& keys : _keyCombs)
+		{
+			for (auto& [ky, val] : keys)
+			{
+				if (ky.first == key && ky.second == mod)
+				{
+					value++;
+				}
+			}
+		}
+		return value;
+	}
+
+
+	size_t WindowT::NumOfKeysInList(Keys key)
+	{
+		size_t value = 0;
+		for (auto& keys : _keyCombs)
+		{
+			for (auto& [ky, val] : keys)
+			{
+				if (ky.first == key && ky.second == Mods::None)
+				{
+					value++;
+				}
+			}
+		}
+		return value;
+	}
+
+	std::shared_ptr<KeyCombB> WindowT::FindKeyComb(Keys key, Mods mod)
+	{
 		for (auto& keys : _keyCombs)
 		{
 			for (auto& [ky, val] : keys)
@@ -311,10 +490,12 @@ namespace tools {
 			}
 		}
 	}
+
 	
 
-	std::shared_ptr<KeyCombB>& WindowT::FindKeyComb(Keys key)
-	{		
+	std::shared_ptr<KeyCombB> WindowT::FindKeyComb(Keys key)
+	{
+		std::vector<std::shared_ptr<KeyCombB>> thekeys;
 		for (auto& keys : _keyCombs)
 		{
 			for (auto& [ky, val] : keys)
@@ -368,8 +549,10 @@ namespace tools {
 			_mainWindow = nullptr;
 			glfwDestroyWindow(_mainWindow);
 		}
-
-		g_numOfWindows--;
+		if (g_numOfWindows > 0)
+		{
+			g_numOfWindows--;
+		}
 
 		//GraphicsHandlerAPI::DeleteWindow(_mainWindow);
 	}
@@ -422,7 +605,11 @@ namespace tools {
 		{
 		case GLFW_PRESS:
 		{
-			_keyPressed = false;
+
+			if (key == 83)
+			{
+				std::cout << "Key 83 pressed\n";
+			}
 			auto& act = _keyCombs[SIZET(Action::Press)];
 
 			for (const auto& [ky, val] : act)
@@ -430,7 +617,8 @@ namespace tools {
 
 				if (val->is_pressed(INT(key), INT(mode)))
 				{
-					_keyPressed = true;
+					_keys[key] = true;
+					_oneInputCurentlyActive.notify_change(val->requires_change());
 					val->execute();
 				}
 			}
@@ -439,15 +627,19 @@ namespace tools {
 		break;
 		case GLFW_RELEASE:
 		{
-			_keyPressed = false;
 			auto& act = _keyCombs[SIZET(Action::Release)];
 
-
+			if (key == 83)
+			{
+				std::cout << "i SET IT TO FALSE FIRST\n"; // fIX THIS ERROR HERE TO MAKE TO NOT SET TO FALSE BEFORE THE FUNCTION RUNS
+			}
 			for (const auto& [ky, val] : act)
 			{
 				if (val->is_pressed(INT(key), INT(mode)))
 				{
-					_keyPressed = true;
+					_keys[key] = false;
+
+					_oneInputCurentlyActive.notify_change(val->requires_change());
 					val->execute();
 				}
 			}
@@ -456,15 +648,13 @@ namespace tools {
 		break;
 		case GLFW_REPEAT:
 		{
-			_keyPressed = true;
 			auto& act = _keyCombs[SIZET(Action::Repeat)];
 
 			for (const auto& [ky, val] : act)
 			{
-
 				if (val->is_pressed(INT(key), INT(mode)))
 				{
-					_keyPressed = true;
+					_oneInputCurentlyActive.notify_change(val->requires_change());
 					val->execute();
 				}
 			}
@@ -474,7 +664,7 @@ namespace tools {
 		}//switch statement
 
 
-		//Poly
+		//Polykeys
 		if (!_keyCombsPoly.empty())
 		{
 
@@ -482,6 +672,7 @@ namespace tools {
 			{
 				if (val->is_pressed(_mainWindow, mode))
 				{
+					_oneInputCurentlyActive.notify_change(val->requires_change());
 					val->execute();
 				}
 			}
@@ -515,13 +706,14 @@ namespace tools {
 			{
 				if (val->is_clicked(_mouseCurrentX, _mouseCurrentY, Action::Press, mouse))
 				{
+					_oneInputCurentlyActive.notify_change(val->requires_change());
 					val->execute();
 				}
 			}
 
 			//_mouseButtons[SIZET(mouse)]->setPressed(true);
 			break;
-		}//case of press
+		}
 
 		case GLFW_RELEASE:
 		{
@@ -534,12 +726,13 @@ namespace tools {
 			{
 				if (val->is_clicked(_mouseCurrentX, _mouseCurrentY, Action::Release, mouse))
 				{
+					_oneInputCurentlyActive.notify_change(val->requires_change());
 					val->execute();
 				}
 			}
 			//_mouseButtons[SIZET(mouse)]->setPressed(false); 
 			break;
-		}//case of release
+		}
 
 		case GLFW_REPEAT:
 		{
@@ -552,15 +745,70 @@ namespace tools {
 			{
 				if (val->is_clicked(_mouseCurrentX, _mouseCurrentY, Action::Repeat, mouse))
 				{
+					_oneInputCurentlyActive.notify_change(val->requires_change());
 					val->execute();
 				}
 			}
 			//_mouseButtons[SIZET(mouse)]->setPressed(false); 
 			break;
-		}//case of release
+		}
 		}//switch statement
 
 	}
 
+
+	WindowT::Async::Async() = default;
+
+	WindowT::Async::Async(const ThreadControlInfo& condition)
+		: windowInputWait(condition.windowInputWait), changingParamsWait(condition.changingParamsWait), lock(condition.lock), state(false)
+	{}
+
+	WindowT::Async::Async(Async&& other) noexcept = default;
+
+	WindowT::Async& WindowT::Async::operator=(Async&& other) noexcept = default;
+
+	void WindowT::Async::notify_change(bool needsChange)
+	{
+		if (needsChange)
+		{
+			state = true;
+			changingParamsWait->notify_one();
+			windowInputWait->wait_for_condition(*lock);
+		}
+	}
+
+	void WindowT::Async::wait_for_window()
+	{
+		windowInputWait->wait_for_condition(*lock);
+	}
+
+	void WindowT::Async::wait_for_change()
+	{
+
+		changingParamsWait->wait_for_condition(*lock);
+	}
+
+	bool WindowT::Async::get_state() const
+	{
+		return state;
+	}
+
+	//void WindowT::Async::wait_for_window()
+	//{
+	//	windowInputWait->wait_for_condition(*lock);
+	//}
+
+	//void WindowT::Async::wait_for_change()
+	//{
+	//	changingParamsWait->wait_for_condition(*lock);
+	//}
+
+	void WindowT::Async::notify_window()
+	{
+		state = false;
+		
+		windowInputWait->notify_one();
+		changingParamsWait->wait_for_condition(*lock);
+	}
 
 } //Namespace tools

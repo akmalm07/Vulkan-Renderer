@@ -82,8 +82,8 @@ namespace tools
 		void move_up(double deltaTime, bool upOrDown);
 		void move_right(double deltaTime, bool rightOrLeft);
 
-		bool event_key(Direction dir, glm::mat4& view, double deltaTime);
-		bool event_key(double xMove, double yMove, glm::mat4& view, double deltaTime);
+		bool event_key(Direction dir, double deltaTime);
+		bool event_key(double xMove, double yMove, double deltaTime);
 
 	};
 

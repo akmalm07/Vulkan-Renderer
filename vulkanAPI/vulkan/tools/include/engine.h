@@ -23,16 +23,17 @@ namespace vkUtil {
 
 
 
-class Engine : public BaseEngine  
+class Engine : public BaseEngine
 {
 public:
 
 	Engine();
 
-	Engine(vkVert::StrideBundle stride, int width, int height, bool orthoOrperspective, bool debug);
+	Engine(int width, int height, bool orthoOrperspective, bool debug);
 
+	Engine(tools::WindowT& window, bool orthoOrperspective, bool debug);
 
-	Engine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool orthoOrperspective, bool debug);
+	Engine(GLFWwindow* glfwWindow, bool orthoOrperspective, bool debug);
 
 	void load_meshes(std::vector<MeshT>& meshes) const;
 	
@@ -40,7 +41,9 @@ public:
 
 	void load_mesh(MeshT& mesh) const;
 
-	void game_logic(double deltaTime) override;
+	void game_logic(const double& deltaTime) override;
+
+	bool camera_logic() override;
 
 	void load_scene(std::unique_ptr<SceneT> scene);
 
@@ -66,11 +69,8 @@ private:
 	mutable std::unique_ptr<VertexBufferT> _vertexBuffer;    
 	mutable std::unique_ptr<IndexBufferT> _indexBuffer;
 
-protected:
+private:
 	void call_push_consts() const;
-
-	void camera_logic(double deltaTime);
-
 };
 
 

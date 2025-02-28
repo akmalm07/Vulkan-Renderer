@@ -29,22 +29,8 @@
 
 BaseEngine::BaseEngine()
 {
-	_MVPMats._modelMat = glm::mat4(1.0f);
-	_MVPMats._viewMat = glm::mat4(1.0f);
-	_MVPMats._projMat = glm::mat4(1.0f);
 	
 	_debugMode = true;
-
-	_stride.pos = vkVert::PosStride::STRIDE_2D;
-	_stride.col = vkVert::ColorStride::RGB;
-	_stride.norm = vkVert::NormalStride::NONE;
-	_stride.tex = vkVert::TextureStride::NONE;
-
-	//this->pos = vkVertex::enumerate_pos_stride(ePosStride);
-	//this->col = vkVertex::enumerate_color_stride(eColStride);
-	//this->norm = vkVertex::enumerate_tex_stride(eTexStride);
-	//this->tex = vkVertex::enumerate_normal_stride(eNormStride);
-
 
 	if (_debugMode) {
 		std::cout << "Making a graphics BaseEngine\n";
@@ -73,36 +59,24 @@ BaseEngine::BaseEngine()
 	make_framebuffer();
 
 	create_command_pool_and_command_buffers();
+
+	handle_threads();
+
 }
 
 
 
 
-BaseEngine::BaseEngine(vkVert::StrideBundle stride, int width, int height, bool orthoOrPerpective, bool debug) 
+BaseEngine::BaseEngine(int width, int height, bool orthoOrPerpective, bool debug) 
 {
 
-	_MVPMats._modelMat = glm::mat4(1.0f);
-	_MVPMats._viewMat = glm::mat4(1.0f);
-	_MVPMats._projMat = glm::mat4(1.0f);
-
 	_debugMode = debug;
-
-	_stride.pos = stride.pos;
-	_stride.col = stride.col;
-	_stride.norm = stride.norm;
-	_stride.tex = stride.tex;
-
-	//this->pos = vkVertex::enumerate_pos_stride(posStride);
-	//this->col = vkVertex::enumerate_color_stride(colStride);
-	//this->norm = vkVertex::enumerate_tex_stride(texStride);
-	//this->tex = vkVertex::enumerate_normal_stride(normStride);
-
 
 	if (_debugMode) {
 		std::cout << "Making a graphics BaseEngine\n"; 
 	}
 
-	build_glfw_window(width, height);  
+	build_glfw_window(width, height, orthoOrPerpective);
 
 	camera_init(orthoOrPerpective); 
 
@@ -126,12 +100,56 @@ BaseEngine::BaseEngine(vkVert::StrideBundle stride, int width, int height, bool 
 
 	create_command_pool_and_command_buffers();
 
+	handle_threads();
+
+}
+
+BaseEngine::BaseEngine(tools::WindowT& glfwWindow, bool orthoOrPerpective, bool debug)
+{
+	camera_init(orthoOrPerpective);
+
+
+	_debugMode = debug;
+
+	_window = std::move(glfwWindow);
+	_window.CreateWindow(true);
+
+
+	_debugMode = debug;
+
+
+	if (_debugMode) {
+		std::cout << "Making a graphics BaseEngine\n";
+	}
+
+
+	make_instance();
+
+	make_debug_messenger();
+
+	make_physical_device();
+
+	make_swapchain();
+
+	read_json_files();
+
+	make_push_consts();
+
+	make_descriptor_sets();
+
+	make_pipeline();
+
+	make_framebuffer();
+
+	create_command_pool_and_command_buffers();
+
+	handle_threads();
 }
 
 
 
 
-BaseEngine::BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool orthoOrPerpective, bool debug) 
+BaseEngine::BaseEngine(GLFWwindow* glfwWindow, bool orthoOrPerpective, bool debug) 
 {
 
 	camera_init(orthoOrPerpective);
@@ -139,17 +157,8 @@ BaseEngine::BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool
 
 	_debugMode = debug;
 
-	_stride.pos = stride.pos;
-	_stride.col = stride.col;
-	_stride.norm = stride.norm;
-	_stride.tex = stride.tex;
-
-	//this->pos = vkVertex::enumerate_pos_stride(posStride);
-	//this->col = vkVertex::enumerate_color_stride(colStride);
-	//this->norm = vkVertex::enumerate_tex_stride(texStride);
-	//this->tex = vkVertex::enumerate_normal_stride(normStride);
-
-	_window.SetWindow(glfwWindow); 
+	_window = std::move(tools::WindowT(800, 800, "Vulkan", true));
+	_window.SetWindow(glfwWindow, orthoOrPerpective);
 
 
 	_debugMode = debug; 
@@ -179,6 +188,8 @@ BaseEngine::BaseEngine(GLFWwindow* glfwWindow, vkVert::StrideBundle stride, bool
 	make_framebuffer();
 
 	create_command_pool_and_command_buffers();
+
+	handle_threads();
 }
 
 
@@ -205,13 +216,15 @@ void BaseEngine::update_FPS()
 
 void BaseEngine::build_glfw_window() 
 { 
-	_window.CreateWindow("Vulkan", 800, 600);
+	_window = std::move(tools::WindowT(800, 800, "Untitled Window", true));
+	_window.CreateWindow(true);
 }
 
 
-void BaseEngine::build_glfw_window(int width, int height) 
+void BaseEngine::build_glfw_window(int width, int height, bool orthoOrPerpective)
 { 
-	_window.CreateWindow("Vulkan", width, height);
+	_window = std::move(tools::WindowT(width, height, "Vulkan", orthoOrPerpective));
+	_window.CreateWindow(true);
 }
 
 
@@ -532,43 +545,9 @@ void BaseEngine::make_descriptor_sets()
 		_vkDescriptorSets.updated[i].reserve(allDescriptorSets[i].size());
 		for (const auto& [j, set] : allDescriptorSets[i] | std::views::enumerate)
 		{
-			size_t id = j;
-			switch (set.type)
-			{
-			case vk::DescriptorType::eUniformBuffer:
-				id += 0;
-				break;
-			case vk::DescriptorType::eUniformBufferDynamic:
-				id += 1000;
-				break;
-			case vk::DescriptorType::eStorageBuffer:
-				id += 2000;
-				break;
-			case vk::DescriptorType::eStorageBufferDynamic:
-				id += 3000;
-				break;
-			case vk::DescriptorType::eUniformTexelBuffer:
-				id += 4000;
-				break;
-			case vk::DescriptorType::eStorageTexelBuffer:
-				id += 5000;
-				break;
-			case vk::DescriptorType::eStorageImage:
-				id += 6000;
-				break;
-			case vk::DescriptorType::eSampledImage:
-				id += 7000;
-				break;
-			case vk::DescriptorType::eSampler:
-				id += 8000;
-				break;
-			case vk::DescriptorType::eCombinedImageSampler:
-				id += 9000;
-				break;
-
-			}
-			_vkDescriptorSets.updated[i].emplace_back(id, true);
+			_vkDescriptorSets.updated[i].emplace_back(gen_desc_id(set.type), true);
 		} 
+
 	}
 
 	_vkDescriptorPool = out.pool;
@@ -667,6 +646,119 @@ void BaseEngine::record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t
 
 
 }
+
+
+void BaseEngine::handle_threads()
+{
+	_windowInputsAsync.windowInput = std::make_shared<tools::ConditionalVariuble>();
+	_windowInputsAsync.updateInputParams = std::make_shared<tools::ConditionalVariuble>();
+	_windowInputsAsync.lockMtx = std::make_shared<std::mutex>();
+
+	
+	_windowInputsAsync.threadUpdateParams.initalize(
+		[this]() -> bool
+		{
+			return this->camera_logic();
+		}
+		, 
+		"handle changing parameters",
+		_debugMode);
+	_window.SetAsyncPollEvents(
+		tools::ThreadControlInfo(
+		_windowInputsAsync.windowInput, 
+		_windowInputsAsync.updateInputParams, 
+		_windowInputsAsync.lockMtx)
+	);
+
+	_windowInputsAsync.threadUpdateParams.start(true);
+}
+
+uint32_t BaseEngine::gen_desc_id(vk::DescriptorType desc)
+{
+	uint32_t id = 0;
+	switch (desc)
+	{
+	case vk::DescriptorType::eUniformBuffer:
+	{
+		static uint32_t val = 0;
+		id += 0 + val;
+		val++;
+		break;
+	}
+	case vk::DescriptorType::eUniformBufferDynamic:
+	{
+		static uint32_t val = 0;
+		id += 1000 + val;
+		val++;
+		break;
+	}
+	case vk::DescriptorType::eStorageBuffer:
+	{
+		static uint32_t val = 0;
+		id += 2000 + val;
+		val++;
+		break;
+	}
+	case vk::DescriptorType::eStorageBufferDynamic:
+	{
+		static uint32_t val = 0;
+		id += 3000 + val;
+		val++;
+		break;
+	}
+	case vk::DescriptorType::eUniformTexelBuffer:
+	{
+		static uint32_t val = 0;
+		id += 4000 + val;
+		val++;
+		break;
+	}
+	case vk::DescriptorType::eStorageTexelBuffer:
+	{
+		static uint32_t val = 0;
+		id += 5000 + val;
+		val++;
+		break;
+	}
+	case vk::DescriptorType::eStorageImage:
+	{
+		static uint32_t val = 0;
+		id += 6000 + val;
+		val++;
+		break;
+	}
+	case vk::DescriptorType::eSampledImage:
+	{
+		static uint32_t val = 0;
+		id += 0 + val;
+		val++;
+		break;
+	}
+	case vk::DescriptorType::eSampler:
+	{
+		static uint32_t val = 0;
+		id += 8000 + val;
+		val++;
+		break;
+	}
+	case vk::DescriptorType::eCombinedImageSampler:
+	{
+		static uint32_t val = 0;
+		id += 9000 + val;
+		val++;
+		break;
+	}
+	default:
+	{
+		static uint32_t val = 0;
+		id += 10000 + val;
+		val++;
+	}
+	}
+	return id;
+}
+
+
 
 void BaseEngine::camera_init(bool orthoOrPerpective)
 {

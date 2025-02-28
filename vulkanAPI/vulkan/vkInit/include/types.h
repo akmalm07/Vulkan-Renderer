@@ -115,6 +115,12 @@ namespace vkType
 	//	using Texture = TEX;
 	//};
 
+	template<class T>
+	const T make_const(T&& t)
+	{
+		const T val = t;
+		return val;
+	}
 
 
 	template <class T>
