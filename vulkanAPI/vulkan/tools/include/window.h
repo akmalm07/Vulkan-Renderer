@@ -24,8 +24,6 @@ namespace tools {
 
 		WindowT& operator=(WindowT&& other) noexcept;
 
-		void SetAsyncPollEvents(const ThreadControlInfo& cv);
-
 		bool CreateWindow(bool disableCursor);
 		
 		bool CreateWindow(float windowWidth, float windowHeight, const std::string& name, bool disableCursor);
@@ -35,37 +33,68 @@ namespace tools {
 		float GetAspectRatio() const;
 
 		void DelKeyComb(Keys key, Mods mod);
+		
 		void DelKeyComb(Keys key);
 
-		std::shared_ptr<AABButtonB>& FindAABButton(std::string_view name);
+
+		void DelKeyCombPoly(const std::array<Keys, KEY_MAX>& key, Mods mod);
 		
+		void DelKeyCombPoly(const std::array<Keys, KEY_MAX>& key);
+
+
+		std::shared_ptr<AABButtonB> FindAABButton(std::string_view name);
+		void DelAABButton(std::string_view name);
+
+
 		std::vector<std::shared_ptr<KeyCombB>> FindKeyCombList(Keys key, Mods mod);
 		
 		std::vector<std::shared_ptr<KeyCombB>> FindKeyCombList(Keys key);
+
+		std::vector<std::shared_ptr<KeyCombB>> FindKeyCombPolyList(const std::array<Keys, KEY_MAX>& key);
+
+		std::vector<std::shared_ptr<KeyCombB>> FindKeyCombPolyList(const std::array<Keys, KEY_MAX>& key, Mods mode);
+
 
 		size_t NumOfKeysInList(Keys key, Mods mod);
 		
 		size_t NumOfKeysInList(Keys key);
 
+		size_t NumOfKeysInListPoly(const std::array<Keys, KEY_MAX>& key, Mods mod);
+		
+		size_t NumOfKeysInListPoly(const std::array<Keys, KEY_MAX>& key);
+
+
 		std::shared_ptr<KeyCombB> FindKeyComb(Keys key, Mods mod);
 		
 		std::shared_ptr<KeyCombB> FindKeyComb(Keys key);
 
+		std::shared_ptr<KeyCombB> FindKeyCombPoly(const std::array<Keys, KEY_MAX>& key);
+		
+		std::shared_ptr<KeyCombB> FindKeyCombPoly(const std::array<Keys, KEY_MAX>& key, Mods mode);
 
-		void DelAABButton(std::string_view name);
+
+		void AddFunctionParametersUpdater(Keys key, Mods mode, std::function<bool()> func);
+
+		void AddFunctionParametersUpdater(Keys key, std::function<bool()> func);
+
+		void AddFunctionParametersUpdaterPoly(const std::array<Keys, KEY_MAX>& key, Mods mode, std::function<bool()> func);
+
+		void AddFunctionParametersUpdaterPoly(const std::array<Keys, KEY_MAX>& key, std::function<bool()> func);
+
+
+		void ChangeFunctionParametersUpdater(Keys key, Mods mode, std::function<bool()> func);
+
+		void ChangeFunctionParametersUpdater(Keys key, std::function<bool()> func);
+
+		void ChangeFunctionParametersUpdaterPoly(const std::array<Keys, KEY_MAX>& key, Mods mode, std::function<bool()> func);
+
+		void ChangeFunctionParametersUpdaterPoly(const std::array<Keys, KEY_MAX>& key, std::function<bool()> func);
+
 
 		void SetWidth(int width) { _width = width; }
 
 		void SetHeight(int height) { _height = height; }
 
-		void AllowWindowToContinueAndWait();
-
-		void WaitInitallyForSignal();
-		//template<class ... Args>
-		//void AddMouseClick(Mouse mouse, std::function<bool(Args...)> function);
-		//void DelMouseClick(Mouse mouse);
-		//MouseButton& FindMouseButtonName(Mouse mouse);
-		//Planning to add a function to find the mouse button soon...
 
 		template<class F, class ... Args>
 		void AddAABButton(const AABButtonInput& input, F&& function, std::string_view str, Args&&... args);
@@ -107,7 +136,6 @@ namespace tools {
 
 		template<class ... Args>
 		void AddKeyComb(const KeyCombInputPoly& input, std::function<bool(Args...)> func, Args&&... args);
-
 
 
 		void SetOrtho(float left, float right, float top, float bottom);
@@ -156,8 +184,6 @@ namespace tools {
 		
 		std::array<bool, KEY_CONST> GetKeys() { return _keys; } // make a system of that if the 
 
-		bool IsOneInputActive() const { return _oneInputCurentlyActive.get_state(); }
-
 		void SwapBuffers() const { glfwSwapBuffers(_mainWindow); }
 
 		void ClearWindow();
@@ -183,7 +209,6 @@ namespace tools {
 
 		std::optional<float> _leftOrtho, _rightOrtho, _topOrtho, _bottomOrtho;
 
-
 		//Mouse Vars
 		bool _isFirstClick = false;
 
@@ -200,54 +225,19 @@ namespace tools {
 
 		std::array<bool, KEY_CONST> _keys{ false };
 
-		struct Async
-		{
-		public:
-			Async();
-			Async(const ThreadControlInfo& condition);
-			Async(Async&& other) noexcept;
-			Async& operator=(Async&& other) noexcept;
-
-			void notify_window();
-			void notify_change(bool needsChange);
-
-			void wait_for_window();
-			void wait_for_change();
-
-			bool get_state() const;
-
-//			void wait_for_window();
-//			void wait_for_change();
-
-		private:
-			std::shared_ptr <ConditionalVariuble> windowInputWait;
-			std::shared_ptr <ConditionalVariuble> changingParamsWait;
-			std::shared_ptr <std::mutex> lock;
-			bool state;
-		} _oneInputCurentlyActive;
-
 		std::string _name = "";
 
-		std::array<std::unordered_map <std::pair<Keys, Mods>, std::shared_ptr<KeyCombB>>, SIZET(Action::Count)> _keyCombs;
+		std::array<std::unordered_map <std::pair<Keys, Mods>, KeyComplete>, SIZET(Action::Count)> _keyCombs;
 
-		std::unordered_map <std::pair<std::array<Keys, KEY_MAX>, Mods>, std::shared_ptr<KeyCombB>> _keyCombsPoly;
+		std::unordered_map <std::pair<std::array<Keys, KEY_MAX>, Mods>, KeyComplete> _keyCombsPoly;
 
-		std::array <std::unordered_map <std::string_view, std::shared_ptr<AABButtonB>>, SIZET(Action::Count)> _AABButtons;
+		std::array <std::unordered_map <std::string_view, ButtonComplete>, SIZET(Action::Count)> _AABButtons;
 
-		//std::array<MouseButtonB, SIZET(Mouse::Count)> _mouseButtons; 
 
-		//void setMouseBeforeX(double posX);
-		//void setMouseBeforeY(double posY);
-
-		//void setMouseAfterX(double posX);
-		//void setMouseAfterY(double posY);
-		//WindowButton& FindWindowButtonName(const std::string& name);
 
 	private:
 
 		void setKey(unsigned int key, bool val);
-
-		//const std::string TranslateCoordinatesToNotation(uint32_t rank, uint32_t file);
 
 		void HandleKeys(int key, int code, int action, int mode);
 		void HandleMouseCursor(double posX, double posY);
@@ -444,3 +434,54 @@ namespace vkType
 {
 	using Window = tools::WindowT;
 }
+
+
+
+
+//------------------------------------------------
+
+
+//PLANNING TO EXTEND
+//void SetAsyncPollEvents(const ThreadControlInfo& cv);
+
+//void AllowWindowToContinueAndWait();
+//void WaitInitallyForSignal();
+//template<class ... Args>
+//void AddMouseClick(Mouse mouse, std::function<bool(Args...)> function);
+//void DelMouseClick(Mouse mouse);
+//MouseButton& FindMouseButtonName(Mouse mouse);
+//Planning to add a function to find the mouse button soon...
+//struct Async
+//{
+//public:
+//	Async();
+//	Async(const ThreadControlInfo& condition);
+//	Async(Async&& other) noexcept;
+//	Async& operator=(Async&& other) noexcept;
+
+//	void notify_window();
+//	void notify_change(bool needsChange);
+
+//	void wait_for_window();
+//	void wait_for_change();
+
+//	bool get_state() const;
+
+//	void wait_for_window();
+//	void wait_for_change();
+
+//private:
+//	std::shared_ptr <ConditionalVariuble> windowInputWait;
+//	std::shared_ptr <ConditionalVariuble> changingParamsWait;
+//	std::shared_ptr <std::mutex> lock;
+//	bool state;
+//} _oneInputCurentlyActive;
+
+//std::array<MouseButtonB, SIZET(Mouse::Count)> _mouseButtons; 
+
+//void setMouseBeforeX(double posX);
+//void setMouseBeforeY(double posY);
+
+//void setMouseAfterX(double posX);
+//void setMouseAfterY(double posY);
+//WindowButton& FindWindowButtonName(const std::string& name);

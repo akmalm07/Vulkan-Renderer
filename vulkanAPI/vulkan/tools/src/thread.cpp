@@ -21,7 +21,7 @@ namespace tools
 
 	void ConditionalVariuble::notify_one()
 	{
-		_condition.notify_one(); 
+		_condition.notify_one();
 	}
 
 	void ConditionalVariuble::notify_all() 

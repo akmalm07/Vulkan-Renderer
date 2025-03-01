@@ -49,8 +49,6 @@ namespace tools
 	struct ConditionalVariuble
 	{
 	public:
-		void notify_condition();
-
 		void wait_for_condition(std::mutex& mutex);
 
 		void wait_for_condition(std::mutex& mutex, bool& value);
@@ -116,7 +114,7 @@ namespace tools
 		_thread.detach();
 		if (_debug)
 		{
-			std::cout << "ThreadT " << _name << " is running independently!" << std::endl;
+			std::cout << "ThreadT: " << _name << " with id: " << _thread.get_id() << " is running independently!" << std::endl;
 		}
 	}
 

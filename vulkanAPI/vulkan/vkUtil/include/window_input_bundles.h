@@ -42,14 +42,30 @@ namespace tools
         std::string_view name;
     };
 
-    struct ThreadControlInfo
-    {
-    public:
-        ThreadControlInfo(const std::shared_ptr<ConditionalVariuble>& windowInput,
-            const std::shared_ptr<ConditionalVariuble>& changingParams, const std::shared_ptr<std::mutex>& mtx);
 
-        std::shared_ptr<ConditionalVariuble> windowInputWait;
-        std::shared_ptr<ConditionalVariuble> changingParamsWait;
-        std::shared_ptr<std::mutex> lock;
+    struct ButtonComplete
+    {
+        std::shared_ptr<AABButtonB> button;
+        std::function<bool()> updater;
+    };
+    struct KeyComplete
+    {
+        std::shared_ptr<KeyCombB> key;
+        std::function<bool()> updater;
+    };
+    struct MouseComplete
+    {
+        std::shared_ptr<MouseButtonB> key;
+        std::function<bool()> updater;
     };
 }
+    //struct ThreadControlInfo
+    //{
+    //public:
+    //    ThreadControlInfo(const std::shared_ptr<ConditionalVariuble>& windowInput,
+    //        const std::shared_ptr<ConditionalVariuble>& changingParams, const std::shared_ptr<std::mutex>& mtx);
+
+    //    std::shared_ptr<ConditionalVariuble> windowInputWait;
+    //    std::shared_ptr<ConditionalVariuble> changingParamsWait;
+    //    std::shared_ptr<std::mutex> lock;
+    //};

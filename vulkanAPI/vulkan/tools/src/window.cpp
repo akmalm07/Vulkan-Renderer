@@ -5,6 +5,7 @@
 #include "tools\include\keys.h"
 
 #include "tools\include\window.h"
+#include "tools\include\timer.h"
 
 
 namespace tools {
@@ -75,11 +76,6 @@ namespace tools {
 
 	WindowT& WindowT::operator=(WindowT&& other) noexcept = default;
 
-
-	void WindowT::SetAsyncPollEvents(const ThreadControlInfo& cv)
-	{
-		_oneInputCurentlyActive = cv;
-	}
 
 	bool WindowT::CreateWindow(bool disableCursor)
 	{
@@ -354,15 +350,6 @@ namespace tools {
 
 	}
 
-	void WindowT::AllowWindowToContinueAndWait()
-	{
-		_oneInputCurentlyActive.notify_window();
-	}
-
-	void WindowT::WaitInitallyForSignal()
-	{
-		_oneInputCurentlyActive.wait_for_change();
-	}
 
 	void WindowT::DelKeyComb(Keys name, Mods mod)
 	{
@@ -392,7 +379,29 @@ namespace tools {
 		}
 	}
 
-	std::shared_ptr<AABButtonB>& WindowT::FindAABButton(std::string_view name)
+	void WindowT::DelKeyCombPoly(const std::array<Keys, KEY_MAX>& key, Mods mod)
+	{
+		auto it = _keyCombsPoly.find(std::make_pair(key, mod));
+		if (it == _keyCombsPoly.end())
+		{
+			fprintf(stderr, "Entered invalid window name ( Window.cpp : DelWindowButton )");
+			return;
+		}
+		_keyCombsPoly.erase(it);
+	}
+
+	void WindowT::DelKeyCombPoly(const std::array<Keys, KEY_MAX>& key)
+	{
+		auto it = _keyCombsPoly.find(std::make_pair(key, Mods::None));
+		if (it == _keyCombsPoly.end())
+		{
+			fprintf(stderr, "Entered invalid window name ( Window.cpp : DelWindowButton )");
+			return;
+		}
+		_keyCombsPoly.erase(it);
+	}
+
+	std::shared_ptr<AABButtonB> WindowT::FindAABButton(std::string_view name)
 	{
 		for (auto& item : _AABButtons)
 		{
@@ -400,15 +409,51 @@ namespace tools {
 			{
 				if (key == name)
 				{
-					return val;
+					return val.button;
 				}
 			}
 		}
 		throw std::runtime_error("Could not find the AABButton with the name: " + std::string(name));
 	}
 
-	std::vector<std::shared_ptr<KeyCombB>> WindowT::FindKeyCombList(Keys key, Mods mod)
+	std::vector<std::shared_ptr<KeyCombB>> WindowT::FindKeyCombPolyList(const std::array<Keys, KEY_MAX>& key, Mods mod)
 	{		
+		std::vector<std::shared_ptr<KeyCombB>> thekeys;
+		thekeys.reserve(2);
+
+		for (auto& keys : _keyCombsPoly)
+		{
+			auto& [ky, val] = keys;
+
+			if (ky.first == key && ky.second == mod)
+			{
+				thekeys.push_back(val.key);
+			}
+			
+		}
+		return thekeys;
+	}
+	
+
+	std::vector<std::shared_ptr<KeyCombB>> WindowT::FindKeyCombPolyList(const std::array<Keys, KEY_MAX>& key)
+	{
+		std::vector<std::shared_ptr<KeyCombB>> thekeys;
+		thekeys.reserve(2);
+		for (auto& keys : _keyCombsPoly)
+		{
+			auto& [ky, val] = keys;
+
+			if (ky.first == key && ky.second == Mods::None)
+			{
+				thekeys.push_back(val.key);
+			}
+
+		}
+		return thekeys;
+	}
+
+	std::vector<std::shared_ptr<KeyCombB>> WindowT::FindKeyCombList(Keys key, Mods mod)
+	{
 		std::vector<std::shared_ptr<KeyCombB>> thekeys;
 		thekeys.reserve(2);
 
@@ -418,13 +463,13 @@ namespace tools {
 			{
 				if (ky.first == key && ky.second == mod)
 				{
-					thekeys.push_back(val);
+					thekeys.push_back(val.key);
 				}
 			}
 		}
 		return thekeys;
 	}
-	
+
 
 	std::vector<std::shared_ptr<KeyCombB>> WindowT::FindKeyCombList(Keys key)
 	{
@@ -436,12 +481,13 @@ namespace tools {
 			{
 				if (ky.first == key && ky.second == Mods::None)
 				{
-					thekeys.push_back(val);
+					thekeys.push_back(val.key);
 				}
 			}
 		}
 		return thekeys;
 	}
+
 
 	size_t WindowT::NumOfKeysInList(Keys key, Mods mod)
 	{
@@ -454,6 +500,10 @@ namespace tools {
 				if (ky.first == key && ky.second == mod)
 				{
 					value++;
+					if (value == 2)
+					{
+						return value;
+					}
 				}
 			}
 		}
@@ -471,7 +521,40 @@ namespace tools {
 				if (ky.first == key && ky.second == Mods::None)
 				{
 					value++;
+					if (value == 2)
+					{
+						return value;
+					}
 				}
+			}
+		}
+		return value;
+	}
+
+	size_t WindowT::NumOfKeysInListPoly(const std::array<Keys, KEY_MAX>& key, Mods mod)
+	{
+		size_t value = 0;
+		for (auto& keys : _keyCombsPoly)
+		{
+			auto& [ky, val] = keys;
+			if (ky.first == key && ky.second == mod)
+			{
+				value++;
+			}
+		}
+		return value;
+	}
+
+
+	size_t WindowT::NumOfKeysInListPoly(const std::array<Keys, KEY_MAX>& key)
+	{
+		size_t value = 0;
+		for (auto& keys : _keyCombsPoly)
+		{
+			auto& [ky, val] = keys;
+			if (ky.first == key && ky.second == Mods::None)
+			{
+				value++;
 			}
 		}
 		return value;
@@ -485,10 +568,12 @@ namespace tools {
 			{
 				if (ky.first == key && ky.second == mod)
 				{
-					return val;
+					return val.key;
 				}
 			}
 		}
+		return nullptr;
+
 	}
 
 	
@@ -502,10 +587,155 @@ namespace tools {
 			{
 				if (ky.first == key && ky.second == Mods::None)
 				{
-					return val;
+					return val.key;
 				}
 			}
 		}
+
+		return nullptr;
+	}
+
+	std::shared_ptr<KeyCombB> WindowT::FindKeyCombPoly(const std::array<Keys, KEY_MAX>& key)
+	{
+		for (auto& keys : _keyCombsPoly)
+		{
+			auto& [ky, val] = keys;
+			if (ky.first == key && ky.second == Mods::None)
+			{
+				return val.key;
+			}
+		}
+
+	}
+
+	std::shared_ptr<KeyCombB> WindowT::FindKeyCombPoly(const std::array<Keys, KEY_MAX>& key, Mods mode)
+	{
+		for (auto& keys : _keyCombsPoly)
+		{
+			auto& [ky, val] = keys;
+			if (ky.first == key && ky.second == mode)
+			{
+				return val.key;
+			}
+		}
+	}
+
+
+	void WindowT::AddFunctionParametersUpdater(Keys key, Mods mode, std::function<bool()> func)
+	{
+		if (NumOfKeysInList(key, mode) == 1)
+		{
+			for (auto& keys : _keyCombs)
+			{
+				auto it = keys.find(std::make_pair(key, mode));
+				if (it != keys.end())
+				{
+					it->second.updater = std::move(func);
+					break;
+				}
+			}
+		}
+		else if (NumOfKeysInList(key) < 1)
+		{
+			for (auto& keys : _keyCombs)
+			{
+				auto it = keys.find(std::make_pair(key, mode));
+				if (it != keys.end())
+				{
+					it->second.updater = std::move(func);
+				}
+			}
+		}
+		else
+		{
+			throw std::runtime_error("There are more than one key with the same name and mode in the list");
+		}
+
+	}
+
+	void WindowT::AddFunctionParametersUpdater(Keys key, std::function<bool()> func)
+	{
+		if (NumOfKeysInList(key) == 1)
+		{
+			for (auto& keys : _keyCombs)
+			{
+				auto it = keys.find(std::make_pair(key, Mods::None));
+				if (it != keys.end())
+				{
+					it->second.updater = std::move(func);
+					break;
+				}
+			}
+		}
+		else if (NumOfKeysInList(key) < 1)
+		{
+			for (auto& keys : _keyCombs)
+			{
+				auto it = keys.find(std::make_pair(key, Mods::None));
+				if (it != keys.end())
+				{
+					it->second.updater = std::move(func);
+				}
+			}
+		}
+		else
+		{
+			throw std::runtime_error("There are more than one key with the same name and mode in the list");
+		}
+
+	}
+
+	void WindowT::AddFunctionParametersUpdaterPoly(const std::array<Keys, KEY_MAX>& key, Mods mode, std::function<bool()> func)
+	{
+		for (auto& keys : _keyCombsPoly)
+		{
+			auto& [ky, val] = keys;
+			if (ky.first == key && ky.second == mode)
+			{
+				val.updater = std::move(func);
+				break;
+			}
+		}
+
+		throw std::runtime_error("There are more than one key with the same name and mode in the list");
+	}
+
+
+	void WindowT::AddFunctionParametersUpdaterPoly(const std::array<Keys, KEY_MAX>& key, std::function<bool()> func)
+	{
+		for (auto& keys : _keyCombsPoly)
+		{
+			auto& [ky, val] = keys;
+			if (ky.first == key && ky.second == Mods::None)
+			{
+				val.updater = std::move(func);
+				break;
+			}
+		}
+
+		throw std::runtime_error("There are more than one key with the same name and mode in the list");
+	}
+
+
+
+	void WindowT::ChangeFunctionParametersUpdater(Keys key, Mods mode, std::function<bool()> func)
+	{
+		AddFunctionParametersUpdater(key, mode, std::move(func));
+	}
+
+	void WindowT::ChangeFunctionParametersUpdater(Keys key, std::function<bool()> func)
+	{
+		AddFunctionParametersUpdater(key, std::move(func));
+	}
+
+	void WindowT::ChangeFunctionParametersUpdaterPoly(const std::array<Keys, KEY_MAX>& key, Mods mode, std::function<bool()> func)
+	{
+		_keyCombsPoly[std::make_pair(key, mode)].updater = std::move(func);
+	}
+
+	void WindowT::ChangeFunctionParametersUpdaterPoly(const std::array<Keys, KEY_MAX>& key, std::function<bool()> func)
+	{
+		_keyCombsPoly[std::make_pair(key, Mods::None)].updater = std::move(func);
 	}
 
 
@@ -606,20 +836,20 @@ namespace tools {
 		case GLFW_PRESS:
 		{
 
-			if (key == 83)
-			{
-				std::cout << "Key 83 pressed\n";
-			}
 			auto& act = _keyCombs[SIZET(Action::Press)];
 
 			for (const auto& [ky, val] : act)
 			{
 
-				if (val->is_pressed(INT(key), INT(mode)))
+				if (val.key->is_pressed(INT(key), INT(mode)))
 				{
 					_keys[key] = true;
-					_oneInputCurentlyActive.notify_change(val->requires_change());
-					val->execute();
+					if (!val.updater)
+					{
+						val.updater();
+					}
+
+					val.key->execute();
 				}
 			}
 			
@@ -632,7 +862,7 @@ namespace tools {
 			if (key == 83)
 			{
 				std::cout << "i SET IT TO FALSE FIRST\n"; // fIX THIS ERROR HERE TO MAKE TO NOT SET TO FALSE BEFORE THE FUNCTION RUNS
-			}
+			} // There are race conditions here, the wait is NOT working properly, must FiX
 			for (const auto& [ky, val] : act)
 			{
 				if (val->is_pressed(INT(key), INT(mode)))
@@ -757,41 +987,26 @@ namespace tools {
 	}
 
 
-	WindowT::Async::Async() = default;
+	//WindowT::Async::Async() = default;
 
-	WindowT::Async::Async(const ThreadControlInfo& condition)
-		: windowInputWait(condition.windowInputWait), changingParamsWait(condition.changingParamsWait), lock(condition.lock), state(false)
-	{}
+	//WindowT::Async::Async(const ThreadControlInfo& condition)
+	//	: windowInputWait(condition.windowInputWait), changingParamsWait(condition.changingParamsWait), lock(condition.lock), state(false)
+	//{}
 
-	WindowT::Async::Async(Async&& other) noexcept = default;
+	//WindowT::Async::Async(Async&& other) noexcept = default;
 
-	WindowT::Async& WindowT::Async::operator=(Async&& other) noexcept = default;
+	//WindowT::Async& WindowT::Async::operator=(Async&& other) noexcept = default;
 
-	void WindowT::Async::notify_change(bool needsChange)
-	{
-		if (needsChange)
-		{
-			state = true;
-			changingParamsWait->notify_one();
-			windowInputWait->wait_for_condition(*lock);
-		}
-	}
+	//void WindowT::Async::notify_change(bool needsChange)
+	//{
+	//	if (needsChange)
+	//	{
+	//		state = true;
+	//		changingParamsWait->notify_one();
+	//		windowInputWait->wait_for_condition(*lock);
 
-	void WindowT::Async::wait_for_window()
-	{
-		windowInputWait->wait_for_condition(*lock);
-	}
-
-	void WindowT::Async::wait_for_change()
-	{
-
-		changingParamsWait->wait_for_condition(*lock);
-	}
-
-	bool WindowT::Async::get_state() const
-	{
-		return state;
-	}
+	//	}
+	//}
 
 	//void WindowT::Async::wait_for_window()
 	//{
@@ -800,15 +1015,34 @@ namespace tools {
 
 	//void WindowT::Async::wait_for_change()
 	//{
+
 	//	changingParamsWait->wait_for_condition(*lock);
 	//}
 
-	void WindowT::Async::notify_window()
-	{
-		state = false;
-		
-		windowInputWait->notify_one();
-		changingParamsWait->wait_for_condition(*lock);
-	}
+	//bool WindowT::Async::get_state() const
+	//{
+	//	return state;
+	//}
+
+	//void WindowT::Async::notify_window()
+	//{
+	//	state = false;
+	//	
+	//	windowInputWait->notify_one();
+	//	changingParamsWait->wait_for_condition(*lock);
+	//}
+	//void WindowT::AllowWindowToContinueAndWait()
+	//{
+	//	_oneInputCurentlyActive.notify_window("I am from the camera logic");
+	//}
+
+	//void WindowT::WaitInitallyForSignal()
+	//{
+	//	_oneInputCurentlyActive.wait_for_change();
+	//}
+	//void WindowT::SetAsyncPollEvents(const ThreadControlInfo& cv)
+	//{
+	//	_oneInputCurentlyActive = cv;
+	//}
 
 } //Namespace tools

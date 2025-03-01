@@ -36,11 +36,11 @@ namespace tools
 
 		std::chrono::duration duration = _timeEnded - _timeStarted;
 
-		double milliseconds = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
+		double milliseconds = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());//
 
 		if (debug)
 		{
-			std::cout << milliseconds << " ms \n";
+			std::cout << "Timer stops at " << milliseconds << " ms \n";
 		}
 
 		return milliseconds;

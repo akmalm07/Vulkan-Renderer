@@ -299,110 +299,99 @@ void Engine::call_push_consts() const
 
 bool Engine::camera_logic()
 {
-	_window.WaitInitallyForSignal();
 
-	bool running = !_window.GetShouldClose();
+	using tools::Keys;
+	using tools::Mods;
 
-	while (running)
+
+	const std::array<bool, 1024>& keys = _window.GetKeysConstRef();
+
+	Keys movekey;
+
+	if (keys[SIZET(Keys::W)])
 	{
-		running = !_window.GetShouldClose();
-
-		if (_window.IsOneInputActive())
-		{
-			std::cout << "Delta Time: " << _deltaTime << std::endl;
-			using tools::Keys;
-			using tools::Mods;
-
-
-			const std::array<bool, 1024>& keys = _window.GetKeysConstRef();
-
-			Keys movekey;
-
-			if (keys[SIZET(Keys::W)])
-			{
-				movekey = Keys::W;
-			}
-			else if (keys[SIZET(Keys::S)])
-			{
-				std::cout << "i CHECKED IT TO FIRST\n";
-				movekey = Keys::S;
-			}
-			else if (keys[SIZET(Keys::A)])
-			{
-				movekey = Keys::A;
-			}
-			else if (keys[SIZET(Keys::D)])
-			{
-				movekey = Keys::D;
-			}
-			else if (keys[SIZET(Keys::Q)])
-			{
-				movekey = Keys::Q;
-			}
-			else if (keys[SIZET(Keys::E)])
-			{
-				movekey = Keys::E;
-			}
-			else
-			{
-				_window.AllowWindowToContinueAndWait();
-				continue;
-			}
-
-
-			if (_window.NumOfKeysInList(movekey) == 1)
-			{
-				_window.FindKeyComb(movekey)->change_parameters(_deltaTime);
-
-			}
-			else if (_window.NumOfKeysInList(movekey) > 1)
-			{
-				for (auto& key : _window.FindKeyCombList(movekey))
-				{
-					key->change_parameters(_deltaTime);
-				}
-			}
-				_vkDescriptorSets.updated[SIZET(Sets::Set1)][SIZET(Set1::Binding1)].status = true;
-
-
-
-			Keys turnkey;
-			if (keys[SIZET(Keys::Up)])
-			{
-				turnkey = Keys::Up;
-			}
-			else if (keys[SIZET(Keys::Down)])
-			{
-				turnkey = Keys::Down;
-			}
-			else if (keys[SIZET(Keys::Right)])
-			{
-				turnkey = Keys::Right;
-			}
-			else if (keys[SIZET(Keys::Left)])
-			{
-				turnkey = Keys::Left;
-			}
-			else
-			{
-				_window.AllowWindowToContinueAndWait();
-				continue;
-			}
-			
-			if (_window.NumOfKeysInList(movekey) == 1)
-			{
-				_window.FindKeyComb(movekey)->change_parameters(0.3, 0.3, _deltaTime);
-
-			}
-			else if (_window.NumOfKeysInList(movekey) < 1)
-			{
-				for (auto& key : _window.FindKeyCombList(movekey))
-				{
-					key->change_parameters(0.3, 0.3, _deltaTime);
-				}
-			}
-		}		
+		movekey = Keys::W;
 	}
+	else if (keys[SIZET(Keys::S)])
+	{
+		std::cout << "i CHECKED IT TO FIRST\n";
+		movekey = Keys::S;
+	}
+	else if (keys[SIZET(Keys::A)])
+	{
+		movekey = Keys::A;
+	}
+	else if (keys[SIZET(Keys::D)])
+	{
+		movekey = Keys::D;
+	}
+	else if (keys[SIZET(Keys::Q)])
+	{
+		movekey = Keys::Q;
+	}
+	else if (keys[SIZET(Keys::E)])
+	{
+		movekey = Keys::E;
+	}
+	else
+	{
+		return false;
+	}
+
+
+	if (_window.NumOfKeysInList(movekey) == 1)
+	{
+		_window.FindKeyComb(movekey)->change_parameters(_deltaTime);
+
+	}
+	else if (_window.NumOfKeysInList(movekey) > 1)
+	{
+		for (auto& key : _window.FindKeyCombList(movekey))
+		{
+			key->change_parameters(_deltaTime);
+		}
+	}
+		_vkDescriptorSets.updated[SIZET(Sets::Set1)][SIZET(Set1::Binding1)].status = true;
+
+
+
+	Keys turnkey;
+	if (keys[SIZET(Keys::Up)])
+	{
+		turnkey = Keys::Up;
+	}
+	else if (keys[SIZET(Keys::Down)])
+	{
+		turnkey = Keys::Down;
+	}
+	else if (keys[SIZET(Keys::Right)])
+	{
+		turnkey = Keys::Right;
+	}
+	else if (keys[SIZET(Keys::Left)])
+	{
+		turnkey = Keys::Left;
+	}
+	else
+	{
+		return false;
+	}
+			
+	if (_window.NumOfKeysInList(movekey) == 1)
+	{
+		_window.FindKeyComb(movekey)->change_parameters(0.3, 0.3, _deltaTime);
+
+	}
+	else if (_window.NumOfKeysInList(movekey) < 1)
+	{
+		for (auto& key : _window.FindKeyCombList(movekey))
+		{
+			key->change_parameters(0.3, 0.3, _deltaTime);
+		}
+	}
+	_window.AllowWindowToContinueAndWait();
+		
+	
 
 	return true;
 }
