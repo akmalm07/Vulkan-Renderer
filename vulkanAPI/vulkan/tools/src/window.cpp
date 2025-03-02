@@ -28,10 +28,7 @@ namespace tools {
 		_topOrtho = 0.0f;
 		_bottomOrtho = 0.0f;
 
-		_aspectRatio = 1.0f;
-
-		_keys.fill(false);
-	
+		_aspectRatio = 1.0f;	
 	}
 
 	WindowT::WindowT(float windowWidth, float windowHeight, const std::string& name, bool isOrtho)
@@ -46,9 +43,6 @@ namespace tools {
 
 		_width = windowWidth;
 		_height = windowHeight;
-
-
-		_keys.fill(false);
 
 
 		_aspectRatio = windowWidth / windowHeight;
@@ -335,410 +329,6 @@ namespace tools {
 	}
 
 
-	void WindowT::DelAABButton(std::string_view name)
-	{
-		for (auto& item : _AABButtons)
-		{
-			auto it = item.find(name);
-			if (it == item.end()) 
-			{
-				fprintf(stderr, "Entered invalid window name ( Window.cpp : DelWindowButton )");
-				return;
-			}
-			item.erase(it);  
-		}
-
-	}
-
-
-	void WindowT::DelKeyComb(Keys name, Mods mod)
-	{
-		for (auto& item : _keyCombs)
-		{
-			auto it = item.find(std::make_pair(name, mod));
-			if (it == item.end())
-			{
-				fprintf(stderr, "Entered invalid window name ( Window.cpp : DelWindowButton )");
-				return;
-			}
-			item.erase(it);
-		}
-	}	
-
-	void WindowT::DelKeyComb(Keys name)
-	{
-		for (auto& item : _keyCombs)
-		{
-			auto it = item.find(std::make_pair(name, Mods::None));
-			if (it == item.end())
-			{
-				fprintf(stderr, "Entered invalid window name ( Window.cpp : DelWindowButton )");
-				return;
-			}
-			item.erase(it);
-		}
-	}
-
-	void WindowT::DelKeyCombPoly(const std::array<Keys, KEY_MAX>& key, Mods mod)
-	{
-		auto it = _keyCombsPoly.find(std::make_pair(key, mod));
-		if (it == _keyCombsPoly.end())
-		{
-			fprintf(stderr, "Entered invalid window name ( Window.cpp : DelWindowButton )");
-			return;
-		}
-		_keyCombsPoly.erase(it);
-	}
-
-	void WindowT::DelKeyCombPoly(const std::array<Keys, KEY_MAX>& key)
-	{
-		auto it = _keyCombsPoly.find(std::make_pair(key, Mods::None));
-		if (it == _keyCombsPoly.end())
-		{
-			fprintf(stderr, "Entered invalid window name ( Window.cpp : DelWindowButton )");
-			return;
-		}
-		_keyCombsPoly.erase(it);
-	}
-
-	std::shared_ptr<AABButtonB> WindowT::FindAABButton(std::string_view name)
-	{
-		for (auto& item : _AABButtons)
-		{
-			for (auto& [key, val] : item)
-			{
-				if (key == name)
-				{
-					return val.button;
-				}
-			}
-		}
-		throw std::runtime_error("Could not find the AABButton with the name: " + std::string(name));
-	}
-
-	std::vector<std::shared_ptr<KeyCombB>> WindowT::FindKeyCombPolyList(const std::array<Keys, KEY_MAX>& key, Mods mod)
-	{		
-		std::vector<std::shared_ptr<KeyCombB>> thekeys;
-		thekeys.reserve(2);
-
-		for (auto& keys : _keyCombsPoly)
-		{
-			auto& [ky, val] = keys;
-
-			if (ky.first == key && ky.second == mod)
-			{
-				thekeys.push_back(val.key);
-			}
-			
-		}
-		return thekeys;
-	}
-	
-
-	std::vector<std::shared_ptr<KeyCombB>> WindowT::FindKeyCombPolyList(const std::array<Keys, KEY_MAX>& key)
-	{
-		std::vector<std::shared_ptr<KeyCombB>> thekeys;
-		thekeys.reserve(2);
-		for (auto& keys : _keyCombsPoly)
-		{
-			auto& [ky, val] = keys;
-
-			if (ky.first == key && ky.second == Mods::None)
-			{
-				thekeys.push_back(val.key);
-			}
-
-		}
-		return thekeys;
-	}
-
-	std::vector<std::shared_ptr<KeyCombB>> WindowT::FindKeyCombList(Keys key, Mods mod)
-	{
-		std::vector<std::shared_ptr<KeyCombB>> thekeys;
-		thekeys.reserve(2);
-
-		for (auto& keys : _keyCombs)
-		{
-			for (auto& [ky, val] : keys)
-			{
-				if (ky.first == key && ky.second == mod)
-				{
-					thekeys.push_back(val.key);
-				}
-			}
-		}
-		return thekeys;
-	}
-
-
-	std::vector<std::shared_ptr<KeyCombB>> WindowT::FindKeyCombList(Keys key)
-	{
-		std::vector<std::shared_ptr<KeyCombB>> thekeys;
-		thekeys.reserve(2);
-		for (auto& keys : _keyCombs)
-		{
-			for (auto& [ky, val] : keys)
-			{
-				if (ky.first == key && ky.second == Mods::None)
-				{
-					thekeys.push_back(val.key);
-				}
-			}
-		}
-		return thekeys;
-	}
-
-
-	size_t WindowT::NumOfKeysInList(Keys key, Mods mod)
-	{
-		size_t value = 0;
-
-		for (auto& keys : _keyCombs)
-		{
-			for (auto& [ky, val] : keys)
-			{
-				if (ky.first == key && ky.second == mod)
-				{
-					value++;
-					if (value == 2)
-					{
-						return value;
-					}
-				}
-			}
-		}
-		return value;
-	}
-
-
-	size_t WindowT::NumOfKeysInList(Keys key)
-	{
-		size_t value = 0;
-		for (auto& keys : _keyCombs)
-		{
-			for (auto& [ky, val] : keys)
-			{
-				if (ky.first == key && ky.second == Mods::None)
-				{
-					value++;
-					if (value == 2)
-					{
-						return value;
-					}
-				}
-			}
-		}
-		return value;
-	}
-
-	size_t WindowT::NumOfKeysInListPoly(const std::array<Keys, KEY_MAX>& key, Mods mod)
-	{
-		size_t value = 0;
-		for (auto& keys : _keyCombsPoly)
-		{
-			auto& [ky, val] = keys;
-			if (ky.first == key && ky.second == mod)
-			{
-				value++;
-			}
-		}
-		return value;
-	}
-
-
-	size_t WindowT::NumOfKeysInListPoly(const std::array<Keys, KEY_MAX>& key)
-	{
-		size_t value = 0;
-		for (auto& keys : _keyCombsPoly)
-		{
-			auto& [ky, val] = keys;
-			if (ky.first == key && ky.second == Mods::None)
-			{
-				value++;
-			}
-		}
-		return value;
-	}
-
-	std::shared_ptr<KeyCombB> WindowT::FindKeyComb(Keys key, Mods mod)
-	{
-		for (auto& keys : _keyCombs)
-		{
-			for (auto& [ky, val] : keys)
-			{
-				if (ky.first == key && ky.second == mod)
-				{
-					return val.key;
-				}
-			}
-		}
-		return nullptr;
-
-	}
-
-	
-
-	std::shared_ptr<KeyCombB> WindowT::FindKeyComb(Keys key)
-	{
-		std::vector<std::shared_ptr<KeyCombB>> thekeys;
-		for (auto& keys : _keyCombs)
-		{
-			for (auto& [ky, val] : keys)
-			{
-				if (ky.first == key && ky.second == Mods::None)
-				{
-					return val.key;
-				}
-			}
-		}
-
-		return nullptr;
-	}
-
-	std::shared_ptr<KeyCombB> WindowT::FindKeyCombPoly(const std::array<Keys, KEY_MAX>& key)
-	{
-		for (auto& keys : _keyCombsPoly)
-		{
-			auto& [ky, val] = keys;
-			if (ky.first == key && ky.second == Mods::None)
-			{
-				return val.key;
-			}
-		}
-
-	}
-
-	std::shared_ptr<KeyCombB> WindowT::FindKeyCombPoly(const std::array<Keys, KEY_MAX>& key, Mods mode)
-	{
-		for (auto& keys : _keyCombsPoly)
-		{
-			auto& [ky, val] = keys;
-			if (ky.first == key && ky.second == mode)
-			{
-				return val.key;
-			}
-		}
-	}
-
-
-	void WindowT::AddFunctionParametersUpdater(Keys key, Mods mode, std::function<bool()> func)
-	{
-		if (NumOfKeysInList(key, mode) == 1)
-		{
-			for (auto& keys : _keyCombs)
-			{
-				auto it = keys.find(std::make_pair(key, mode));
-				if (it != keys.end())
-				{
-					it->second.updater = std::move(func);
-					break;
-				}
-			}
-		}
-		else if (NumOfKeysInList(key) < 1)
-		{
-			for (auto& keys : _keyCombs)
-			{
-				auto it = keys.find(std::make_pair(key, mode));
-				if (it != keys.end())
-				{
-					it->second.updater = std::move(func);
-				}
-			}
-		}
-		else
-		{
-			throw std::runtime_error("There are more than one key with the same name and mode in the list");
-		}
-
-	}
-
-	void WindowT::AddFunctionParametersUpdater(Keys key, std::function<bool()> func)
-	{
-		if (NumOfKeysInList(key) == 1)
-		{
-			for (auto& keys : _keyCombs)
-			{
-				auto it = keys.find(std::make_pair(key, Mods::None));
-				if (it != keys.end())
-				{
-					it->second.updater = std::move(func);
-					break;
-				}
-			}
-		}
-		else if (NumOfKeysInList(key) < 1)
-		{
-			for (auto& keys : _keyCombs)
-			{
-				auto it = keys.find(std::make_pair(key, Mods::None));
-				if (it != keys.end())
-				{
-					it->second.updater = std::move(func);
-				}
-			}
-		}
-		else
-		{
-			throw std::runtime_error("There are more than one key with the same name and mode in the list");
-		}
-
-	}
-
-	void WindowT::AddFunctionParametersUpdaterPoly(const std::array<Keys, KEY_MAX>& key, Mods mode, std::function<bool()> func)
-	{
-		for (auto& keys : _keyCombsPoly)
-		{
-			auto& [ky, val] = keys;
-			if (ky.first == key && ky.second == mode)
-			{
-				val.updater = std::move(func);
-				break;
-			}
-		}
-
-		throw std::runtime_error("There are more than one key with the same name and mode in the list");
-	}
-
-
-	void WindowT::AddFunctionParametersUpdaterPoly(const std::array<Keys, KEY_MAX>& key, std::function<bool()> func)
-	{
-		for (auto& keys : _keyCombsPoly)
-		{
-			auto& [ky, val] = keys;
-			if (ky.first == key && ky.second == Mods::None)
-			{
-				val.updater = std::move(func);
-				break;
-			}
-		}
-
-		throw std::runtime_error("There are more than one key with the same name and mode in the list");
-	}
-
-
-
-	void WindowT::ChangeFunctionParametersUpdater(Keys key, Mods mode, std::function<bool()> func)
-	{
-		AddFunctionParametersUpdater(key, mode, std::move(func));
-	}
-
-	void WindowT::ChangeFunctionParametersUpdater(Keys key, std::function<bool()> func)
-	{
-		AddFunctionParametersUpdater(key, std::move(func));
-	}
-
-	void WindowT::ChangeFunctionParametersUpdaterPoly(const std::array<Keys, KEY_MAX>& key, Mods mode, std::function<bool()> func)
-	{
-		_keyCombsPoly[std::make_pair(key, mode)].updater = std::move(func);
-	}
-
-	void WindowT::ChangeFunctionParametersUpdaterPoly(const std::array<Keys, KEY_MAX>& key, std::function<bool()> func)
-	{
-		_keyCombsPoly[std::make_pair(key, Mods::None)].updater = std::move(func);
-	}
-
-
 	void WindowT::SetOrtho(float left, float right, float top, float bottom)
 	{
 		_leftOrtho = left;
@@ -747,23 +337,6 @@ namespace tools {
 		_bottomOrtho = bottom;
 	}
 
-
-	void WindowT::setKey(unsigned int key, bool val)
-	{
-		_keys[key] = val;
-	}
-
-
-	bool WindowT::IsMouseButtonPressed() const
-	{
-		return _isMouseButtonPressed; 
-	}
-
-
-	bool WindowT::IsFirstClick() const
-	{
-		return _isFirstClick;
-	}
 
 	void WindowT::MakeWindowContextCurrent()
 	{
@@ -859,18 +432,17 @@ namespace tools {
 		{
 			auto& act = _keyCombs[SIZET(Action::Release)];
 
-			if (key == 83)
-			{
-				std::cout << "i SET IT TO FALSE FIRST\n"; // fIX THIS ERROR HERE TO MAKE TO NOT SET TO FALSE BEFORE THE FUNCTION RUNS
-			} // There are race conditions here, the wait is NOT working properly, must FiX
 			for (const auto& [ky, val] : act)
 			{
-				if (val->is_pressed(INT(key), INT(mode)))
+				if (val.key->is_pressed(INT(key), INT(mode)))
 				{
 					_keys[key] = false;
 
-					_oneInputCurentlyActive.notify_change(val->requires_change());
-					val->execute();
+					if (!val.updater)
+					{
+						val.updater();
+					}
+					val.key->execute();
 				}
 			}
 			
@@ -882,10 +454,13 @@ namespace tools {
 
 			for (const auto& [ky, val] : act)
 			{
-				if (val->is_pressed(INT(key), INT(mode)))
+				if (val.key->is_pressed(INT(key), INT(mode)))
 				{
-					_oneInputCurentlyActive.notify_change(val->requires_change());
-					val->execute();
+					if (!val.updater)
+					{
+						val.updater();
+					}
+					val.key->execute();
 				}
 			}
 		
@@ -900,10 +475,13 @@ namespace tools {
 
 			for (const auto& [ky, val] : _keyCombsPoly)
 			{
-				if (val->is_pressed(_mainWindow, mode))
+				if (val.key->is_pressed(_mainWindow, mode))
 				{
-					_oneInputCurentlyActive.notify_change(val->requires_change());
-					val->execute();
+					if (!val.updater)
+					{
+						val.updater();
+					}
+					val.key->execute();
 				}
 			}
 		}
@@ -919,8 +497,6 @@ namespace tools {
 
 		_mouseCurrentX = posX;
 		_mouseCurrentY = posY;
-
-
 	}
 
 	void WindowT::HandleMouseButtons(int mouseButton, int action, int mods)
@@ -934,10 +510,10 @@ namespace tools {
 
 			for (const auto& [key, val] : act)
 			{
-				if (val->is_clicked(_mouseCurrentX, _mouseCurrentY, Action::Press, mouse))
+				if (val.button->is_clicked(_mouseCurrentX, _mouseCurrentY, Action::Press, mouse))
 				{
-					_oneInputCurentlyActive.notify_change(val->requires_change());
-					val->execute();
+					//ADD A FUNCTION TO THE MOUSE BUTTON
+					val.button->execute();
 				}
 			}
 
@@ -954,10 +530,9 @@ namespace tools {
 
 			for (const auto& [key, val] : act)
 			{
-				if (val->is_clicked(_mouseCurrentX, _mouseCurrentY, Action::Release, mouse))
+				if (val.button->is_clicked(_mouseCurrentX, _mouseCurrentY, Action::Release, mouse))
 				{
-					_oneInputCurentlyActive.notify_change(val->requires_change());
-					val->execute();
+					val.button->execute();
 				}
 			}
 			//_mouseButtons[SIZET(mouse)]->setPressed(false); 
@@ -973,10 +548,9 @@ namespace tools {
 
 			for (const auto& [key, val] : act)
 			{
-				if (val->is_clicked(_mouseCurrentX, _mouseCurrentY, Action::Repeat, mouse))
+				if (val.button->is_clicked(_mouseCurrentX, _mouseCurrentY, Action::Repeat, mouse))
 				{
-					_oneInputCurentlyActive.notify_change(val->requires_change());
-					val->execute();
+					val.button->execute();
 				}
 			}
 			//_mouseButtons[SIZET(mouse)]->setPressed(false); 
@@ -986,6 +560,7 @@ namespace tools {
 
 	}
 
+	// TO BE ADDED
 
 	//WindowT::Async::Async() = default;
 
