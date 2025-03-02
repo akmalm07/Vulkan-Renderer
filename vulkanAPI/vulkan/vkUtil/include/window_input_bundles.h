@@ -8,6 +8,10 @@
 
 namespace tools
 {
+    struct AABButtonB;
+	struct KeyCombB;
+	struct MouseButtonB;
+    
     struct KeyCombInputOne
     {
 		KeyCombInputOne(Keys key, Action action)

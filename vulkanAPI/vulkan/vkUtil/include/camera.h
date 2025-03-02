@@ -35,8 +35,6 @@ namespace tools
 		
 		void update(Direction dir, double xMove, double yMove, double deltaTime);
 		
-		void debug_position();
-
 		void set_speed(float speed);
 		float get_speed() const;
 
@@ -85,6 +83,7 @@ namespace tools
 		bool event_key(Direction dir, double deltaTime);
 		bool event_key(double xMove, double yMove, double deltaTime);
 
+		//void debug_position();
 	};
 
 }

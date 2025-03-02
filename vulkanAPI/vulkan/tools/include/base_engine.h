@@ -43,7 +43,7 @@ public:
 	
 	virtual void update_sets(vk::CommandBuffer& commandBuffer) = 0;
 	
-	virtual bool camera_logic() = 0;
+	virtual void camera_logic() = 0;
 
 	void update_FPS();
 
@@ -181,16 +181,6 @@ protected:
 		glm::mat4 _projMat;
 	} _MVPMats;
 
-
-	// Threads
-	struct WindowInputAcync
-	{
-		std::shared_ptr<tools::ConditionalVariuble> windowInput;
-		std::shared_ptr<tools::ConditionalVariuble> updateInputParams;
-		std::shared_ptr<std::mutex> lockMtx;
-		tools::ThreadT<false, false> threadUpdateParams;
-	} _windowInputsAsync;
-
 	protected:
 
 	//glfw setup
@@ -241,3 +231,13 @@ protected:
 
 };
 
+
+
+// Threads
+//struct WindowInputAcync
+//{
+//	std::shared_ptr<tools::ConditionalVariuble> windowInput;
+//	std::shared_ptr<tools::ConditionalVariuble> updateInputParams;
+//	std::shared_ptr<std::mutex> lockMtx;
+//	tools::ThreadT<false, false> threadUpdateParams;
+//} _windowInputsAsync;

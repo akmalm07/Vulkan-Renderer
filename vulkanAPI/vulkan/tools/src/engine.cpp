@@ -2,26 +2,36 @@
 
 #include "tools\include\engine.h"
 #include "tools\include\descriptor_set_registry.h"
+#include "tools\include\const_push_registry.h"
+#include "tools\include\key_usage_registry.h"
 
 
 Engine::Engine() : 
 	BaseEngine()
-{}
+{
+	camera_logic();
+}
 
 
 Engine::Engine(GLFWwindow* glfwWindow, bool orthoOrperspective, bool debug) :
 	BaseEngine(glfwWindow, orthoOrperspective, debug), _scene(nullptr)
-{}
+{
+	camera_logic();
+}
 
 
 Engine::Engine(tools::WindowT& window, bool orthoOrperspective, bool debug) :
 	BaseEngine(window, orthoOrperspective, debug), _scene(nullptr)
-{}
+{
+	camera_logic();
+}
 
 
 Engine::Engine(int width, int height, bool orthoOrperspective, bool debug) :
 	BaseEngine(width, height, orthoOrperspective, debug), _scene(nullptr)
-{}
+{
+	camera_logic();
+}
 
 
 void Engine::load_mesh(MeshT& mesh) const
@@ -154,35 +164,7 @@ void Engine::load_scene(std::unique_ptr<SceneT> scene)
 
 void Engine::draw_scene(vk::CommandBuffer& cmdBuffer) const
 {
-	//For now, we are not using the scene class,
-	// so we will just draw the mesh
-	//FIX IMMIDIATELY TO DRAW IN THE CORRECT ORDER
-
-	//if (_scene)
-	//{
-	//	for (const auto& position : _scene->get_triangles_pos())
-	//	{ 
-	//		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(position.x, position.y, 0.0f));
-	//		vkUtil::ObjectData objectData(vkUtil::ShaderStage::VERTEX);
-	//		objectData.c_data._model = model;
-	//		send_as_push_const(objectData.c_data, cmdBuffer, vkUtil::ShaderStage::VERTEX, 0);
-	//	}
-	//}
-
-	//vkUtil::ObjectData objectData(vkUtil::ShaderStage::VERTEX);
-	//objectData.c_data._model = glm::mat4(1.0f);
-	//send_as_push_const(objectData.c_data, cmdBuffer, vkUtil::ShaderStage::VERTEX, 0); 
 }
-
-
-//
-//void Engine::load_scene(std::unique_ptr<SceneT>& scene)
-//{
-//	if (scene)
-//	{
-//		_scene = std::move(scene);
-//	}
-//}
 
 
 void Engine::draw(vk::CommandBuffer& commandBuffer) const
@@ -218,7 +200,7 @@ void Engine::draw(vk::CommandBuffer& commandBuffer) const
 
 }
 
-void Engine::update_sets(vk::CommandBuffer& cmdBuff) 
+void Engine::update_sets(vk::CommandBuffer& cmdBuff)
 { 
 	//Binding the descriptor set
 
@@ -297,101 +279,73 @@ void Engine::call_push_consts() const
 }
 
 
-bool Engine::camera_logic()
+void Engine::camera_logic()
 {
+    using tools::Keys;
+    using tools::Mods;
 
-	using tools::Keys;
-	using tools::Mods;
+    tools::KeyUsageRegistry& keys = tools::KeyUsageRegistry::get_instance();
+    
+	const auto arrowKeys = keys.arrow_keys_in_use();
 
+    for (size_t i = 0; i < keys.num_of_arrow_keys_in_use(); i++)
+    {
+		const auto [key, mod] = arrowKeys[i];
 
-	const std::array<bool, 1024>& keys = _window.GetKeysConstRef();
+		std::function<bool()> func = [this, val = _window.FindKeyComb(key)]() -> bool
+			{
+				val->change_parameters(_window.GetMouseChangeX(), _window.GetMouseChangeX(), _deltaTime);
+				return true;
+			};
 
-	Keys movekey;
+		_window.AddFuncParamUpdaterKeys(key, std::move(func), mod);
+    }
 
-	if (keys[SIZET(Keys::W)])
-	{
-		movekey = Keys::W;
-	}
-	else if (keys[SIZET(Keys::S)])
-	{
-		std::cout << "i CHECKED IT TO FIRST\n";
-		movekey = Keys::S;
-	}
-	else if (keys[SIZET(Keys::A)])
-	{
-		movekey = Keys::A;
-	}
-	else if (keys[SIZET(Keys::D)])
-	{
-		movekey = Keys::D;
-	}
-	else if (keys[SIZET(Keys::Q)])
-	{
-		movekey = Keys::Q;
-	}
-	else if (keys[SIZET(Keys::E)])
-	{
-		movekey = Keys::E;
-	}
-	else
-	{
-		return false;
-	}
+	const auto azKeys = keys.a_to_z_keys_in_use();
 
+    for (size_t i = 0; i < keys.num_of_a_to_z_keys_in_use(); i++)
+    {
+		const auto [key, mod] = azKeys[i];
 
-	if (_window.NumOfKeysInList(movekey) == 1)
-	{
-		_window.FindKeyComb(movekey)->change_parameters(_deltaTime);
+		std::function<bool()> func = [this, val = _window.FindKeyComb(key)]() -> bool
+			{
+				val->change_parameters(_deltaTime);
+				return true;
+			};
 
-	}
-	else if (_window.NumOfKeysInList(movekey) > 1)
-	{
-		for (auto& key : _window.FindKeyCombList(movekey))
-		{
-			key->change_parameters(_deltaTime);
-		}
-	}
-		_vkDescriptorSets.updated[SIZET(Sets::Set1)][SIZET(Set1::Binding1)].status = true;
+		_window.AddFuncParamUpdaterKeys(key, std::move(func), mod);
+    }
 
-
-
-	Keys turnkey;
-	if (keys[SIZET(Keys::Up)])
-	{
-		turnkey = Keys::Up;
-	}
-	else if (keys[SIZET(Keys::Down)])
-	{
-		turnkey = Keys::Down;
-	}
-	else if (keys[SIZET(Keys::Right)])
-	{
-		turnkey = Keys::Right;
-	}
-	else if (keys[SIZET(Keys::Left)])
-	{
-		turnkey = Keys::Left;
-	}
-	else
-	{
-		return false;
-	}
-			
-	if (_window.NumOfKeysInList(movekey) == 1)
-	{
-		_window.FindKeyComb(movekey)->change_parameters(0.3, 0.3, _deltaTime);
-
-	}
-	else if (_window.NumOfKeysInList(movekey) < 1)
-	{
-		for (auto& key : _window.FindKeyCombList(movekey))
-		{
-			key->change_parameters(0.3, 0.3, _deltaTime);
-		}
-	}
-	_window.AllowWindowToContinueAndWait();
-		
-	
-
-	return true;
 }
+
+
+
+//For now, we are not using the scene class,
+// so we will just draw the mesh
+//FIX IMMIDIATELY TO DRAW IN THE CORRECT ORDER
+
+//if (_scene)
+//{
+//	for (const auto& position : _scene->get_triangles_pos())
+//	{ 
+//		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(position.x, position.y, 0.0f));
+//		vkUtil::ObjectData objectData(vkUtil::ShaderStage::VERTEX);
+//		objectData.c_data._model = model;
+//		send_as_push_const(objectData.c_data, cmdBuffer, vkUtil::ShaderStage::VERTEX, 0);
+//	}
+//}
+
+//vkUtil::ObjectData objectData(vkUtil::ShaderStage::VERTEX);
+//objectData.c_data._model = glm::mat4(1.0f);
+//send_as_push_const(objectData.c_data, cmdBuffer, vkUtil::ShaderStage::VERTEX, 0); 
+
+
+
+//
+//void Engine::load_scene(std::unique_ptr<SceneT>& scene)
+//{
+//	if (scene)
+//	{
+//		_scene = std::move(scene);
+//	}
+//}

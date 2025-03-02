@@ -43,7 +43,7 @@ public:
 
 	void game_logic(const double& deltaTime) override;
 
-	bool camera_logic() override;
+	void camera_logic() override;
 
 	void load_scene(std::unique_ptr<SceneT> scene);
 

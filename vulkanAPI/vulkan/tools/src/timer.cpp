@@ -75,9 +75,9 @@ namespace tools
 	double Timer::get_delta_time(bool debug)
 	{
 		double time = reset(debug);
-		if (time < 0.1)
+		if (time < 0.01)
 		{
-			time = 0.1;
+			time = 0.01;
 		}
 		return time;
 	}

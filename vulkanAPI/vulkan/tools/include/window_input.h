@@ -99,6 +99,24 @@ namespace tools
 		bool is_pressed(int number, int mod) const;
 		
 		bool is_pressed(GLFWwindow* window, int mods) const;
+		
+		std::string get_key()
+		{
+			switch (_charater[0])
+			{
+			case Keys::W:
+				return "W is pressed";
+			case Keys::A:
+				return "A is pressed";
+			case Keys::S:
+				return "S is pressed";
+			case Keys::D:
+				return "D is pressed";
+			default:
+				return "No key is pressed";
+			}
+
+		}
 
 		virtual bool execute() const = 0;
 
@@ -111,17 +129,6 @@ namespace tools
 				throw std::runtime_error("Invalid dynamic cast in change_parameters");
 			}
 			derived->change_parameter(std::forward<Args>(args)...);
-		}
-
-		template <class ... Args>
-		std::function<bool(Args...)> get_funcs()
-		{
-			auto* derived = dynamic_cast<KeyComb<Args...>*>(this);
-			if (!derived)
-			{
-				throw std::runtime_error("Invalid dynamic cast in change_parameters");
-			}
-			return derived->get_func();
 		}
 		
 
@@ -276,3 +283,15 @@ namespace tools
 	};
 
 }
+
+
+//template <class ... Args>
+//std::function<bool(Args...)> get_funcs()
+//{
+//	auto* derived = dynamic_cast<KeyComb<Args...>*>(this);
+//	if (!derived)
+//	{
+//		throw std::runtime_error("Invalid dynamic cast in change_parameters");
+//	}
+//	return derived->get_func();
+//}

@@ -650,27 +650,7 @@ void BaseEngine::record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t
 
 void BaseEngine::handle_threads()
 {
-	_windowInputsAsync.windowInput = std::make_shared<tools::ConditionalVariuble>();
-	_windowInputsAsync.updateInputParams = std::make_shared<tools::ConditionalVariuble>();
-	_windowInputsAsync.lockMtx = std::make_shared<std::mutex>();
 
-	
-	_windowInputsAsync.threadUpdateParams.initalize(
-		[this]() -> bool
-		{
-			return this->camera_logic();
-		}
-		, 
-		"handle changing parameters",
-		_debugMode);
-	_window.SetAsyncPollEvents(
-		tools::ThreadControlInfo(
-		_windowInputsAsync.windowInput, 
-		_windowInputsAsync.updateInputParams, 
-		_windowInputsAsync.lockMtx)
-	);
-
-	_windowInputsAsync.threadUpdateParams.start(true);
 }
 
 uint32_t BaseEngine::gen_desc_id(vk::DescriptorType desc)

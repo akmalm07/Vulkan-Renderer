@@ -4,6 +4,11 @@
 
 namespace tools {
 
+#define KEYS(x) static_cast<Keys>(x)
+#define MODS(x) static_cast<Mods>(x)
+#define MOUSE(x) static_cast<Mouse>(x)
+#define ACTION(x) static_cast<Action>(x)
+
 	enum class Mods
 	{
 		None = 0,
@@ -142,13 +147,28 @@ namespace tools {
 
 namespace std 
 {
-	template <typename T1, typename T2>
-	struct hash<std::pair<T1, T2>> {
-		size_t operator()(const std::pair<T1, T2>& p) const {
-			size_t hash1 = hash<T1>{}(p.first);  	
-			size_t hash2 = hash<T2>{}(p.second); 
+	template <class T1, class T2>
+		requires std::is_enum_v<T1>&& std::is_enum_v<T2>
+	struct std::hash<std::pair<T1, T2>> {
+		size_t operator()(const std::pair<T1, T2>& p) const noexcept {
+			size_t hash1 = std::hash<T1>{}(p.first);
+			size_t hash2 = std::hash<T2>{}(p.second);
 
-			return hash1 ^ (hash2 << 1);  // Shift the second hash and XOR with the first hash
+			return hash1 ^ (hash2 * 0x9e3779b9 + (hash1 << 6) + (hash1 >> 2));
+		}
+	};
+
+	template <class Keys, class Mods>
+	struct std::hash<std::pair<std::array<Keys, KEY_MAX>, Mods>> {
+		size_t operator()(const std::pair<std::array<Keys, KEY_MAX>, Mods>& p) const noexcept {
+			size_t hash1 = 0;
+			size_t hash2 = std::hash<Mods>{}(p.second);
+
+			for (const auto& key : p.first) {
+				hash1 ^= std::hash<Keys>{}(key)+0x9e3779b9 + (hash1 << 6) + (hash1 >> 2);
+			}
+
+			return hash1 ^ (hash2 * 0x9e3779b9 + (hash1 << 6) + (hash1 >> 2));
 		}
 	};
 }

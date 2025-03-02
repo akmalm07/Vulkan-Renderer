@@ -31,7 +31,7 @@ namespace tools
 		bool IsFirstClick() const;
 
 
-	private:
+	protected:
 
 		bool _isFirstClick = false;
 

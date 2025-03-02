@@ -61,16 +61,11 @@ namespace tools
 	{
 		if (upOrDown)
 		{
-			PRINT_VEC3("Pos vec", _position);
-			std::cout << "Speed: " << _speed << std::endl;
-			std::cout << "Delta: " << std::fixed << deltaTime<< std::endl;
+
 			_position += _up * _speed * (float)deltaTime;
 		}
 		else
 		{
-			PRINT_VEC3("Pos vec", _position);
-			std::cout << "Speed: " << _speed << std::endl;
-			std::cout << "Delta: " << std::fixed << deltaTime << std::endl;
 			_position -= _up * _speed * (float)deltaTime;
 		}
 		_target = _position + _front;
@@ -111,8 +106,6 @@ namespace tools
 		move_dir(dir, deltaTime);
 
 		_view = std::move(glm::lookAt(_position, _target, _up));
-
-		debug_position(); ///////////////////////////
 	}
 
 	void CameraT::update(double xMove, double yMove, double deltaTime)// parameters are NOT being updated!! REVIEW THIS ERROR
@@ -134,8 +127,6 @@ namespace tools
 		_target = _position + _front;
 
 		_view = std::move(glm::lookAt(_position, _target, _up));
-
-		debug_position();///////////////////////////
 	}
 
 	void CameraT::update(Direction dir, double xMove, double yMove, double deltaTime)
@@ -157,11 +148,6 @@ namespace tools
 		move_dir(dir, deltaTime);
 
 		_view = std::move(glm::lookAt(_position, _target, _up));
-	}
-
-	void CameraT::debug_position()
-	{
-		std::cout << "Camera Position: (" << _position.x << ", " << _position.y << ", " << _position.z << ")\n";
 	}
 
 
@@ -456,3 +442,9 @@ namespace tools
 	CameraT::~CameraT() = default;
 
 }//namespace vkUtil
+
+
+//void CameraT::debug_position()
+//{
+//	std::cout << "Camera Position: (" << _position.x << ", " << _position.y << ", " << _position.z << ")\n";
+//}

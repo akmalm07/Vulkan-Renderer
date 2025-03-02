@@ -169,12 +169,4 @@ namespace tools {
 		_mode = std::nullopt;
 	}
 
-
-
-
-
-	ThreadControlInfo::ThreadControlInfo(const std::shared_ptr<ConditionalVariuble>& windowInput, const std::shared_ptr<ConditionalVariuble>& changingParams, const std::shared_ptr<std::mutex>& mtx)
-		: windowInputWait(std::move(windowInput)), changingParamsWait(std::move(changingParams)), lock(std::move(mtx))
-	{}
-
 }

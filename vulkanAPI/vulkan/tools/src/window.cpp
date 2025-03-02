@@ -367,13 +367,14 @@ namespace tools {
 
 
 	//Private Functions
-
 	void WindowT::CreateCallbacks()
 	{
 		//glfwSetWindowUserPointer(_mainWindow, this); 
 		glfwSetKeyCallback(_mainWindow, m_HandleKeys);
 		glfwSetCursorPosCallback(_mainWindow, m_HandleMouseCursor);
 		glfwSetMouseButtonCallback(_mainWindow, m_HandleMouseButtons);
+
+
 	}
 
 
@@ -417,7 +418,8 @@ namespace tools {
 				if (val.key->is_pressed(INT(key), INT(mode)))
 				{
 					_keys[key] = true;
-					if (!val.updater)
+
+					if (val.updater)
 					{
 						val.updater();
 					}
@@ -432,13 +434,17 @@ namespace tools {
 		{
 			auto& act = _keyCombs[SIZET(Action::Release)];
 
+			if (_keyCombs.empty())
+			{
+				return;
+			}
 			for (const auto& [ky, val] : act)
 			{
 				if (val.key->is_pressed(INT(key), INT(mode)))
 				{
 					_keys[key] = false;
 
-					if (!val.updater)
+					if (val.updater)
 					{
 						val.updater();
 					}
@@ -456,7 +462,7 @@ namespace tools {
 			{
 				if (val.key->is_pressed(INT(key), INT(mode)))
 				{
-					if (!val.updater)
+					if (val.updater)
 					{
 						val.updater();
 					}
@@ -470,21 +476,23 @@ namespace tools {
 
 
 		//Polykeys
-		if (!_keyCombsPoly.empty())
+		if (_keyCombsPoly.empty())
 		{
+			return;
+		}
 
-			for (const auto& [ky, val] : _keyCombsPoly)
+		for (const auto& [ky, val] : _keyCombsPoly)
+		{
+			if (val.key->is_pressed(_mainWindow, mode))
 			{
-				if (val.key->is_pressed(_mainWindow, mode))
+				if (val.updater)
 				{
-					if (!val.updater)
-					{
-						val.updater();
-					}
-					val.key->execute();
+					val.updater();
 				}
+				val.key->execute();
 			}
 		}
+		
 	}
 
 	
@@ -512,12 +520,10 @@ namespace tools {
 			{
 				if (val.button->is_clicked(_mouseCurrentX, _mouseCurrentY, Action::Press, mouse))
 				{
-					//ADD A FUNCTION TO THE MOUSE BUTTON
 					val.button->execute();
 				}
 			}
 
-			//_mouseButtons[SIZET(mouse)]->setPressed(true);
 			break;
 		}
 

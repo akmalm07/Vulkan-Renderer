@@ -8,7 +8,7 @@ namespace tools
 	KeyControl::KeyControl() = default;
 
 
-	void KeyControl::DelKeyComb(Keys name, std::optional<Mods> mod = std::nullopt)
+	void KeyControl::DelKeyComb(Keys name, std::optional<Mods> mod)
 	{
 		for (auto& item : _keyCombs)
 		{
@@ -22,7 +22,7 @@ namespace tools
 		}
 	}
 
-	void KeyControl::DelKeyCombPoly(const std::array<Keys, KEY_MAX>& key, std::optional<Mods> mod = std::nullopt)
+	void KeyControl::DelKeyCombPoly(const std::array<Keys, KEY_MAX>& key, std::optional<Mods> mod)
 	{
 
 		auto it = _keyCombsPoly.find(std::make_pair(key, mod.value_or(Mods::None)));
@@ -35,7 +35,7 @@ namespace tools
 	}
 
 
-	std::vector<std::shared_ptr<KeyCombB>> KeyControl::FindKeyCombPolyList(const std::array<Keys, KEY_MAX>& key, std::optional<Mods> mod = std::nullopt)
+	std::vector<std::shared_ptr<KeyCombB>> KeyControl::FindKeyCombPolyList(const std::array<Keys, KEY_MAX>& key, std::optional<Mods> mod)
 	{
 		std::vector<std::shared_ptr<KeyCombB>> thekeys;
 		thekeys.reserve(2);
@@ -54,7 +54,7 @@ namespace tools
 	}
 
 
-	std::vector<std::shared_ptr<KeyCombB>> KeyControl::FindKeyCombList(Keys key, std::optional<Mods> mod = std::nullopt)
+	std::vector<std::shared_ptr<KeyCombB>> KeyControl::FindKeyCombList(Keys key, std::optional<Mods> mod)
 	{
 		std::vector<std::shared_ptr<KeyCombB>> thekeys;
 		thekeys.reserve(2);
@@ -74,30 +74,26 @@ namespace tools
 
 
 
-	size_t KeyControl::NumOfKeysInList(Keys key, std::optional<Mods> mod = std::nullopt)
+	size_t KeyControl::NumOfKeysInList(Keys key, std::optional<Mods> mod)
 	{
 		size_t value = 0;
 
-		for (auto& keys : _keyCombs)
+		for (const auto& thekey : _keyCombs)
 		{
-			for (auto& [ky, val] : keys)
+			auto it = thekey.find(std::make_pair(key, mod.value_or(Mods::None)));
+
+			if (it != thekey.end())
 			{
-				if (ky.first == key && ky.second == mod.value_or(Mods::None))
-				{
-					value++;
-					if (value == 2)
-					{
-						return value;
-					}
-				}
+				value++;
 			}
+			
 		}
 		return value;
 	}
 
 
 
-	size_t KeyControl::NumOfKeysInListPoly(const std::array<Keys, KEY_MAX>& key, std::optional<Mods> mod = std::nullopt)
+	size_t KeyControl::NumOfKeysInListPoly(const std::array<Keys, KEY_MAX>& key, std::optional<Mods> mod)
 	{
 		size_t value = 0;
 		for (auto& keys : _keyCombsPoly)
@@ -112,24 +108,28 @@ namespace tools
 	}
 
 
-	std::shared_ptr<KeyCombB> KeyControl::FindKeyComb(Keys key, std::optional<Mods> mod = std::nullopt)
+	std::shared_ptr<KeyCombB> KeyControl::FindKeyComb(Keys key, std::optional<Mods> mod)
 	{
 		for (auto& keys : _keyCombs)
 		{
-			for (auto& [ky, val] : keys)
+			auto it = keys.find(std::make_pair(key, mod.value_or(Mods::None)));
+
+			if (it != keys.end())
 			{
-				if (ky.first == key && ky.second == mod.value_or(Mods::None))
-				{
-					return val.key;
-				}
+				return it->second.key;
 			}
 		}
 		return nullptr;
 
 	}
 
+	std::shared_ptr<KeyCombB> KeyControl::FindKeyComb(Action action, Keys key, std::optional<Mods> mod)
+	{
+		return _keyCombs[SIZET(action)][std::make_pair(key, mod.value_or(Mods::None))].key;
+	}
 
-	std::shared_ptr<KeyCombB> KeyControl::FindKeyCombPoly(const std::array<Keys, KEY_MAX>& key, std::optional<Mods> mod = std::nullopt)
+
+	std::shared_ptr<KeyCombB> KeyControl::FindKeyCombPoly(const std::array<Keys, KEY_MAX>& key, std::optional<Mods> mod)
 	{
 		for (auto& keys : _keyCombsPoly)
 		{
@@ -139,67 +139,74 @@ namespace tools
 				return val.key;
 			}
 		}
+		return nullptr;
 	}
 
 
-	void KeyControl::AddFuncParamUpdaterKeys(Keys key, std::optional<Mods> mod = std::nullopt, std::function<bool()> func)
+	void KeyControl::AddFuncParamUpdaterKeys(Keys key, std::function<bool()> func, std::optional<Mods> mod)
 	{
-		if (NumOfKeysInList(key, mod.value_or(Mods::None)) == 1)
+		bool ran = false;
+		for (auto& keys : _keyCombs)
 		{
-			for (auto& keys : _keyCombs)
+			auto it = keys.find(std::make_pair(key, mod.value_or(Mods::None)));
+			if (it != keys.end())
 			{
-				auto it = keys.find(std::make_pair(key, mod.value_or(Mods::None)));
-				if (it != keys.end())
-				{
-					it->second.updater = std::move(func);
-					break;
-				}
+				it->second.updater = std::move(func);
+				ran = true;
+				break;
 			}
 		}
-		else if (NumOfKeysInList(key) < 1)
+		if (!ran)
 		{
-			for (auto& keys : _keyCombs)
-			{
-				auto it = keys.find(std::make_pair(key, mod.value_or(Mods::None)));
-				if (it != keys.end())
-				{
-					it->second.updater = std::move(func);
-				}
-			}
-		}
-		else
-		{
-			throw std::runtime_error("There are more than one key with the same name and mode in the list");
+			throw std::runtime_error("No such item exists!");
 		}
 
 	}
 
 
-	void KeyControl::AddFuncParamUpdaterKeysPoly(const std::array<Keys, KEY_MAX>& key, std::optional<Mods> mod = std::nullopt, std::function<bool()> func)
+	void KeyControl::AddFuncParamUpdaterKeysPoly(const std::array<Keys, KEY_MAX>& key, std::function<bool()> func, std::optional<Mods> mod)
 	{
+		bool ran = false;
+
 		for (auto& keys : _keyCombsPoly)
 		{
 			auto& [ky, val] = keys;
 			if (ky.first == key && ky.second == mod.value_or(Mods::None))
 			{
 				val.updater = std::move(func);
+				ran = true;
 				break;
 			}
 		}
 
-		throw std::runtime_error("There are more than one key with the same name and mode in the list");
+		if (ran)
+		{
+			throw std::runtime_error("No such item exists!");
+		}
 	}
 
 
-	void KeyControl::ChangeFuncParamUpdaterKeys(Keys key, std::optional<Mods> mod = std::nullopt, std::function<bool()> func)
+	void KeyControl::ChangeFuncParamUpdaterKeys(Keys key, std::function<bool()> func, std::optional<Mods> mod)
 	{
-		AddFuncParamUpdaterKeys(key, mod.value_or(Mods::None), std::move(func));
+		AddFuncParamUpdaterKeys(key, std::move(func), mod.value_or(Mods::None));
 	}
 
 
-	void KeyControl::ChangeFuncParamUpdaterKeysPoly(const std::array<Keys, KEY_MAX>& key, std::optional<Mods> mod = std::nullopt, std::function<bool()> func)
+	void KeyControl::ChangeFuncParamUpdaterKeysPoly(const std::array<Keys, KEY_MAX>& key, std::function<bool()> func, std::optional<Mods> mod)
 	{
 		_keyCombsPoly[std::make_pair(key, mod.value_or(Mods::None))].updater = std::move(func);
+	}
+
+	bool KeyControl::IsKeyPressed(Keys key, std::optional<Mods> mod)
+	{
+		auto modVal = mod.value_or(Mods::None); //
+		return FindKeyComb(key, modVal)->is_pressed(toInt(key), toInt(modVal));
+	}
+
+	bool KeyControl::IsKeyPressed(int key, std::optional<int> mod)
+	{
+		auto modVal = mod.value_or(0);
+		return FindKeyComb(KEYS(key), MODS(modVal))->is_pressed(toInt(key), toInt(mod.value_or(0)));
 	}
 
 
