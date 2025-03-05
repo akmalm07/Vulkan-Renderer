@@ -44,7 +44,6 @@
 bin/
 bin-int/
 build/
-scripts/
 Makefile
 *.make
 obj/
