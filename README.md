@@ -34,7 +34,11 @@ This project is open to contributions. If you'd like to contribute, please fork 
 ## Known Issues
 
 - Premake has some known bugs, particularly around handling the C++ version and generating the correct configurations. Please ensure you manually adjust the C++ version to C++23 in Visual Studio after generating the project files.
+- If you notice any bugs related to the camera, which ahs poorly been tested, feel free to contribute.
   
 ## License
 
 This project is open-source and free to use and modify. Please feel free to contribute or adapt it for your needs.
+
+## Future Extentions
+- The goal is to add further extentions and testibility. I currently have a problem setting up a pch, so that would be a big bonus.
