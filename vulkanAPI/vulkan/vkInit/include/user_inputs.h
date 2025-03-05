@@ -8,24 +8,38 @@
 
 namespace UserInput
 {
+
+#define _POS_ glm::vec2
+
+#define _COL_ glm::vec3
+
+#define _NORM_ std::nullptr_t
+
+#define _TEX_ std::nullptr_t
+
+#define _VERT_SHADER_PATH_ "..\\..\\shaders\\vertex.spv"
+
+#define _FRAG_SHADER_PATH_ "..\\..\\shaders\\fragment.spv"
+
+
 	//USER DEFITIONS
-	using pos = glm::vec3;
+	using pos = _POS_;
 
-	using col = glm::vec3;
+	using col = _COL_;
 
-	using norm = std::nullptr_t;
+	using norm = _NORM_;
 
-	using tex = std::nullptr_t;
+	using tex = _TEX_;
 
-	using AttributeDescription = AllInOneVertBuffer; 
+	using AttributeDescription = AllInOneVertBuffer; // IF YOu Edit this, make nessasary changes to the Engine and Shaders
 
-	constexpr char v_shader_path[] = "..\\shaders\\vertex.spv";
-	constexpr char f_shader_path[] = "..\\shaders\\fragment.spv";
-	constexpr char desc_set_json_path[] = "json\\descriptor_sets.json";
-	constexpr char push_const_json_path[] = "json\\push_const.json";
+	constexpr char v_shader_path[] = _VERT_SHADER_PATH_;
+	constexpr char f_shader_path[] = _FRAG_SHADER_PATH_;
+	constexpr char desc_set_json_path[] = "..\\json\\descriptor_sets.json";
+	constexpr char push_const_json_path[] = "..\\json\\push_const.json";
 
 
-	constexpr vk::ClearValue clear_color = { std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} };
+	constexpr vk::ClearValue clear_color = { std::array<float, 4>{1.0f, 0.5f, 0.0f, 1.0f} };
 
 
 } // namespace UserInput

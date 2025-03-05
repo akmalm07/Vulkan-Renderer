@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "headers.h"
 
 #include "tools\include\base_engine.h"
 #include "vkInit\include\instance.h"
@@ -481,7 +481,7 @@ void BaseEngine::make_pipeline()
 	spesifications.swapchainFormat = _vkSwapchainFormat;
 	spesifications.descriptorSetLayouts = _vkDescriptorSetLayouts;
 	spesifications.pushConsts = _vkPushConsts;
-	spesifications.instanced = false; 
+	spesifications.instanced = false;
 
 
 	vkInit::GraphicsPipelineOutBundle output = vkInit::create_pipeline(spesifications, _debugMode);

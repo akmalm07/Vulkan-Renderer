@@ -37,3 +37,4 @@ namespace vk
 
 using OncePerVertBuffer = vk::VertexInputAttributeDescription; 
 using AllInOneVertBuffer = std::vector<vk::VertexInputAttributeDescription>; 
+

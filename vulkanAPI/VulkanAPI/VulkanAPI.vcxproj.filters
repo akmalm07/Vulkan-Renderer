@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="global">
+      <UniqueIdentifier>{D63F0300-C2E1-2DD6-AB9C-412A97DDB426}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{89AF369E-F58E-B539-FEA6-40106A051C9B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vulkan">
+      <UniqueIdentifier>{F6FEA123-E2A0-CCF9-CB5B-E04DB79C534A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vulkan\tools">
+      <UniqueIdentifier>{1634334F-0297-C2F3-AB1C-FBA9975E8E76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vulkan\tools\include">
+      <UniqueIdentifier>{89116616-75A0-EFDF-1EBF-03DB0A2D0086}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vulkan\tools\src">
+      <UniqueIdentifier>{2D0D575F-1906-76B1-4238-5B362E9055BD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vulkan\vkInit">
+      <UniqueIdentifier>{5AD7E639-C697-6270-8FD2-ABEDFB51A74C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vulkan\vkInit\include">
+      <UniqueIdentifier>{CDB81A31-3925-D62B-0219-6E896E44F893}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vulkan\vkInit\src">
+      <UniqueIdentifier>{71B2F2F5-DDC8-F08B-2640-7CAD9295C113}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vulkan\vkUtil">
+      <UniqueIdentifier>{6485ED39-D045-6970-9980-B2ED0500AE4C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vulkan\vkUtil\include">
+      <UniqueIdentifier>{D7D0CBF8-433D-87F3-0C31-1F51785CA95B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vulkan\vkUtil\src">
+      <UniqueIdentifier>{7B5555D6-E76B-536C-30E3-DE8D9C3824F4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\global\config.h">
+      <Filter>global</Filter>
+    </ClInclude>
+    <ClInclude Include="..\global\headers.h">
+      <Filter>global</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\main.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\aabb_button_control.h">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\aabb_button_control.inl">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\base_engine.h">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\const_push_registry.h">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\descriptor_set_registry.h">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\engine.h">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\json_reader.h">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\key_control.h">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\key_control.inl">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\key_usage_registry.h">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\keys.h">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\memory_pool.h">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\memory_pool_container.h">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\mouse_control.h">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\scene.h">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\stride.h">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\thread.h">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\timer.h">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\window.h">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\tools\include\window_input.h">
+      <Filter>vulkan\tools\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkInit\include\debug.h">
+      <Filter>vulkan\vkInit\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkInit\include\descriptor_set.h">
+      <Filter>vulkan\vkInit\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkInit\include\descriptor_set_bundles.h">
+      <Filter>vulkan\vkInit\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkInit\include\device.h">
+      <Filter>vulkan\vkInit\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkInit\include\discription.h">
+      <Filter>vulkan\vkInit\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkInit\include\instance.h">
+      <Filter>vulkan\vkInit\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkInit\include\logging.h">
+      <Filter>vulkan\vkInit\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkInit\include\pipeline.h">
+      <Filter>vulkan\vkInit\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkInit\include\predefines.h">
+      <Filter>vulkan\vkInit\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkInit\include\push_constants.h">
+      <Filter>vulkan\vkInit\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkInit\include\swapchain.h">
+      <Filter>vulkan\vkInit\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkInit\include\types.h">
+      <Filter>vulkan\vkInit\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkInit\include\user_inputs.h">
+      <Filter>vulkan\vkInit\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\IndexBuffer.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\VertexBuffer.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\base_buffer.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\buffers.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\camera.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\camera_bundle.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\command.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\framebuffer.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\memory.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\mesh.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\pipeline_bundles.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\queue_families.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\render_structs.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\shader.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\shader_bundles.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\swapchain_frames.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\sync.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\vertex.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\vertex_base.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vulkan\vkUtil\include\window_input_bundles.h">
+      <Filter>vulkan\vkUtil\include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\tools\src\aabb_button_control.cpp">
+      <Filter>vulkan\tools\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\tools\src\base_engine.cpp">
+      <Filter>vulkan\tools\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\tools\src\const_push_registry.cpp">
+      <Filter>vulkan\tools\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\tools\src\descriptor_set_registry.cpp">
+      <Filter>vulkan\tools\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\tools\src\engine.cpp">
+      <Filter>vulkan\tools\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\tools\src\json_reader.cpp">
+      <Filter>vulkan\tools\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\tools\src\key_control.cpp">
+      <Filter>vulkan\tools\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\tools\src\key_usage_registry.cpp">
+      <Filter>vulkan\tools\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\tools\src\memory_pool.cpp">
+      <Filter>vulkan\tools\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\tools\src\memory_pool_container.cpp">
+      <Filter>vulkan\tools\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\tools\src\mouse_control.cpp">
+      <Filter>vulkan\tools\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\tools\src\scene.cpp">
+      <Filter>vulkan\tools\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\tools\src\stride.cpp">
+      <Filter>vulkan\tools\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\tools\src\thread.cpp">
+      <Filter>vulkan\tools\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\tools\src\timer.cpp">
+      <Filter>vulkan\tools\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\tools\src\window.cpp">
+      <Filter>vulkan\tools\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\tools\src\window_input.cpp">
+      <Filter>vulkan\tools\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkInit\src\descriptor_set.cpp">
+      <Filter>vulkan\vkInit\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkInit\src\descriptor_set_bundles.cpp">
+      <Filter>vulkan\vkInit\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkInit\src\device.cpp">
+      <Filter>vulkan\vkInit\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkInit\src\discription.cpp">
+      <Filter>vulkan\vkInit\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkInit\src\instance.cpp">
+      <Filter>vulkan\vkInit\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkInit\src\logging.cpp">
+      <Filter>vulkan\vkInit\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkInit\src\pipeline.cpp">
+      <Filter>vulkan\vkInit\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkInit\src\push_constants.cpp">
+      <Filter>vulkan\vkInit\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkInit\src\swapchain.cpp">
+      <Filter>vulkan\vkInit\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkUtil\src\IndexBuffer.cpp">
+      <Filter>vulkan\vkUtil\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkUtil\src\VertexBuffer.cpp">
+      <Filter>vulkan\vkUtil\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkUtil\src\base_buffer.cpp">
+      <Filter>vulkan\vkUtil\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkUtil\src\camera.cpp">
+      <Filter>vulkan\vkUtil\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkUtil\src\command.cpp">
+      <Filter>vulkan\vkUtil\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkUtil\src\framebuffer.cpp">
+      <Filter>vulkan\vkUtil\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkUtil\src\memory.cpp">
+      <Filter>vulkan\vkUtil\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkUtil\src\mesh.cpp">
+      <Filter>vulkan\vkUtil\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkUtil\src\queue_families.cpp">
+      <Filter>vulkan\vkUtil\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkUtil\src\render_structs.cpp">
+      <Filter>vulkan\vkUtil\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkUtil\src\shader.cpp">
+      <Filter>vulkan\vkUtil\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkUtil\src\shader_bundles.cpp">
+      <Filter>vulkan\vkUtil\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkUtil\src\swapchain_frames.cpp">
+      <Filter>vulkan\vkUtil\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkUtil\src\sync.cpp">
+      <Filter>vulkan\vkUtil\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\vulkan\vkUtil\src\vertex.cpp">
+      <Filter>vulkan\vkUtil\src</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

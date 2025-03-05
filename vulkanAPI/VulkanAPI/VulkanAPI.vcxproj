@@ -1,0 +1,208 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{30224388-9C8C-F7FE-E5CA-A8A45174D553}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>VulkanAPI</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>..\bin\Debug-windows-x86_64\VulkanAPI\</OutDir>
+    <IntDir>..\bin-int\Debug-windows-x86_64\VulkanAPI\</IntDir>
+    <TargetName>VulkanAPI</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\bin\Release-windows-x86_64\VulkanAPI\</OutDir>
+    <IntDir>..\bin-int\Release-windows-x86_64\VulkanAPI\</IntDir>
+    <TargetName>VulkanAPI</TargetName>
+    <TargetExt>.exe</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>DEBUG;PLATFORM_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%VULKAN_SDK%\Include;..\..\vendor\GLFW\include;..\..\vendor\JSON;..\global;..\include;..\vulkan;..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/std:c++23 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp23</LanguageStandard>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>glfw3_mt.lib;vulkan-1.lib;libcmt.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%VULKAN_SDK%\Lib;..\..\vendor\GLFW\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;PLATFORM_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%VULKAN_SDK%\Include;..\..\vendor\GLFW\include;..\..\vendor\JSON;..\global;..\include;..\vulkan;..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/std:c++23 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%VULKAN_SDK%\Lib;..\..\vendors\GLFW\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\global\config.h" />
+    <ClInclude Include="..\global\headers.h" />
+    <ClInclude Include="..\include\main.h" />
+    <ClInclude Include="..\vulkan\tools\include\aabb_button_control.h" />
+    <ClInclude Include="..\vulkan\tools\include\aabb_button_control.inl" />
+    <ClInclude Include="..\vulkan\tools\include\base_engine.h" />
+    <ClInclude Include="..\vulkan\tools\include\const_push_registry.h" />
+    <ClInclude Include="..\vulkan\tools\include\descriptor_set_registry.h" />
+    <ClInclude Include="..\vulkan\tools\include\engine.h" />
+    <ClInclude Include="..\vulkan\tools\include\json_reader.h" />
+    <ClInclude Include="..\vulkan\tools\include\key_control.h" />
+    <ClInclude Include="..\vulkan\tools\include\key_control.inl" />
+    <ClInclude Include="..\vulkan\tools\include\key_usage_registry.h" />
+    <ClInclude Include="..\vulkan\tools\include\keys.h" />
+    <ClInclude Include="..\vulkan\tools\include\memory_pool.h" />
+    <ClInclude Include="..\vulkan\tools\include\memory_pool_container.h" />
+    <ClInclude Include="..\vulkan\tools\include\mouse_control.h" />
+    <ClInclude Include="..\vulkan\tools\include\scene.h" />
+    <ClInclude Include="..\vulkan\tools\include\stride.h" />
+    <ClInclude Include="..\vulkan\tools\include\thread.h" />
+    <ClInclude Include="..\vulkan\tools\include\timer.h" />
+    <ClInclude Include="..\vulkan\tools\include\window.h" />
+    <ClInclude Include="..\vulkan\tools\include\window_input.h" />
+    <ClInclude Include="..\vulkan\vkInit\include\debug.h" />
+    <ClInclude Include="..\vulkan\vkInit\include\descriptor_set.h" />
+    <ClInclude Include="..\vulkan\vkInit\include\descriptor_set_bundles.h" />
+    <ClInclude Include="..\vulkan\vkInit\include\device.h" />
+    <ClInclude Include="..\vulkan\vkInit\include\discription.h" />
+    <ClInclude Include="..\vulkan\vkInit\include\instance.h" />
+    <ClInclude Include="..\vulkan\vkInit\include\logging.h" />
+    <ClInclude Include="..\vulkan\vkInit\include\pipeline.h" />
+    <ClInclude Include="..\vulkan\vkInit\include\predefines.h" />
+    <ClInclude Include="..\vulkan\vkInit\include\push_constants.h" />
+    <ClInclude Include="..\vulkan\vkInit\include\swapchain.h" />
+    <ClInclude Include="..\vulkan\vkInit\include\types.h" />
+    <ClInclude Include="..\vulkan\vkInit\include\user_inputs.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\IndexBuffer.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\VertexBuffer.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\base_buffer.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\buffers.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\camera.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\camera_bundle.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\command.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\framebuffer.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\memory.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\mesh.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\pipeline_bundles.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\queue_families.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\render_structs.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\shader.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\shader_bundles.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\swapchain_frames.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\sync.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\vertex.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\vertex_base.h" />
+    <ClInclude Include="..\vulkan\vkUtil\include\window_input_bundles.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\vulkan\tools\src\aabb_button_control.cpp" />
+    <ClCompile Include="..\vulkan\tools\src\base_engine.cpp" />
+    <ClCompile Include="..\vulkan\tools\src\const_push_registry.cpp" />
+    <ClCompile Include="..\vulkan\tools\src\descriptor_set_registry.cpp" />
+    <ClCompile Include="..\vulkan\tools\src\engine.cpp" />
+    <ClCompile Include="..\vulkan\tools\src\json_reader.cpp" />
+    <ClCompile Include="..\vulkan\tools\src\key_control.cpp" />
+    <ClCompile Include="..\vulkan\tools\src\key_usage_registry.cpp" />
+    <ClCompile Include="..\vulkan\tools\src\memory_pool.cpp" />
+    <ClCompile Include="..\vulkan\tools\src\memory_pool_container.cpp" />
+    <ClCompile Include="..\vulkan\tools\src\mouse_control.cpp" />
+    <ClCompile Include="..\vulkan\tools\src\scene.cpp" />
+    <ClCompile Include="..\vulkan\tools\src\stride.cpp" />
+    <ClCompile Include="..\vulkan\tools\src\thread.cpp" />
+    <ClCompile Include="..\vulkan\tools\src\timer.cpp" />
+    <ClCompile Include="..\vulkan\tools\src\window.cpp" />
+    <ClCompile Include="..\vulkan\tools\src\window_input.cpp" />
+    <ClCompile Include="..\vulkan\vkInit\src\descriptor_set.cpp" />
+    <ClCompile Include="..\vulkan\vkInit\src\descriptor_set_bundles.cpp" />
+    <ClCompile Include="..\vulkan\vkInit\src\device.cpp" />
+    <ClCompile Include="..\vulkan\vkInit\src\discription.cpp" />
+    <ClCompile Include="..\vulkan\vkInit\src\instance.cpp" />
+    <ClCompile Include="..\vulkan\vkInit\src\logging.cpp" />
+    <ClCompile Include="..\vulkan\vkInit\src\pipeline.cpp" />
+    <ClCompile Include="..\vulkan\vkInit\src\push_constants.cpp" />
+    <ClCompile Include="..\vulkan\vkInit\src\swapchain.cpp" />
+    <ClCompile Include="..\vulkan\vkUtil\src\IndexBuffer.cpp" />
+    <ClCompile Include="..\vulkan\vkUtil\src\VertexBuffer.cpp" />
+    <ClCompile Include="..\vulkan\vkUtil\src\base_buffer.cpp" />
+    <ClCompile Include="..\vulkan\vkUtil\src\camera.cpp" />
+    <ClCompile Include="..\vulkan\vkUtil\src\command.cpp" />
+    <ClCompile Include="..\vulkan\vkUtil\src\framebuffer.cpp" />
+    <ClCompile Include="..\vulkan\vkUtil\src\memory.cpp" />
+    <ClCompile Include="..\vulkan\vkUtil\src\mesh.cpp" />
+    <ClCompile Include="..\vulkan\vkUtil\src\queue_families.cpp" />
+    <ClCompile Include="..\vulkan\vkUtil\src\render_structs.cpp" />
+    <ClCompile Include="..\vulkan\vkUtil\src\shader.cpp" />
+    <ClCompile Include="..\vulkan\vkUtil\src\shader_bundles.cpp" />
+    <ClCompile Include="..\vulkan\vkUtil\src\swapchain_frames.cpp" />
+    <ClCompile Include="..\vulkan\vkUtil\src\sync.cpp" />
+    <ClCompile Include="..\vulkan\vkUtil\src\vertex.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

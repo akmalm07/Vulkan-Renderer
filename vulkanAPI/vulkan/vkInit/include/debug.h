@@ -2,8 +2,6 @@
 
 #include <vulkan/vulkan.hpp>
 
-#define DEBUG
-
 #ifndef NDEBUG
 
 #define VK_CHECK_RESULT(f) {																	\
