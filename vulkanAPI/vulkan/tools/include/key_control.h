@@ -54,6 +54,11 @@ namespace tools
 		void ChangeFuncParamUpdaterKeysPoly(const std::array<Keys, KEY_MAX>& key, std::function<bool()> func, std::optional<Mods> mod = std::nullopt);
 
 
+		double GetKeyMoveX(Keys key, double val);
+		
+		double GetKeyMoveY(Keys key, double val);
+
+
 		template<class F, class ... Args>
 		void AddKeyComb(bool repeatAsWell, const KeyCombInputOne& input, F&& function, Args&&... args);
 

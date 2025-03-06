@@ -290,11 +290,11 @@ void Engine::camera_logic()
 
     for (size_t i = 0; i < keys.num_of_arrow_keys_in_use(); i++)
     {
-		const auto [key, mod] = arrowKeys[i];
+		const auto& [key, mod] = arrowKeys[i];
 
-		std::function<bool()> func = [this, val = _window.FindKeyComb(key)]() -> bool
+		std::function<bool()> func = [this, key, val = _window.FindKeyComb(key)]() -> bool
 			{
-				val->change_parameters(_window.GetMouseChangeX(), _window.GetMouseChangeX(), _deltaTime);
+				val->change_parameters(_window.GetKeyMoveX(key, 0.3), _window.GetKeyMoveY(key, 0.3), _deltaTime);
 				return true;
 			};
 

@@ -197,6 +197,36 @@ namespace tools
 		_keyCombsPoly[std::make_pair(key, mod.value_or(Mods::None))].updater = std::move(func);
 	}
 
+	double KeyControl::GetKeyMoveX(Keys key, double val)
+	{
+		switch (key)
+		{
+		case Keys::A:
+		case Keys::Left:
+			return -1 * val;
+		case Keys::D:
+		case Keys::Right:
+			return val;
+		default:
+			return 0.0;
+		}
+	}
+
+	double KeyControl::GetKeyMoveY(Keys key, double val)
+	{
+		switch (key)
+		{
+		case Keys::W:
+		case Keys::Up:
+			return val;
+		case Keys::S:
+		case Keys::Down:
+			return -1 * val;
+		default:
+			return 0.0;
+		}
+	}
+
 	bool KeyControl::IsKeyPressed(Keys key, std::optional<Mods> mod)
 	{
 		auto modVal = mod.value_or(Mods::None); //

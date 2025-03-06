@@ -2,7 +2,7 @@ project "VulkanAPI"
     location "VulkanAPI"
     kind "ConsoleApp"
     language "C++"
-    cppdialect "C++20"
+    cppdialect "C++latest"
     staticruntime "on"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
@@ -35,6 +35,7 @@ project "VulkanAPI"
         "vulkan/vkInit/include/**.inl",
         "vulkan/vkUtil/include/**.inl",
         "global/**.h",
+        "global/**.cpp"
     }
 
     -- Library directories
@@ -47,14 +48,23 @@ project "VulkanAPI"
     -- Links
     links 
     { 
-        "glfw3.lib",
-        "vulkan-1.lib"
+        "glfw3_mt.lib",
+        "vulkan-1.lib",
+        "libcmt.lib",
+        "kernel32.lib"
     }
+
+    pchheader "headers.h"
+    pchsource "headers.cpp"
+
+    flags { "Verbose" }
+
 
     -- Toolset and compiler settings
     filter "toolset:msc"
-        buildoptions { "/std:c++23" }
-
+        toolset "msc-v143" --
+        buildoptions { "/std:c++23" } 
+        
     filter "toolset:gcc or toolset:clang"
         buildoptions { "-std=c++23" }
 
@@ -63,11 +73,13 @@ project "VulkanAPI"
         defines "DEBUG"
         symbols "On"
         optimize "Off"
+        runtime "Release"  
 
     filter "configurations:Release"
         symbols "Off"
         optimize "On"
         defines "NDEBUG"
+        runtime "Release"  
 
     -- Windows system settings
     filter "system:windows"
@@ -77,9 +89,12 @@ project "VulkanAPI"
     -- Visual Studio specific settings
     filter "action:vs*"
         defines "_CRT_SECURE_NO_WARNINGS"
-        buildoptions { "/std:c++23" }
         staticruntime "on"
 
     -- Linux and GCC/Clang settings
     filter "system:linux or toolset:gcc or toolset:clang"
         buildoptions { "-include pch.h" }
+    
+    filter "files:global/headers.cpp"   
+        buildoptions { "/Ycheaders.h" }
+    

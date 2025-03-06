@@ -40,7 +40,7 @@ namespace tools
 
 		void set_position(const glm::vec3& position);
 
-		glm::mat4 get_view() ;
+		glm::mat4 get_view();
 
 		glm::mat4 get_projection() const;
 
@@ -52,6 +52,8 @@ namespace tools
 
 		void turn_dir(Direction dir, double pitch, double yaw, double deltaTime);
 
+		bool is_moving();
+
 		~CameraT();
 
 	private:
@@ -60,7 +62,9 @@ namespace tools
 		glm::mat4 _view;
 
 		glm::vec3 _position;
+		glm::vec3 _prevPosition;
 		glm::vec3 _rotation;
+		glm::vec3 _prevRotation;
 		glm::vec3 _scale;
 		glm::vec3 _front;
 		glm::vec3 _up;

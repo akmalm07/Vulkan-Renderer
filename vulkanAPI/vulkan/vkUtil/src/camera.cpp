@@ -41,6 +41,9 @@ namespace tools
 		_turnSpeed = turnSpeed;
 		_target = _position + _front;
 
+		_prevPosition = _position;
+		_prevRotation = _rotation;
+
 		update(position);
 	}
 
@@ -97,7 +100,13 @@ namespace tools
 
 		_position =	position;
 
+		is_moving();
+
 		_view = std::move(glm::lookAt(_position, _target, _up));
+
+		PRINT_VEC3("Camera Position", _position);
+		PRINT_VEC3("Camera Rotation", _rotation);
+		std::cout << "\n";
 
 	}
 
@@ -105,7 +114,14 @@ namespace tools
 	{
 		move_dir(dir, deltaTime);
 
+		is_moving();
+
 		_view = std::move(glm::lookAt(_position, _target, _up));
+
+		PRINT_VEC3("Camera Position", _position);
+		PRINT_VEC3("Camera Rotation", _rotation);
+		std::cout << "\n";
+
 	}
 
 	void CameraT::update(double xMove, double yMove, double deltaTime)// parameters are NOT being updated!! REVIEW THIS ERROR
@@ -126,7 +142,15 @@ namespace tools
 
 		_target = _position + _front;
 
+		is_moving();
+
 		_view = std::move(glm::lookAt(_position, _target, _up));
+
+		PRINT_VEC3("Camera Position", _position);
+		PRINT_VEC3("Camera Rotation", _rotation);
+		std::cout << "\n";
+
+
 	}
 
 	void CameraT::update(Direction dir, double xMove, double yMove, double deltaTime)
@@ -147,7 +171,14 @@ namespace tools
 
 		move_dir(dir, deltaTime);
 
+		is_moving();
+
 		_view = std::move(glm::lookAt(_position, _target, _up));
+
+		PRINT_VEC3("Camera Position", _position);
+		PRINT_VEC3("Camera Rotation", _rotation);
+		std::cout << "\n";
+
 	}
 
 
@@ -436,6 +467,17 @@ namespace tools
 			_rotation.y += yaw * _turnSpeed * deltaTime;
 			break;
 		}
+	}
+
+	bool CameraT::is_moving()
+	{
+		bool positionChanged = glm::length(_position - _prevPosition) > 0.0001f; // Use a threshold for small movements
+		bool rotationChanged = glm::dot(_rotation, _prevRotation) < 0.9999f; // Use a threshold for rotation change
+
+		_prevPosition = _position;
+		_prevRotation = _rotation;
+
+		return positionChanged || rotationChanged;
 	}
 
 
