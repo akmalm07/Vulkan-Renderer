@@ -20,12 +20,12 @@ A simple Vulkan renderer with a movable camera and basic abstraction to simplify
 3. **Build with Premake**:
    - The project uses Premake5 for configuration. Simply click and run the `premake5.bat` file to generate project files for MSVC 2022.
    
-4. **C++ Version**: There is a known issue with Premake's default C++ version. To build this project, you need to manually change the C++ version in Visual Studio:
+4. **C++ Version**: If you get errors, it's most likly premakes misconfigurations. To build this project, you need to manually change the C++ version in Visual Studio:
    - Open the generated Visual Studio project.
    - Go to **Project Properties** -> **C/C++** -> **Language** -> **C++ Language Standard**.
    - Set it to **C++23**.
 
-5. **Build the Project**: After running the `premake5.bat` file, open the project in Visual Studio, build it, and run the resulting executable.
+5. **Build the Project**: After running the `premake5.bat` file, open the project in Visual Studio, build it, and run the resulting executable. The project uses a pch, so it won't take so long
 
 ## Contributing
 
@@ -33,8 +33,7 @@ This project is open to contributions. If you'd like to contribute, please fork 
 
 ## Known Issues
 
-- Premake has some known bugs, particularly around handling the C++ version and generating the correct configurations. Please ensure you manually adjust the C++ version to C++23 in Visual Studio after generating the project files.
-- If you notice any bugs related to the camera, which ahs poorly been tested, feel free to contribute.
+- Premake has some known bugs, particularly around handling the C++ version and generating the correct configurations. If you get errors about std::views::enumerate, please ensure you manually adjust the C++ version to C++23 in Visual Studio after generating the project files.
   
 ## License
 
@@ -42,3 +41,4 @@ This project is open-source and free to use and modify. Please feel free to cont
 
 ## Future Extentions
 - The goal is to add further extentions and testibility. I currently have a problem setting up a pch, so that would be a big bonus.
+- Also, a texture feature is currently being developed
