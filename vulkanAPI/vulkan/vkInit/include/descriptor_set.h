@@ -12,7 +12,7 @@ namespace vkInit
 	DescriptorSetOutBundle create_descriptor_set(const vk::Device& device, const vk::PhysicalDevice& logicalDevice, 
 		const std::vector<DescriptorSetBindings>& discriptor,
 		const std::vector<DescriptorSetBindings>& layouts,
-		std::vector<std::shared_ptr<vkInit::DescriptorBuffer>> buffers, bool debug);
+		std::vector<vkInit::DescriptorBuffer> buffers, bool debug);
 	 
 	vk::DescriptorSetLayoutBinding create_descriptor_set_layout_binding(const DescriptorSetBindingBundle& input, bool debug);
 

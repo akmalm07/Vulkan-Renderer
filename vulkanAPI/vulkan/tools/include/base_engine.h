@@ -8,6 +8,7 @@
 
 #include "vkUtil\include\render_structs.h"
 #include "vkUtil\include\swapchain_frames.h"
+#include "vkUtil\include\memory.h"
 #include "vkUtil\include\camera.h"
 #include "vkInit\include\descriptor_set_bundles.h"
 #include "tools\include\memory_pool.h"
@@ -41,7 +42,7 @@ public:
 	
 	virtual void game_logic(const double& deltaTime) = 0;
 	
-	virtual void update_sets(vk::CommandBuffer& commandBuffer) = 0;
+	virtual void update_sets() = 0;
 	
 	virtual void camera_logic() = 0;
 
@@ -57,13 +58,29 @@ public:
 
 protected:
 
-	enum DescriptorSetBuffers : size_t 
+	enum class DescSetID : size_t
+	{
+		UniformBuff = 0,
+		UniformBuffDynamic = 1000,
+		StorageBuff = 2000,
+		StorageBuffDynamic = 3000,
+		UniformTexelBuffer = 4000,
+		StorageTexelBuff = 5000,
+		StorageImage = 6000,
+		SampledImage = 7000,
+		StorageTexelBuffer = 7000,
+		Sampler = 8000,
+		CombinedImageSampler = 9000,
+		Other = 10000
+	};
+
+	enum class DescSetBuff : size_t 
 	{
 		Buffer1,
 		BufferCount
 	};
 
-	enum Sets
+	enum class Sets
 	{
 		Set1,
 		SetCount
@@ -75,7 +92,11 @@ protected:
 		BindingCount
 	};
 
-
+	enum class Bindings : size_t
+	{
+		Binding1,
+		BindingCount
+	};
 
 
 	bool _debugMode = true;
@@ -150,18 +171,20 @@ protected:
 		public:
 			Update(size_t id, bool status) : id(id), status(status) {}
 			size_t get_id() const { return id; }
+			bool is_id(DescSetID id, uint32_t num) const { return this->id == SIZET(id)+num; }
 			bool status;
 		private:
 			const size_t id;
 		};
 
-		std::array<vk::DescriptorSet, SIZET(SetCount)> sets;
-		std::array<std::vector<Update>, SIZET(SetCount)> updated;
+		std::array<vk::DescriptorSet, SIZET(Sets::SetCount)> sets;
+		std::array<std::vector<Update>, SIZET(Sets::SetCount)> updated;
 
 	}_vkDescriptorSets;
+
 	std::vector<vk::DescriptorSetLayout> _vkDescriptorSetLayouts;
 	vk::DescriptorPool _vkDescriptorPool;
-	std::array<vkUtil::Buffer, SIZET(BufferCount)> _vkDescriptorSetBuffers;
+	std::array < vkUtil::Buffer, SIZET(DescSetBuff::BufferCount)> _vkDescriptorSetBuffers;
 
 
 	//Push Consts
@@ -208,8 +231,6 @@ protected:
 
 	void make_descriptor_sets();
 
-	std::vector <std::shared_ptr< vkInit::DescriptorBuffer >> initalize_descriptor_buffers(const std::vector<vkUtil::BufferInput>&descriptorBuffer);
-
 	void make_push_consts();
 
 	void make_pipeline();
@@ -222,14 +243,35 @@ protected:
 
 	void record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t imageIndex);
 
+	std::vector <vkInit::DescriptorBuffer> initalize_descriptor_buffers(const std::vector<vkUtil::BufferInput>& descriptorBuffer);
+
 	void handle_threads();
 
 	uint32_t gen_desc_id(vk::DescriptorType desc);
 
+	size_t id_of(DescSetID desc, uint32_t index);
 
+	void change_desc_set(Sets set, Bindings index);
 
+	vk::DescriptorBufferInfo get_buffer_info(DescSetBuff buffer);
+
+	vk::WriteDescriptorSet write_descriptor_set(const vk::DescriptorBufferInfo& bufferInfo, const vk::DescriptorSet& descriptorSet, vk::DescriptorType type, uint32_t binding);
+
+	template <class T>
+	void update_buffer(DescSetBuff buffer, const T&);
 
 };
+
+template<class T>
+inline void BaseEngine::update_buffer(DescSetBuff buffer, const T& item)
+{
+	vkUtil::update_buffer(
+		_vkLogicalDevice,
+		_vkDescriptorSetBuffers[SIZET(buffer)].bufferMemory,
+		item,
+		true
+	);
+}
 
 
 

@@ -3,7 +3,8 @@
 #include "config.h"
 
 
-namespace vkUtil {
+namespace vkUtil 
+{
 
 	class Buffer
 	{

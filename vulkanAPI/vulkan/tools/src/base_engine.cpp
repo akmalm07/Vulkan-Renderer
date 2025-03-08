@@ -325,7 +325,6 @@ void BaseEngine::read_json_files()
 					stages,
 					layout["descriptor_count"].get<uint32_t>(),
 					layout["binding"].get<uint32_t>()
-					//layout["buffer"].get<uint16_t>()
 				);
 			}
 			else
@@ -494,11 +493,19 @@ void BaseEngine::make_pipeline()
 
 }
 
-std::vector <std::shared_ptr< vkInit::DescriptorBuffer >> BaseEngine::initalize_descriptor_buffers(const std::vector<vkUtil::BufferInput>& descriptorBuffer)
-{
-	std::vector<std::shared_ptr<vkInit::DescriptorBuffer>> buffer;
 
-	buffer.emplace_back(std::make_shared<vkInit::DescriptorBufferData<Matrices>>(descriptorBuffer[SIZET(Buffer1)], _MVPMats));
+std::vector <vkInit::DescriptorBuffer> BaseEngine::initalize_descriptor_buffers(const std::vector<vkUtil::BufferInput>& descriptorBuffer)
+{
+	// Here, you specify which buffers you want to use in the descriptor set.
+
+	std::vector<vkInit::DescriptorBuffer> buffer;
+
+	buffer.emplace_back(descriptorBuffer[SIZET(DescSetBuff::Buffer1)], &_MVPMats);
+
+	if (buffer.size() != SIZET(DescSetBuff::BufferCount))
+	{
+		throw std::runtime_error("Descriptor Buffer Count does not match the Set Count! Buffer Count Enum must be update it!");
+	}
 
 	return buffer;
 }
@@ -510,14 +517,9 @@ void BaseEngine::make_descriptor_sets()
 	tools::DescriptorSetRegistry& descReg = tools::DescriptorSetRegistry::get_instance();
 	const std::vector<vkInit::DescriptorSetBindings>& allDescriptorSets = descReg.get_descriptor_sets();
 
-	size_t count = 0;
-	for (const auto& size : descReg.get_descriptor_buffers())
-	{
-		count += size.size; 
-	}
 
 	std::cout << "Count: " << descReg.get_descriptor_set_layouts().size() << std::endl;
-
+	
 	vkInit::DescriptorSetOutBundle out = vkInit::create_descriptor_set(
 		_vkLogicalDevice,
 		_vkPhysicalDevice,
@@ -527,14 +529,14 @@ void BaseEngine::make_descriptor_sets()
 		_debugMode
 	);
 	
-	if (out.descriptorSets.size() != SIZET(SetCount))
+	if (out.descriptorSets.size() != SIZET(Sets::SetCount))
 	{
 		throw std::runtime_error("Descriptor Set Count does not match the Set Count! Set Count Enum must be update it!");
 	}
 	std::move(out.descriptorSets.begin(), out.descriptorSets.end(), _vkDescriptorSets.sets.begin());
 
 
-	if (out.descriptorSetBuffers.size() != SIZET(BufferCount))
+	if (out.descriptorSetBuffers.size() != SIZET(DescSetBuff::BufferCount))
 	{
 		throw std::runtime_error("Descriptor Set Buffer Count does not match the Set Count! Buffer Count Enum must be update it!");
 	}
@@ -627,8 +629,7 @@ void BaseEngine::record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t
 	vk::Rect2D vkScissor = vk::Rect2D({ 0, 0 }, { static_cast<uint32_t>(_window.GetBufferWidth()), static_cast<uint32_t>(_window.GetBufferHeight()) }); 
 	commandBuffer.setScissor(0, vkScissor);
 
-
-	update_sets(commandBuffer);
+	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _vkPipelineLayout, 0, 1, _vkDescriptorSets.sets.data(), 0, nullptr);
 
 	draw(commandBuffer);
 
@@ -710,7 +711,7 @@ uint32_t BaseEngine::gen_desc_id(vk::DescriptorType desc)
 	case vk::DescriptorType::eSampledImage:
 	{
 		static uint32_t val = 0;
-		id += 0 + val;
+		id += 7000 + val;
 		val++;
 		break;
 	}
@@ -736,6 +737,42 @@ uint32_t BaseEngine::gen_desc_id(vk::DescriptorType desc)
 	}
 	}
 	return id;
+}
+
+size_t BaseEngine::id_of(DescSetID desc, uint32_t index)
+{
+	return SIZET(desc) + index;
+}
+
+void BaseEngine::change_desc_set(Sets set, Bindings index)
+{
+	_vkDescriptorSets.updated[SIZET(set)][SIZET(index)].status = true;
+}
+
+vk::DescriptorBufferInfo BaseEngine::get_buffer_info(DescSetBuff buffer)
+{
+	vk::DescriptorBufferInfo bufferInfo;
+	bufferInfo.buffer = _vkDescriptorSetBuffers[SIZET(buffer)].buffer;
+	bufferInfo.offset = 0;
+	bufferInfo.range = tools::DescriptorSetRegistry::get_instance().get_descriptor_buffers()[SIZET(buffer)].size;
+	return bufferInfo;
+}
+
+vk::WriteDescriptorSet BaseEngine::write_descriptor_set(const vk::DescriptorBufferInfo& bufferInfo, const vk::DescriptorSet& descriptorSet, 
+	vk::DescriptorType type, uint32_t binding)
+{
+	vk::WriteDescriptorSet writeDescriptorSet;
+	writeDescriptorSet.dstSet = descriptorSet;
+	writeDescriptorSet.dstBinding = binding;
+	writeDescriptorSet.dstArrayElement = 0;
+	writeDescriptorSet.descriptorType = type;
+	writeDescriptorSet.descriptorCount = 1;
+	writeDescriptorSet.pBufferInfo = &bufferInfo;
+	
+	writeDescriptorSet.pImageInfo = nullptr;
+	writeDescriptorSet.pTexelBufferView = nullptr;
+
+	return writeDescriptorSet;
 }
 
 

@@ -164,11 +164,16 @@ void Engine::load_scene(std::unique_ptr<SceneT> scene)
 
 void Engine::draw_scene(vk::CommandBuffer& cmdBuffer) const
 {
+	if (_scene)
+	{
+		_scene->update_sets(cmdBuffer);
+	}
 }
 
 
 void Engine::draw(vk::CommandBuffer& commandBuffer) const
 {
+
 	draw_scene(commandBuffer);
 	
 	bool hasVertBuffer = _vertexBuffer != nullptr; 
@@ -200,20 +205,11 @@ void Engine::draw(vk::CommandBuffer& commandBuffer) const
 
 }
 
-void Engine::update_sets(vk::CommandBuffer& cmdBuff)
-{ 
-	//Binding the descriptor set
+void Engine::update_sets()
+{
+	tools::DescriptorSetRegistry& reg = tools::DescriptorSetRegistry::get_instance();
 
-	cmdBuff.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, _vkPipelineLayout, 0, 1, _vkDescriptorSets.sets.data(), 0, nullptr);
-
-
-
-	if(_scene)
-	{
-		_scene->update_sets(cmdBuff);
-	}
-
-
+	std::vector<vk::WriteDescriptorSet> writeDescriptorSets;
 
 	for (const auto& [i, set] : _vkDescriptorSets.updated | std::views::enumerate)
 	{
@@ -223,49 +219,26 @@ void Engine::update_sets(vk::CommandBuffer& cmdBuff)
 			{
 				_vkDescriptorSets.updated[i][j].status = false;
 
-				if (updated.get_id() == 0)
+				if (updated.is_id(DescSetID::UniformBuff, 0))
 				{
 					_vkDescriptorSets.updated[SIZET(Sets::Set1)][SIZET(Set1::Binding1)].status = false;
-					vkUtil::update_buffer(
-						_vkLogicalDevice,
-						_vkDescriptorSetBuffers[SIZET(Buffer1)].bufferMemory,
-						_MVPMats
+			
+					update_buffer(DescSetBuff::Buffer1, _MVPMats);
+
+					writeDescriptorSets.push_back(
+						write_descriptor_set(
+							get_buffer_info(DescSetBuff::Buffer1),
+							_vkDescriptorSets.sets[SIZET(Sets::Set1)], 
+							vk::DescriptorType::eUniformBuffer, 
+							0)
 					);
 				}
-
-				vk::DescriptorBufferInfo bufferInfo;
-				bufferInfo.buffer = _vkDescriptorSetBuffers[SIZET(Buffer1)].buffer;
-				bufferInfo.offset = 0;
-				bufferInfo.range = sizeof(_MVPMats);
-
-				vk::WriteDescriptorSet writeDescriptorSet;
-				writeDescriptorSet.descriptorType = vk::DescriptorType::eUniformBuffer;
-				writeDescriptorSet.descriptorCount = 1;
-				writeDescriptorSet.dstBinding = 0;
-				writeDescriptorSet.dstArrayElement = 0;
-				writeDescriptorSet.dstSet = _vkDescriptorSets.sets[SIZET(Sets::Set1)];
-				writeDescriptorSet.pBufferInfo = &bufferInfo;
-				writeDescriptorSet.pImageInfo = nullptr;
-				writeDescriptorSet.pTexelBufferView = nullptr;
-
-				_vkLogicalDevice.updateDescriptorSets(1, &writeDescriptorSet, 0, nullptr);
 
 			}
 		}
 	}
-}
-
-Engine::~Engine()
-
-{
-	_vkLogicalDevice.waitIdle();
-
-	_vkGraphicsQueue.waitIdle();
-
-	_vertexBuffer.reset();
-	_indexBuffer.reset();
-	_scene.reset();
 	
+	_vkLogicalDevice.updateDescriptorSets(writeDescriptorSets.size(), writeDescriptorSets.data(), 0, nullptr);
 }
 
 
@@ -281,40 +254,57 @@ void Engine::call_push_consts() const
 
 void Engine::camera_logic()
 {
-    using tools::Keys;
-    using tools::Mods;
+	using tools::Keys;
+	using tools::Mods;
 
-    tools::KeyUsageRegistry& keys = tools::KeyUsageRegistry::get_instance();
-    
+	tools::KeyUsageRegistry& keys = tools::KeyUsageRegistry::get_instance();
+	
 	const auto arrowKeys = keys.arrow_keys_in_use();
 
-    for (size_t i = 0; i < keys.num_of_arrow_keys_in_use(); i++)
-    {
+	for (size_t i = 0; i < keys.num_of_arrow_keys_in_use(); i++)
+	{
 		const auto& [key, mod] = arrowKeys[i];
 
 		std::function<bool()> func = [this, key, val = _window.FindKeyComb(key)]() -> bool
 			{
 				val->change_parameters(_window.GetKeyMoveX(key, 0.3), _window.GetKeyMoveY(key, 0.3), _deltaTime);
+				update_sets();
 				return true;
 			};
 
 		_window.AddFuncParamUpdaterKeys(key, std::move(func), mod);
-    }
+	}
 
 	const auto azKeys = keys.a_to_z_keys_in_use();
 
-    for (size_t i = 0; i < keys.num_of_a_to_z_keys_in_use(); i++)
-    {
+	for (size_t i = 0; i < keys.num_of_a_to_z_keys_in_use(); i++)
+	{
 		const auto [key, mod] = azKeys[i];
 
 		std::function<bool()> func = [this, val = _window.FindKeyComb(key)]() -> bool
 			{
 				val->change_parameters(_deltaTime);
+				change_desc_set(Sets::Set1, Bindings::Binding1);
+				update_sets();
 				return true;
 			};
 
 		_window.AddFuncParamUpdaterKeys(key, std::move(func), mod);
-    }
+	}
+
+}
+
+
+Engine::~Engine()
+
+{
+	_vkLogicalDevice.waitIdle();
+
+	_vkGraphicsQueue.waitIdle();
+
+	_vertexBuffer.reset();
+	_indexBuffer.reset();
+	_scene.reset();
 
 }
 

@@ -30,7 +30,7 @@ namespace vkInit
 
 	DescriptorSetOutBundle create_descriptor_set(const vk::Device& device, const vk::PhysicalDevice& logicalDevice,
 		const std::vector<DescriptorSetBindings>& descriptors, const std::vector<DescriptorSetBindings>& layouts,
-		std::vector<std::shared_ptr<vkInit::DescriptorBuffer>> buffers, bool debug)
+		std::vector<vkInit::DescriptorBuffer> buffers, bool debug)
 	{
 		if (debug)
 		{
@@ -125,11 +125,11 @@ namespace vkInit
 		for (size_t i = 0; i < buffers.size(); i++)
 		{
 			vkUtil::BufferInput bufferInfo;
-			bufferInfo.size = buffers[i]->maxSize;
-			bufferInfo.usage = buffers[i]->bufferType;
+			bufferInfo.size = buffers[i].maxSize;
+			bufferInfo.usage = buffers[i].bufferType;
 
 			descriptorBuffer.emplace_back(vkUtil::create_vk_util_buffer(logicalDevice, device, bufferInfo, 
-				buffers[i]->get_data_ptr(), debug));
+				buffers[i].data, debug));
 		}
 
 		std::vector<vk::DescriptorSet> descriptorSets = create_descriptor_sets(device, pool, allLayout, descriptors.size(), debug);

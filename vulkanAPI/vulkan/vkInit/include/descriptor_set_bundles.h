@@ -42,33 +42,12 @@ namespace vkInit
 	public:
 		vk::BufferUsageFlags bufferType;
 		uint32_t maxSize;
+		void* data = nullptr;
+
 
 		DescriptorBuffer();
-		DescriptorBuffer(vk::BufferUsageFlags bufferType, uint32_t maxSize);
-	public:
-		virtual void* get_data_ptr() = 0;
+		DescriptorBuffer(vk::BufferUsageFlags bufferType, uint32_t maxSize, void* data);
+		DescriptorBuffer(const vkUtil::BufferInput& buffer, void* data);
 	};
-
-	template<class T>
-	struct DescriptorBufferData : public DescriptorBuffer
-	{
-	public:
-		T data;
-
-		DescriptorBufferData(vk::BufferUsageFlags bufferType, uint32_t maxSize, T data) : data(data), DescriptorBuffer(bufferType, maxSize ) {}
-		DescriptorBufferData(const DescriptorBuffer& buffer) : DescriptorBuffer(buffer.bufferType, buffer.maxSize ) {}
-		DescriptorBufferData(const vkUtil::BufferInput& buffer, T data) : DescriptorBuffer(buffer.usage, buffer.size ), data(data) {}
-		DescriptorBufferData(const DescriptorBuffer& buffer, T data) : DescriptorBuffer(buffer.bufferType, buffer.maxSize ), data(data) {}
-
-	public:
-		virtual void* get_data_ptr() override;
-	};
-
-
-	template<class T>
-	inline void* DescriptorBufferData<T>::get_data_ptr() 
-	{
-		return &data;
-	}
 
 }

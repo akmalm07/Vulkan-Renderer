@@ -51,7 +51,7 @@ public:
 
 	void draw(vk::CommandBuffer& commandBuffer) const override; 
 
-	void update_sets(vk::CommandBuffer& cmdBuffer) override;
+	void update_sets() override;
 
 
 	template<vkType::ValidObj T>

@@ -27,14 +27,15 @@ namespace vkUtil
 
 
 	template <class T>
-	void update_buffer(const vk::Device& device, vk::DeviceMemory bufferMemory, const T& data);
+	void update_buffer(const vk::Device& device, vk::DeviceMemory bufferMemory, const T& data, bool hostCohesive);
 
 
 	void destroy_vk_util_buffer(const vk::Device& dev, Buffer buffer);
 	
 	
 	template <class T>
-	void update_buffer(const vk::Device& device, vk::DeviceMemory bufferMemory, const T& data) {
+	void update_buffer(const vk::Device& device, vk::DeviceMemory bufferMemory, const T& data, bool hostCohesive) 
+	{
 		void* mappedData;
 		vk::Result result = device.mapMemory(bufferMemory, 0, sizeof(T), {}, &mappedData);
 
@@ -43,6 +44,12 @@ namespace vkUtil
 		}
 
 		std::memcpy(mappedData, &data, sizeof(T));
+
+		if (hostCohesive) 
+		{
+			vk::MappedMemoryRange memoryRange(bufferMemory, 0, sizeof(T));
+			device.flushMappedMemoryRanges(memoryRange);
+		}
 
 		device.unmapMemory(bufferMemory);
 	}
