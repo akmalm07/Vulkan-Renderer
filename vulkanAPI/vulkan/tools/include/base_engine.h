@@ -15,6 +15,8 @@
 #include "tools\include\memory_pool_container.h"
 #include "tools\include\timer.h"
 #include "tools\include\thread.h"
+#include "vkUtil\include\VertexBuffer.h"
+
 
 
 #include "tools\include\window.h"
@@ -147,6 +149,14 @@ protected:
 
 	vk::RenderPass _vkRenderpass;
 
+	vk::Pipeline _vkLinePipeline;
+
+	vk::PipelineLayout _vkLinePipelineLayout;
+
+	vk::RenderPass _vkLineRenderpass;
+
+
+
 	//Command variubles  
 	vk::CommandPool _vkCommandPool;
 	vk::CommandBuffer _vkMainCommandBuffer;
@@ -163,6 +173,8 @@ protected:
 
 	tools::Timer _timer = false;
 
+
+	bool _shouldUpdateDescSets = false;
 	//Descriptor Sets
 	struct DescriptorSetsStruct
 	{
@@ -192,8 +204,10 @@ protected:
 
 
 	//Syncronization variubles
+	vk::Semaphore _vkCanUpdate;
 	size_t _maxFramesInFlight, _frameNum;
 	
+	mutable std::unique_ptr<VertexBufferT> _vertexLineBuffer;
 
 	//Matrices
 
@@ -203,6 +217,8 @@ protected:
 		glm::mat4 _viewMat;
 		glm::mat4 _projMat;
 	} _MVPMats;
+
+	VertexBufferT _lineBuffer;
 
 	protected:
 
@@ -242,6 +258,10 @@ protected:
 	void make_frame_sync_objects();
 
 	void record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t imageIndex);
+
+	void draw_lines(vk::CommandBuffer& commandBuffer) const;
+	
+	void load_line_buffer();
 
 	std::vector <vkInit::DescriptorBuffer> initalize_descriptor_buffers(const std::vector<vkUtil::BufferInput>& descriptorBuffer);
 

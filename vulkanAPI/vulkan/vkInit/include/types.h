@@ -77,6 +77,9 @@ namespace vkType
 	concept BoolLambdaVardic = std::invocable<Func, Args...>&& std::convertible_to<std::invoke_result_t<Func, Args...>, bool>;
 
 
+	template <typename T>
+	concept Enum = std::is_enum_v<T>;
+
 	template <class T>
 	concept VertBuff = std::same_as<OncePerVertBuffer, T> || std::same_as<AllInOneVertBuffer, T>;
 

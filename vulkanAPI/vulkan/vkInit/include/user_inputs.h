@@ -9,7 +9,7 @@
 namespace UserInput
 {
 
-#define _POS_ glm::vec2
+#define _POS_ glm::vec3
 
 #define _COL_ glm::vec3
 
@@ -17,9 +17,13 @@ namespace UserInput
 
 #define _TEX_ std::nullptr_t
 
-#define _VERT_SHADER_PATH_ "..\\..\\shaders\\vertex.spv"
+#define _VERT_SHADER_PATH_ "..\\shaders\\spv\\vertex.spv"
 
-#define _FRAG_SHADER_PATH_ "..\\..\\shaders\\fragment.spv"
+#define _FRAG_SHADER_PATH_ "..\\shaders\\spv\\fragment.spv"
+
+#define LINE_VERT_SHADER_PATH_ "..\\shaders\\spv\\vertex_line.spv"
+
+#define LINE_FRAG_SHADER_PATH_ "..\\shaders\\spv\\fragment_line.spv"
 
 
 	//USER DEFITIONS
@@ -35,6 +39,8 @@ namespace UserInput
 
 	constexpr char v_shader_path[] = _VERT_SHADER_PATH_;
 	constexpr char f_shader_path[] = _FRAG_SHADER_PATH_;
+	constexpr char line_v_shader_path[] = LINE_VERT_SHADER_PATH_;
+	constexpr char line_f_shader_path[] = LINE_FRAG_SHADER_PATH_;
 	constexpr char desc_set_json_path[] = "..\\json\\descriptor_sets.json";
 	constexpr char push_const_json_path[] = "..\\json\\push_const.json";
 

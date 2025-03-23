@@ -23,15 +23,10 @@ namespace tools {
 		_width = 800.0f;
 		_height = 800.0f;
 
-		_leftOrtho = 0.0f;
-		_rightOrtho = 0.0f;
-		_topOrtho = 0.0f;
-		_bottomOrtho = 0.0f;
-
 		_aspectRatio = 1.0f;	
 	}
 
-	WindowT::WindowT(float windowWidth, float windowHeight, const std::string& name, bool isOrtho)
+	WindowT::WindowT(float windowWidth, float windowHeight, const std::string& name)
 	{
 
 		_name = name;
@@ -43,35 +38,49 @@ namespace tools {
 
 		_width = windowWidth;
 		_height = windowHeight;
-
-
-		_aspectRatio = windowWidth / windowHeight;
-
-		if (isOrtho)
-		{
-			if (_aspectRatio >= 1.0f)
-			{
-				_leftOrtho = -1.0f * _aspectRatio;
-				_rightOrtho = 1.0f * _aspectRatio;
-				_topOrtho = 1.0f;
-				_bottomOrtho = -1.0f;
-			}
-			else
-			{
-				_leftOrtho = -1.0f;
-				_rightOrtho = 1.0f;
-				_topOrtho = 1.0f / _aspectRatio;
-				_bottomOrtho = -1.0f / _aspectRatio;
-			}
-		}
 	}
 
 	WindowT::WindowT(WindowT&& other) noexcept = default;
 
 	WindowT& WindowT::operator=(WindowT&& other) noexcept = default;
 
+	void WindowT::SetOrtho()
+	{
+		_aspectRatio = _width / _height;
 
-	bool WindowT::CreateWindow(bool disableCursor)
+
+		if (_aspectRatio >= 1.0f)
+		{
+			_leftOrtho = -1.0f * _aspectRatio;
+			_rightOrtho = 1.0f * _aspectRatio;
+			_topOrtho = 1.0f;
+			_bottomOrtho = -1.0f;
+		}
+		else
+		{
+			_leftOrtho = -1.0f;
+			_rightOrtho = 1.0f;
+			_topOrtho = 1.0f / _aspectRatio;
+			_bottomOrtho = -1.0f / _aspectRatio;
+		}
+	
+	}
+
+
+	void WindowT::SetEscapeButton(Keys key, std::optional<Mods> mod)
+	{
+		AddKeyComb(
+			false,
+			{ key, Action::Press, mod.value_or(Mods::None) },
+			[this]() -> bool
+			{
+				glfwSetWindowShouldClose(_mainWindow, GLFW_TRUE);
+				return true;
+			}
+		);
+	}
+
+	bool WindowT::CreateWindow(bool disableCursor, bool isOrtho)
 	{
 	
 		std::cout << "window count : " << g_numOfWindows <<"\n";
@@ -116,17 +125,22 @@ namespace tools {
 
 		CreateCallbacks();
 
-		if (!disableCursor)
+		if (disableCursor)
 		{
 			glfwSetInputMode(_mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		}
 
 		glfwSetWindowUserPointer(_mainWindow, this);
 
+		if (isOrtho)
+		{
+			SetOrtho();
+		}
+
 		return true;
 	}
 
-	bool WindowT::CreateWindow(float windowWidth, float windowHeight, const std::string& name, bool disableCursor)
+	bool WindowT::CreateWindow(float windowWidth, float windowHeight, const std::string& name, bool disableCursor, bool isOrtho)
 	{
 		if (g_numOfWindows == 0)
 		{
@@ -179,6 +193,11 @@ namespace tools {
 		}
 
 		glfwSetWindowUserPointer(_mainWindow, this);
+
+		if (isOrtho)
+		{
+			SetOrtho();
+		}
 
 		return true;
 	}
@@ -303,7 +322,7 @@ namespace tools {
 		glfwSetWindowUserPointer(_mainWindow, this); 
 
 
-		_aspectRatio = _width / _width;
+		_aspectRatio = _width / _height;
 
 		if (isOrtho)
 		{
@@ -415,16 +434,11 @@ namespace tools {
 			for (const auto& [ky, val] : act)
 			{
 
-				if (val.key->is_pressed(INT(key), INT(mode)))
+				if (val->is_pressed(INT(key), INT(mode)))
 				{
 					_keys[key] = true;
 
-					if (val.updater)
-					{
-						val.updater();
-					}
-
-					val.key->execute();
+					val->execute();
 				}
 			}
 			
@@ -440,15 +454,11 @@ namespace tools {
 			}
 			for (const auto& [ky, val] : act)
 			{
-				if (val.key->is_pressed(INT(key), INT(mode)))
+				if (val->is_pressed(INT(key), INT(mode)))
 				{
 					_keys[key] = false;
 
-					if (val.updater)
-					{
-						val.updater();
-					}
-					val.key->execute();
+					val->execute();
 				}
 			}
 			
@@ -460,13 +470,9 @@ namespace tools {
 
 			for (const auto& [ky, val] : act)
 			{
-				if (val.key->is_pressed(INT(key), INT(mode)))
+				if (val->is_pressed(INT(key), INT(mode)))
 				{
-					if (val.updater)
-					{
-						val.updater();
-					}
-					val.key->execute();
+					val->execute();
 				}
 			}
 		
@@ -483,13 +489,9 @@ namespace tools {
 
 		for (const auto& [ky, val] : _keyCombsPoly)
 		{
-			if (val.key->is_pressed(_mainWindow, mode))
+			if (val->is_pressed(_mainWindow, mode))
 			{
-				if (val.updater)
-				{
-					val.updater();
-				}
-				val.key->execute();
+				val->execute();
 			}
 		}
 		
@@ -505,6 +507,14 @@ namespace tools {
 
 		_mouseCurrentX = posX;
 		_mouseCurrentY = posY;
+
+		if (_mouseMove)
+		{
+			if (_mouseMove->is_changed(_mouseCurrentX, _mouseCurrentY, _mouseChangeX, _mouseChangeY))
+			{
+				_mouseMove->execute();
+			}
+		}
 	}
 
 	void WindowT::HandleMouseButtons(int mouseButton, int action, int mods)
@@ -518,9 +528,9 @@ namespace tools {
 
 			for (const auto& [key, val] : act)
 			{
-				if (val.button->is_clicked(_mouseCurrentX, _mouseCurrentY, Action::Press, mouse))
+				if (val->is_clicked(_mouseCurrentX, _mouseCurrentY, Action::Press, mouse))
 				{
-					val.button->execute();
+					val->execute();
 				}
 			}
 
@@ -536,9 +546,9 @@ namespace tools {
 
 			for (const auto& [key, val] : act)
 			{
-				if (val.button->is_clicked(_mouseCurrentX, _mouseCurrentY, Action::Release, mouse))
+				if (val->is_clicked(_mouseCurrentX, _mouseCurrentY, Action::Release, mouse))
 				{
-					val.button->execute();
+					val->execute();
 				}
 			}
 			//_mouseButtons[SIZET(mouse)]->setPressed(false); 
@@ -554,9 +564,9 @@ namespace tools {
 
 			for (const auto& [key, val] : act)
 			{
-				if (val.button->is_clicked(_mouseCurrentX, _mouseCurrentY, Action::Repeat, mouse))
+				if (val->is_clicked(_mouseCurrentX, _mouseCurrentY, Action::Repeat, mouse))
 				{
-					val.button->execute();
+					val->execute();
 				}
 			}
 			//_mouseButtons[SIZET(mouse)]->setPressed(false); 

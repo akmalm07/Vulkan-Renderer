@@ -48,7 +48,61 @@ protected:
 
 
 		vkUtil::BufferInput input = {};
-		input.size = data.size() * sizeof(data[0]);// FIX THE SIZE!!!!
+		input.size = data.size() * sizeof(data[0]);
+		input.usage = usage;
+
+
+		buffer = vkUtil::create_buffer(device, input, debug);
+		if (debug)
+		{
+			std::cout << "Creating the " << bufferStr << " buffer...\n";
+			if (!buffer)
+			{
+				std::cout << "Error: Failed to create " << bufferStr << " buffer!\n";
+			}
+		}
+
+
+		bufferMemory = vkUtil::alloc_buffer_memory(buffer, physicalDevice, device, input);
+		if (debug)
+		{
+			std::cout << "Allocating the " << bufferStr << " buffer...\n";
+
+			if (!bufferMemory)
+			{
+				std::cout << "Error: Failed to allocate " << bufferStr << " buffer memory!\n";
+			}
+		}
+
+
+		void* memLocation = device.mapMemory(bufferMemory, 0, input.size);
+
+		if (!memLocation)
+		{
+			std::cout << "Error: Failed to map memory!\n";
+		}
+
+		memcpy(memLocation, data.data(), input.size);
+
+		device.unmapMemory(bufferMemory);
+
+
+	}
+
+	template <vkType::BufferType T, size_t S>
+	void createBuffer(const std::array<T, S>& data, vk::DeviceMemory& bufferMemory, vk::BufferUsageFlagBits usage, bool debug)
+	{
+		std::string_view bufferStr = (usage == vk::BufferUsageFlagBits::eVertexBuffer ? "vertex" : (usage == vk::BufferUsageFlagBits::eIndexBuffer ? "index" : "unknown buffer"));
+
+			if (debug)
+			{
+				std::cout << "Initalizing the " << bufferStr << " buffer...\n";
+			}
+
+
+
+		vkUtil::BufferInput input = {};
+		input.size = S * sizeof(data[0]);
 		input.usage = usage;
 
 

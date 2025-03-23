@@ -39,7 +39,7 @@ namespace vkDiscription
 }
 
 
-namespace // Im just a helper function
+namespace 
 {
 	template<vkType::GLMVec T>
 	vk::VertexInputAttributeDescription get_attribute_desc(uint32_t offset,
@@ -75,24 +75,22 @@ namespace // Im just a helper function
 		return disc;
 	}
 
-
-	inline uint32_t& get_S_location()
-	{
-		static uint32_t s_location = 0;
-		return s_location;
-	
-	}
-
-	inline uint32_t& get_S_offset()
-	{
-		static uint32_t s_location = 0;
-		return s_location;
-	
-	}
-
 }
 
 
+inline uint32_t& get_S_location()
+{
+	static uint32_t s_location = 0;
+	return s_location;
+
+}
+
+inline uint32_t& get_S_offset()
+{
+	static uint32_t s_location = 0;
+	return s_location;
+
+}
 	template<vkType::GLMVec T> 
 	vk::VertexInputAttributeDescription vkDiscription::get_attribute_descriptions(uint32_t binding, bool debug)
 	{

@@ -52,7 +52,7 @@ void Engine::load_mesh(MeshT& mesh) const
 
 	bufferInfo.physicalDevice = _vkPhysicalDevice;
 
-	_vertexBuffer = std::make_unique<VertexBuffer>(bufferInfo);
+	_vertexBuffer = std::make_unique<vkType::VertexBuffer>(bufferInfo);
 	_vertexBuffer->initalize(vertices, _debugMode);
 
 	const auto& inds = mesh.get_indices();
@@ -111,7 +111,7 @@ void Engine::load_meshes(std::vector<MeshT>& meshes) const
 
 	bufferInfo.physicalDevice = _vkPhysicalDevice;
 
-	_vertexBuffer = std::make_unique<VertexBuffer>(bufferInfo);
+	_vertexBuffer = std::make_unique<vkType::VertexBuffer>(bufferInfo);
 
 	_vertexBuffer->initalize(vertices, _debugMode);
 
@@ -134,7 +134,7 @@ void Engine::load_meshes(std::vector<vkType::Vertex>& meshes, std::vector<vkType
 
 	bufferInfo.physicalDevice = _vkPhysicalDevice;
 
-	_vertexBuffer = std::make_unique<VertexBuffer>(bufferInfo);
+	_vertexBuffer = std::make_unique<vkType::VertexBuffer>(bufferInfo);
 
 	_vertexBuffer->initalize(meshes, _debugMode);
 
@@ -179,7 +179,7 @@ void Engine::draw(vk::CommandBuffer& commandBuffer) const
 	bool hasVertBuffer = _vertexBuffer != nullptr; 
 	bool hasIndBuffer = (_indexBuffer != nullptr) && (hasVertBuffer); 
 
-	if (_vertexBuffer)
+	if (hasVertBuffer)
 	{
 		std::vector<vk::DeviceSize> vertOffset = { 0 };
 		_vertexBuffer->bind_buffer(commandBuffer, vertOffset);
@@ -223,6 +223,7 @@ void Engine::update_sets()
 				{
 					_vkDescriptorSets.updated[SIZET(Sets::Set1)][SIZET(Set1::Binding1)].status = false;
 			
+					_MVPMats._viewMat = _camera.get_view();
 					update_buffer(DescSetBuff::Buffer1, _MVPMats);
 
 					writeDescriptorSets.push_back(
@@ -239,6 +240,7 @@ void Engine::update_sets()
 	}
 	
 	_vkLogicalDevice.updateDescriptorSets(writeDescriptorSets.size(), writeDescriptorSets.data(), 0, nullptr);
+	_shouldUpdateDescSets = false;
 }
 
 
@@ -259,39 +261,29 @@ void Engine::camera_logic()
 
 	tools::KeyUsageRegistry& keys = tools::KeyUsageRegistry::get_instance();
 	
-	const auto arrowKeys = keys.arrow_keys_in_use();
 
-	for (size_t i = 0; i < keys.num_of_arrow_keys_in_use(); i++)
+	for (const auto& [key, mod] : keys.keys_in_use())
 	{
-		const auto& [key, mod] = arrowKeys[i];
-
-		std::function<bool()> func = [this, key, val = _window.FindKeyComb(key)]() -> bool
-			{
-				val->change_parameters(_window.GetKeyMoveX(key, 0.3), _window.GetKeyMoveY(key, 0.3), _deltaTime);
-				update_sets();
-				return true;
-			};
-
-		_window.AddFuncParamUpdaterKeys(key, std::move(func), mod);
-	}
-
-	const auto azKeys = keys.a_to_z_keys_in_use();
-
-	for (size_t i = 0; i < keys.num_of_a_to_z_keys_in_use(); i++)
-	{
-		const auto [key, mod] = azKeys[i];
-
 		std::function<bool()> func = [this, val = _window.FindKeyComb(key)]() -> bool
 			{
 				val->change_parameters(_deltaTime);
 				change_desc_set(Sets::Set1, Bindings::Binding1);
-				update_sets();
 				return true;
 			};
 
-		_window.AddFuncParamUpdaterKeys(key, std::move(func), mod);
+		_window.SetFuncParamUpdaterKeys(key, std::move(func), mod);
 	}
 
+	_window.SetMouseChangeUpdater([this, mouseMove = _window.GetMouseMove()]() -> bool
+		{
+			mouseMove->change_parameters(_deltaTime, _window.GetMouseChangeXf(), _window.GetMouseChangeYf());
+			change_desc_set(Sets::Set1, Bindings::Binding1);
+			return true;
+		}
+	);
+
+
+	_window.SetEscapeButton(Keys::Esc);
 }
 
 

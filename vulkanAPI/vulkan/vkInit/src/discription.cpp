@@ -161,12 +161,19 @@ namespace vkDiscription
 
 	std::variant<DescriptionOutBundle, DescriptionOutBundleSeperate> attrib_and_desc(bool instanced, bool debug)
 	{
-		return bind_attrib_and_desc(instanced, debug);
+		auto val = bind_attrib_and_desc(instanced, debug);
+		get_S_location() = 0;
+		get_S_offset() = 0;
+		return val;
+
 	}
 
 	std::variant<DescriptionOutBundle, DescriptionOutBundleSeperate> attrib_and_desc(std::array<bool, vkType::Vert::size()> instanced, bool debug)
 	{
-		return bind_attrib_and_desc_seperate(instanced, debug); 
+		auto val = bind_attrib_and_desc_seperate(instanced, debug);
+		get_S_location() = 0;
+		get_S_offset() = 0;
+		return val;
 	}
 
 

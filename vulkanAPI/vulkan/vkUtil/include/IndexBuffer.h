@@ -11,7 +11,7 @@
 
 
 
-class IndexBufferT : private BufferFather
+class IndexBufferT : public BufferFather
 {
 public: 
 

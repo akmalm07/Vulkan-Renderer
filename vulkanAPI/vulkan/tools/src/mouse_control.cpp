@@ -28,6 +28,26 @@ namespace tools
 		return _mouseChangeY;
 	}
 
+	float MouseControl::GetMouseCurrentXf() const
+	{
+		return (float)_mouseCurrentX;
+	}
+
+	float MouseControl::GetMouseCurrentYf() const
+	{
+		return (float)_mouseCurrentY;
+	}
+
+	float MouseControl::GetMouseChangeXf() const
+	{
+		return (float)_mouseChangeX;
+	}
+
+	float MouseControl::GetMouseChangeYf() const
+	{
+		return (float)_mouseChangeY;
+	}
+
 
 	bool MouseControl::IsMouseButtonPressed() const
 	{
@@ -35,9 +55,21 @@ namespace tools
 	}
 
 
+	void MouseControl::SetMouseChangeUpdater(std::function<bool()> func)
+	{
+		if (_mouseMove)
+		{
+			_mouseMove->set_updater(std::move(func));
+		}
+	}
+
 	bool MouseControl::IsFirstClick() const
 	{
 		return _isFirstClick;
 	}
 
+	std::shared_ptr<MouseMovementB> MouseControl::GetMouseMove() const
+	{
+		return _mouseMove;
+	}
 }

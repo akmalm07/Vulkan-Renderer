@@ -18,17 +18,20 @@ namespace tools {
 	public:
 		WindowT();
 
-		WindowT(float windowWidth, float windowHeight, const std::string& name, bool isOrtho);
+		WindowT(float windowWidth, float windowHeight, const std::string& name);
 
 		WindowT(WindowT&& other) noexcept;
 
 		WindowT& operator=(WindowT&& other) noexcept;
 
 
-		bool CreateWindow(bool disableCursor);
+		void SetOrtho();
+
+
+		bool CreateWindow(bool disableCursor, bool isOrtho);
 		
 		
-		bool CreateWindow(float windowWidth, float windowHeight, const std::string& name, bool disableCursor);
+		bool CreateWindow(float windowWidth, float windowHeight, const std::string& name, bool disableCursor, bool isOrtho);
 
 
 		void SetDisableCursor(bool disableCursor);
@@ -102,7 +105,10 @@ namespace tools {
 		
 		inline void waitEvents() const { glfwWaitEvents(); }
 
-		
+
+		void SetEscapeButton(Keys key, std::optional<Mods> mod = std::nullopt);
+
+
 		~WindowT();
 
 	private:

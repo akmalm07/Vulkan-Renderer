@@ -49,7 +49,7 @@ namespace tools
 
 		std::array<bool, KEY_CONST> _keys{ false };
 
-		std::array <std::unordered_map <std::string_view, ButtonComplete>, SIZET(Action::Count)> _AABButtons;
+		std::array <std::unordered_map <std::string_view, std::shared_ptr<AABButtonB>>, SIZET(Action::Count)> _AABButtons;
 
 	protected:
 		void SetKey(unsigned int key, bool val);

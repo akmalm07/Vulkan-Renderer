@@ -29,6 +29,8 @@ namespace vk
 
 #define KEY_MAX 2 // CANNOT BE LESS THEN 2!!
 
+#define BOOL(x) static_cast<bool>(x)
+
 #define PRINT_VEC3(str, v) std::cout << str << ": " << v.x << " " << v.y << " " << v.z << std::endl;
 
 #define PRINT_MAT4(str, v) std::cout << str << ": \n" << v[0][0] << " " << v[0][1] << " " << v[0][2] << " " << v[0][3] << std::endl; \

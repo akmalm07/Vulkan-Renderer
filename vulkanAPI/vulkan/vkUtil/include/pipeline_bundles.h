@@ -21,6 +21,14 @@ namespace vkInit
 		vk::Extent2D swapchainExtent;
 		std::vector<vk::DescriptorSetLayout> descriptorSetLayouts; 
 		std::vector<vkType::PushConst> pushConsts; 
+
+		std::string vertShader;
+		std::string fragShader;
+
+		vk::CullModeFlagBits cullMode = vk::CullModeFlagBits::eNone;
+		vk::FrontFace frontFace = vk::FrontFace::eClockwise;
+		vk::PolygonMode polygonMode = vk::PolygonMode::eFill;
+		vk::PrimitiveTopology topology = vk::PrimitiveTopology::eTriangleList;
 	};
 
 	template <vkType::VertBuff T>

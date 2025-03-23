@@ -49,7 +49,7 @@ public:
 
 	void draw_scene(vk::CommandBuffer& cmdBuffer) const;
 
-	void draw(vk::CommandBuffer& commandBuffer) const override; 
+	void draw(vk::CommandBuffer& commandBuffer) const override;  
 
 	void update_sets() override;
 

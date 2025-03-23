@@ -66,7 +66,7 @@ bool vkInit::supported(std::vector<const char*>& extensions, std::vector<const c
 	return true;
 }
 
-vk::Instance vkInit::make_instance(const char* applicationName, bool debug)
+vk::Instance vkInit::make_instance(const char* applicationName, std::vector<const char*> extensionInput, std::vector<const char*> layersInput, bool debug)
 {
 
 	if (debug) {
@@ -105,8 +105,17 @@ vk::Instance vkInit::make_instance(const char* applicationName, bool debug)
 
 	std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-	//In order to hook in a custom validation callback
-	if (debug) {
+	for (const char* extension : extensionInput) 
+	{
+		extensions.push_back(extension);
+		if (debug) 
+		{
+			std::cout << "Extension: " << extension << " is requested" << '\n';
+		}
+	}
+
+	if (debug) 
+	{
 		extensions.push_back("VK_EXT_debug_utils");
 	}
 
@@ -119,23 +128,36 @@ vk::Instance vkInit::make_instance(const char* applicationName, bool debug)
 	}
 
 	std::vector<const char*> layers;
-	if (debug) {
+
+	for (const char* layer : layersInput)
+	{
+		layers.push_back(layer);
+		if (debug)
+		{
+			std::cout << "Layer: " << layer << " is requested" << '\n';
+		}
+	}
+
+	if (debug) 
+	{
 		layers.push_back("VK_LAYER_KHRONOS_validation");
 	}
 
-	if (!supported(extensions, layers, debug)) {
+	if (!supported(extensions, layers, debug)) 
+	{
 		return nullptr;
 	}
 
 	vk::InstanceCreateInfo createInfo = vk::InstanceCreateInfo(
 		vk::InstanceCreateFlags(),
 		&appInfo,
-		static_cast<uint32_t>(layers.size()), layers.data(), // enabled layers
-		static_cast<uint32_t>(extensions.size()), extensions.data() // enabled extensions
+		static_cast<uint32_t>(layers.size()), layers.data(),
+		static_cast<uint32_t>(extensions.size()), extensions.data()
 	);
 
 
-	try {
+	try
+	{
 
 		return vk::createInstance(createInfo);
 	}

@@ -17,6 +17,7 @@ namespace tools
 	template<class ... Args> struct MouseButton;
 	template<class ... Args> struct AABButton;
 	template<class ... Args> struct KeyComb;
+	template<class ... Args> struct MouseMovement;
 
 	struct MouseButtonB
 	{
@@ -39,8 +40,13 @@ namespace tools
 			derived->change_parameter(std::forward<Args>(args)...);
 		}
 
+
+		void set_updater(std::function<bool()> updater);
+
 		bool getPressed() const;
 		void setPressed(bool value);
+
+		bool get_result() const;
 
 		virtual ~MouseButtonB();
 
@@ -48,7 +54,50 @@ namespace tools
 		bool _pressed = false;
 		Mouse _button;
 		Action _action;
+		std::function<bool()> _updater;
 		mutable bool _result = false;
+	};
+
+
+	struct MouseMovementB
+	{
+	public:
+		MouseMovementB();
+		MouseMovementB(const MouseMoveInput& mouse);
+
+		void set_updater(std::function<bool()> updater);
+
+		virtual bool execute() const = 0;
+
+		inline bool is_changed(float prevX, float prevY, float newX, float newY) const
+		{
+			if (_change == MouseChange::None)
+				return false;
+			return (prevX != newX || prevY != newY);
+		}
+
+		template <class ... Args>
+		void change_parameters(Args... args)
+		{
+			auto* derived = dynamic_cast<MouseMovement<Args...>*>(this);
+			if (!derived)
+			{
+				throw std::runtime_error("Invalid dynamic cast in change_parameters");
+			}
+			derived->change_parameter(std::forward<Args>(args)...);
+		}
+
+		bool get_result() const;
+
+		virtual ~MouseMovementB();
+
+	protected: 
+
+		Mouse _button = Mouse::None;
+		MouseChange _change = MouseChange::None;
+		std::function<bool()> _updater;
+		mutable bool _result = false;
+
 	};
 
 	struct AABButtonB
@@ -63,6 +112,8 @@ namespace tools
 
 		bool is_clicked(float x, float y, Action action, Mouse button) const;
 
+		void set_updater(std::function<bool()> updater);
+
 		template <class ... Args>
 		void change_parameters(Args... args)
 		{
@@ -74,6 +125,8 @@ namespace tools
 			derived->change_parameter(std::forward<Args>(args)...);
 		}
 
+		bool get_result() const;
+
 		virtual ~AABButtonB();
 
 	protected:
@@ -81,6 +134,7 @@ namespace tools
 		Action _action;
 		Mouse _button;
 		std::string_view _name;
+		std::function<bool()> _updater;
 		mutable bool _result = false;
 	};
 
@@ -99,24 +153,8 @@ namespace tools
 		bool is_pressed(int number, int mod) const;
 		
 		bool is_pressed(GLFWwindow* window, int mods) const;
-		
-		std::string get_key()
-		{
-			switch (_charater[0])
-			{
-			case Keys::W:
-				return "W is pressed";
-			case Keys::A:
-				return "A is pressed";
-			case Keys::S:
-				return "S is pressed";
-			case Keys::D:
-				return "D is pressed";
-			default:
-				return "No key is pressed";
-			}
 
-		}
+		void set_updater(std::function<bool()> updater);
 
 		virtual bool execute() const = 0;
 
@@ -130,7 +168,8 @@ namespace tools
 			}
 			derived->change_parameter(std::forward<Args>(args)...);
 		}
-		
+
+		bool get_result() const;
 
 		virtual ~KeyCombB();
 
@@ -138,6 +177,7 @@ namespace tools
 		std::array<Keys, KEY_MAX> _charater;
 		std::optional<Mods> _mode;
 		Action _trigger;
+		std::function<bool()> _updater;
 		mutable bool _result = false;
 
 	};
@@ -160,19 +200,13 @@ namespace tools
 
 		bool execute() const override
 		{
+			if (_updater)
+			{
+				_updater();
+			}
 			_result = std::apply(_func, _args);
 			return _result;
 		}
-
-		bool requires_change() const override
-		{
-			if constexpr (std::tuple_size<std::tuple<Args...>>::value == 0) 
-			{
-				return false;
-			}
-			return true;
-		}
-
 
 		void change_parameter(Args&&... args)
 		{
@@ -218,6 +252,10 @@ namespace tools
 
 		bool execute() const override
 		{
+			if (_updater)
+			{
+				_updater();
+			}
 			_result = std::apply(_func, _args);
 			return _result;
 		}
@@ -247,16 +285,20 @@ namespace tools
 	struct MouseButton : MouseButtonB
 	{
 	public:
-		MouseButton(const MouseButtonInput& in, std::function<bool(Args...)> func, Args&&... args)
+		MouseButton(const MouseMoveInput& in, std::function<bool(Args...)> func, Args&&... args)
 			: MouseButtonB(in), _func(std::move(func)), _args(std::forward<Args>(args)...) {
 		}
 
-		MouseButton(const MouseButtonInput& in, std::function<bool(Args...)> func, std::tuple<Args...>&& args)
+		MouseButton(const MouseMoveInput& in, std::function<bool(Args...)> func, std::tuple<Args...>&& args)
 			: MouseButtonB(in), _func(std::move(func)), _args(std::forward<std::tuple<Args...>>(args)) { //recent add
 		}
 
 		bool execute() const override
 		{
+			if (_updater)
+			{
+				_updater();
+			}
 			_result = std::apply(_func, _args);
 			return _result;
 		}
@@ -282,6 +324,36 @@ namespace tools
 		std::tuple<Args...> _args;
 	};
 
+
+	template<class ... Args>
+	struct MouseMovement : MouseMovementB
+	{
+	public:
+		MouseMovement(const MouseMoveInput& in, std::function<bool(Args...)> func, Args&&... args)
+			: MouseMovementB(in), _func(std::move(func)), _args(std::forward<Args>(args)...) {
+		}
+		MouseMovement(const MouseMoveInput& in, std::function<bool(Args...)> func, std::tuple<Args...>&& args)
+			: MouseMovementB(in), _func(std::move(func)), _args(std::forward<std::tuple<Args...>>(args)) { //recent add
+		}
+		bool execute() const override
+		{
+			if (_updater)
+			{
+				_updater();
+			}
+			_result = std::apply(_func, _args);
+			return _result;
+		}
+
+		void change_parameter(Args&&... args)
+		{
+			_args = std::tuple<Args...>(std::forward<Args>(args)...);
+		}
+		~MouseMovement() override = default;
+	private:
+		std::function<bool(Args...)> _func;
+		std::tuple<Args...> _args;
+	};
 }
 
 

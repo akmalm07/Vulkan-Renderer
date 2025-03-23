@@ -12,7 +12,12 @@ namespace tools {
 		_button(in.name), _action(in.action), _pressed(false), _result(false)
 	{}
 
-	bool MouseButtonB::getPressed() const	
+	void MouseButtonB::set_updater(std::function<bool()> updater)
+	{
+		_updater = std::move(updater);
+	}
+
+	bool MouseButtonB::getPressed() const
 	{
 		return _pressed;
 	}
@@ -20,6 +25,11 @@ namespace tools {
 	void MouseButtonB::setPressed(bool value)
 	{
 		_pressed = value;
+	}
+
+	bool MouseButtonB::get_result() const
+	{
+		return _result;
 	}
 
 
@@ -33,12 +43,21 @@ namespace tools {
 		:_x(in.cordX), _y(in.cordY), _width(in.width), _height(in.height), _action(in.action), _button(in.button), _name(in.name), _result(false)
 	{}
 
+	void AABButtonB::set_updater(std::function<bool()> updater)
+	{
+		_updater = std::move(updater);
+	}
 
 	bool AABButtonB::is_clicked(float x, float y, Action action, Mouse button) const
 	{
 		if (action != _action || button != _button)
 			return false;
 		return (x >= _x && x <= _x + _width && y >= _y && y <= _y + _height);
+	}
+
+	bool AABButtonB::get_result() const
+	{
+		return _result;
 	}
 
 	AABButtonB::~AABButtonB() = default;
@@ -49,6 +68,10 @@ namespace tools {
 		_charater(Keys::None), _trigger(Action::None), _mode(std::nullopt), _result(false)
 	{}
 
+	void KeyCombB::set_updater(std::function<bool()> updater)
+	{
+		_updater = std::move(updater);
+	}
 
 	KeyCombB::KeyCombB(const KeyCombInputOne& in) :
 		_trigger(in.action), _result(false)
@@ -70,6 +93,10 @@ namespace tools {
 
 	}
 	
+	bool KeyCombB::get_result() const
+	{
+		return _result;
+	}
 
 	KeyCombB::KeyCombB(const KeyCombInputPoly& in) :
 		_charater(in.number), _trigger(in.action), _result(false)
@@ -168,5 +195,22 @@ namespace tools {
 	{
 		_mode = std::nullopt;
 	}
+
+	MouseMovementB::MouseMovementB() = default;
+	MouseMovementB::MouseMovementB(const MouseMoveInput& mouse)
+		: _button(mouse.button), _change(mouse.change) {
+	}
+
+	void MouseMovementB::set_updater(std::function<bool()> updater)
+	{
+		_updater = std::move(updater);
+	}
+
+	bool MouseMovementB::get_result() const
+	{
+		return _result;
+	}
+
+	MouseMovementB::~MouseMovementB() = default;
 
 }

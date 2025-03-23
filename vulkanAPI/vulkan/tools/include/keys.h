@@ -76,7 +76,8 @@ namespace tools {
 		Rbracket = GLFW_KEY_RIGHT_BRACKET,
 		Lbracket = GLFW_KEY_LEFT_BRACKET,
 		GravAcc = GLFW_KEY_GRAVE_ACCENT,
-		Count = 47
+		Esc = GLFW_KEY_ESCAPE,	
+		Count = 48
 	};
 
 
@@ -85,6 +86,14 @@ namespace tools {
 		None = GLFW_KEY_UNKNOWN,
 		Left = GLFW_MOUSE_BUTTON_LEFT,
 		Right = GLFW_MOUSE_BUTTON_RIGHT,
+		Count = 2
+	};
+
+	enum class MouseChange
+	{
+		None = 0,
+		MoveX = 1 << 0,
+		MoveY = 1 << 1,
 		Count = 2
 	};
 
@@ -113,27 +122,33 @@ namespace tools {
 		Count = 10
 	};
 
-	constexpr Direction operator|(Direction a, Direction b) {
-		return static_cast<Direction>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
+	template <vkType::Enum T>
+	constexpr T operator|(T a, T b) {
+		return static_cast<T>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
 	}
 
-	constexpr Direction operator&(Direction a, Direction b) {
-		return static_cast<Direction>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
+	template <vkType::Enum T>
+	constexpr T operator&(T a, T b) {	
+		return static_cast<T>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
 	}
 
-	constexpr Direction operator^(Direction a, Direction b) {
-		return static_cast<Direction>(static_cast<uint32_t>(a) ^ static_cast<uint32_t>(b));
+	template <vkType::Enum T>
+	constexpr T operator^(T a, T b) {
+		return static_cast<T>(static_cast<uint32_t>(a) ^ static_cast<uint32_t>(b));
 	}
 
-	constexpr Direction operator~(Direction a) {
-		return static_cast<Direction>(~static_cast<uint32_t>(a));
+	template <vkType::Enum T>
+	constexpr T operator~(T a) {
+		return static_cast<T>(~static_cast<uint32_t>(a));
 	}
 
-	constexpr Direction& operator|=(Direction& a, Direction b) {
+	template <vkType::Enum T>
+	constexpr T& operator|=(T& a, T b) {
 		return a = a | b;
 	}
 
-	constexpr Direction& operator&=(Direction& a, Direction b) {
+	template <vkType::Enum T>
+	constexpr T& operator&=(T& a, T b) {
 		return a = a & b;
 	}
 

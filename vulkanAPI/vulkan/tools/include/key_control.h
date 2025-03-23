@@ -44,14 +44,9 @@ namespace tools
 		void DelKeyCombPoly(const std::array<Keys, KEY_MAX>& key, std::optional<Mods> mod = std::nullopt);
 
 
-		void AddFuncParamUpdaterKeys(Keys key, std::function<bool()> func, std::optional<Mods> mod = std::nullopt);
+		void SetFuncParamUpdaterKeys(Keys key, std::function<bool()> func, std::optional<Mods> mod = std::nullopt);
 
-		void AddFuncParamUpdaterKeysPoly(const std::array<Keys, KEY_MAX>& key, std::function<bool()> func, std::optional<Mods> mod = std::nullopt);
-
-
-		void ChangeFuncParamUpdaterKeys(Keys key, std::function<bool()> func, std::optional<Mods> mod = std::nullopt);
-
-		void ChangeFuncParamUpdaterKeysPoly(const std::array<Keys, KEY_MAX>& key, std::function<bool()> func, std::optional<Mods> mod = std::nullopt);
+		void SetFuncParamUpdaterKeysPoly(const std::array<Keys, KEY_MAX>& key, std::function<bool()> func, std::optional<Mods> mod = std::nullopt);
 
 
 		double GetKeyMoveX(Keys key, double val);
@@ -91,9 +86,9 @@ namespace tools
 
 	protected:
 
-		std::array<std::unordered_map <std::pair<Keys, Mods>, KeyComplete>, SIZET(Action::Count)> _keyCombs;
+		std::array<std::unordered_map <std::pair<Keys, Mods>, std::shared_ptr<KeyCombB>>, SIZET(Action::Count)> _keyCombs;
 
-		std::unordered_map <std::pair<std::array<Keys, KEY_MAX>, Mods>, KeyComplete> _keyCombsPoly;
+		std::unordered_map <std::pair<std::array<Keys, KEY_MAX>, Mods>, std::shared_ptr<KeyCombB>> _keyCombsPoly;
 	};
 
 }

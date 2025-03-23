@@ -44,7 +44,9 @@ namespace tools
 		_prevPosition = _position;
 		_prevRotation = _rotation;
 
-		update(position);
+		rotate_calc();
+
+		_view = glm::lookAt(_position, _target, _up);
 	}
 
 	void CameraT::move_forward(double deltaTime, bool forwardOrBack)
@@ -88,7 +90,80 @@ namespace tools
 	}
 
 
-	void CameraT::update(const glm::vec3& position)
+	void CameraT::pitch(double deltaTime, bool forwardOrBack)
+	{
+		if (forwardOrBack)
+		{
+			_rotation.x += _turnSpeed * (float)deltaTime;
+		}
+		else
+		{
+			_rotation.x -= _turnSpeed * (float)deltaTime;
+		}
+	}
+
+	void CameraT::yaw(double deltaTime, bool upOrDown)
+	{
+		if (upOrDown)
+		{
+			_rotation.y += _turnSpeed * (float)deltaTime;
+		}
+		else
+		{
+			_rotation.y -= _turnSpeed * (float)deltaTime;
+		}
+	}
+
+	void CameraT::roll(double deltaTime, bool rightOrLeft)
+	{
+		if (rightOrLeft)
+		{
+			_rotation.z += _turnSpeed * (float)deltaTime;
+		}
+		else
+		{
+			_rotation.z -= _turnSpeed * (float)deltaTime;
+		}
+	}
+
+	void CameraT::pitch(double deltaTime, float intentsity, bool forwardOrBack)
+	{
+		if (forwardOrBack)
+		{
+			_rotation.x += _turnSpeed * intentsity * (float)deltaTime;
+		}
+		else
+		{
+			_rotation.x -= _turnSpeed * intentsity * (float)deltaTime;
+		}
+	}
+	void CameraT::yaw(double deltaTime, float intentsity, bool upOrDown)
+	{
+		if (upOrDown)
+		{
+			_rotation.y += _turnSpeed * intentsity * (float)deltaTime;
+		}
+		else
+		{
+			_rotation.y -= _turnSpeed * intentsity * (float)deltaTime;
+		}
+	}
+	void CameraT::roll(double deltaTime, float intentsity, bool rightOrLeft)
+	{
+		if (rightOrLeft)
+		{
+			_rotation.z += _turnSpeed * intentsity * (float)deltaTime;
+		}
+		else
+		{
+			_rotation.z -= _turnSpeed * intentsity * (float)deltaTime;
+		}
+		_target = _position + _front;
+		rotate_calc();
+	}
+
+
+	void CameraT::rotate_calc()
 	{
 		_front.x = cos(glm::radians(_rotation.y)) * cos(glm::radians(_rotation.x));
 		_front.y = sin(glm::radians(_rotation.x));
@@ -98,86 +173,22 @@ namespace tools
 		_right = glm::normalize(glm::cross(_front, _worldUp));
 		_up = glm::normalize(glm::cross(_right, _front));
 
-		_position =	position;
-
-		is_moving();
-
-		_view = std::move(glm::lookAt(_position, _target, _up));
-
-		PRINT_VEC3("Camera Position", _position);
-		PRINT_VEC3("Camera Rotation", _rotation);
-		std::cout << "\n";
+		_view = glm::lookAt(_position, _target, _up);
 
 	}
 
 	void CameraT::update(Direction dir, double deltaTime)
 	{
-		move_dir(dir, deltaTime);
+		move_and_turn_dir(dir, deltaTime);
 
-		is_moving();
+		if (is_moving())
+		{
+			std::cout << "Camera is moving\n";
+		}
 
-		_view = std::move(glm::lookAt(_position, _target, _up));
+		_view = glm::lookAt(_position, _target, _up);
 
-		PRINT_VEC3("Camera Position", _position);
-		PRINT_VEC3("Camera Rotation", _rotation);
-		std::cout << "\n";
-
-	}
-
-	void CameraT::update(double xMove, double yMove, double deltaTime)// parameters are NOT being updated!! REVIEW THIS ERROR
-	{
-		_rotation.x += xMove * _turnSpeed * deltaTime;
-		_rotation.y += yMove * _turnSpeed * deltaTime;
-
-		glm::clamp(_rotation.y, -180.0f, 180.0f);
-		glm::clamp(_rotation.x, -89.0f, 89.0f);
-
-		_front.x = cos(glm::radians(_rotation.y)) * cos(glm::radians(_rotation.x));
-		_front.y = sin(glm::radians(_rotation.x));
-		_front.z = sin(glm::radians(_rotation.y)) * cos(glm::radians(_rotation.x));
-		_front = glm::normalize(_front);
-
-		_right = glm::normalize(glm::cross(_front, _worldUp));
-		_up = glm::normalize(glm::cross(_right, _front));
-
-		_target = _position + _front;
-
-		is_moving();
-
-		_view = std::move(glm::lookAt(_position, _target, _up));
-
-		PRINT_VEC3("Camera Position", _position);
-		PRINT_VEC3("Camera Rotation", _rotation);
-		std::cout << "\n";
-
-
-	}
-
-	void CameraT::update(Direction dir, double xMove, double yMove, double deltaTime)
-	{
-		_rotation.x += xMove * _turnSpeed * deltaTime;
-		_rotation.y += yMove * _turnSpeed * deltaTime;
-
-		glm::clamp(_rotation.y, -180.0f, 180.0f);
-		glm::clamp(_rotation.x, -89.0f, 89.0f);
-
-		_front.x = cos(glm::radians(_rotation.y)) * cos(glm::radians(_rotation.x));
-		_front.y = sin(glm::radians(_rotation.x));
-		_front.z = sin(glm::radians(_rotation.y)) * cos(glm::radians(_rotation.x));
-		_front = glm::normalize(_front);
-
-		_right = glm::normalize(glm::cross(_front, _worldUp));
-		_up = glm::normalize(glm::cross(_right, _front));
-
-		move_dir(dir, deltaTime);
-
-		is_moving();
-
-		_view = std::move(glm::lookAt(_position, _target, _up));
-
-		PRINT_VEC3("Camera Position", _position);
-		PRINT_VEC3("Camera Rotation", _rotation);
-		std::cout << "\n";
+		PRINT_MAT4("view: ",_view);
 
 	}
 
@@ -188,9 +199,16 @@ namespace tools
 		return true;
 	}
 
-	bool CameraT::event_key(double xMove, double yMove, double deltaTime)
+	bool CameraT::event_key(double deltaTime, float xMove, float yMove)
 	{
-		update(xMove, yMove, deltaTime);
+
+		pitch(deltaTime, xMove, xMove > 0.0f);
+		yaw(deltaTime, yMove, yMove > 0.0f);
+
+		PRINT_VEC3("Rotation: ", _rotation);
+
+		rotate_calc();
+	
 		return true;
 	}
 
@@ -228,20 +246,16 @@ namespace tools
 	void CameraT::set_commands_to_window(tools::WindowT& window)
 	{
 
-		std::array<KeyCombInputOne, 10> input = 
+		std::array<KeyCombInputOne, 6> input = 
 		{
 		KeyCombInputOne(Keys::W, Action::Press),
 		KeyCombInputOne(Keys::S, Action::Press),
 		KeyCombInputOne(Keys::A, Action::Press),
 		KeyCombInputOne(Keys::D, Action::Press),
 		KeyCombInputOne(Keys::Q, Action::Press),
-		KeyCombInputOne(Keys::E, Action::Press),
-		KeyCombInputOne(Keys::Up, Action::Press),
-		KeyCombInputOne(Keys::Down, Action::Press),
-		KeyCombInputOne(Keys::Right, Action::Press),
-		KeyCombInputOne(Keys::Left, Action::Press)
-
+		KeyCombInputOne(Keys::E, Action::Press)
 		};
+
 		std::array<Direction, 10> dirs = 
 		{
 		Direction::Up,
@@ -250,229 +264,109 @@ namespace tools
 		Direction::Right,
 		Direction::Forward,
 		Direction::Backward,
-		Direction::TurnUp,
-		Direction::TurnDown,
-		Direction::TurnRight,
-		Direction::TurnLeft
+
 		};
 
-		glm::mat4& matrix = _view;
-		double doub = 0.0;
-		double& zer0 = doub;
-		std::array<std::function<bool(double)>, 6> moveFuncs;
-		std::array<std::function<bool(double, double, double)>, 4> turnFuncs;
 
-		for (size_t i = 0; i < moveFuncs.size(); i++)
+		std::array<std::function<bool(double)>, 6> funcs;
+
+		for (size_t i = 0; i < funcs.size(); i++)
 		{
-			moveFuncs[i] = [this, dir = dirs[i] ](double deltaTime) -> bool
+			funcs[i] = [this, dir = dirs[i] ](double deltaTime) -> bool
 			{
 				return this->event_key(dir, deltaTime);
 			};
 		}
 
-		for (size_t i = 0; i < turnFuncs.size(); i++)
+		std::function<bool(double, float, float)> mouseFuncs = [this] (double deltaTime, float xChange, float yChange) -> bool
 		{
-			turnFuncs[i] = [this, dir = dirs[i+6] ](double xMove, double yMove, double deltaTime) -> bool
-			{
-				return this->event_key(xMove, yMove, deltaTime);
-			};
-		}
+			return this->event_key(deltaTime, xChange, yChange);
+		};
+
+		window.AddMouseChange
+		(
+			{MouseChange::MoveX | MouseChange::MoveY, Mouse::None},
+			mouseFuncs,
+			0.0, 0.0f, 0.0f
+		);
+
 			
-			
-		for (size_t i = 0; i < moveFuncs.size(); i++)
+		for (size_t i = 0; i < funcs.size(); i++)
 		{
 			window.AddKeyComb
 			(
 				true,
 				input[i],
-				moveFuncs[i],
+				funcs[i],
 				0.0
 			);
 		}
-		
-
-		for (size_t i = 0; i < turnFuncs.size(); i++)
-		{
-			window.AddKeyComb
-			(
-				true,
-				input[i+6],
-				turnFuncs[i],
-				0.0, 0.0, 0.0
-			);
-		}
 
 	}
 
-	void CameraT::move_dir(Direction dir, double deltaTime)
+	void CameraT::move_and_turn_dir(Direction dir, double deltaTime)
 	{
-		switch (dir)
+		static uint64_t count = 0;
+		bool rotate = false;
+		if (BOOL(dir & Direction::Forward))
 		{
-		case Direction::Forward:
 			move_forward(deltaTime, true);
-			break;
-		case Direction::Backward:
-			move_forward(deltaTime, false);
-			break;
-		case Direction::Left:
-			move_right(deltaTime, false);
-			break;
-		case Direction::Right:
-			move_right(deltaTime, true);
-			break;
-		case Direction::Up:
-			move_up(deltaTime, true);
-			break;
-		case Direction::Down:
-			move_up(deltaTime, false);
-			break;
-		case Direction::Down | Direction::Forward:
-			move_forward(deltaTime, true);
-			move_up(deltaTime, false);
-			break;
-		case Direction::Down | Direction::Backward:
-			move_forward(deltaTime, false);
-			move_up(deltaTime, false);
-			break;
-		case Direction::Up | Direction::Forward:
-			move_forward(deltaTime, true);
-			move_up(deltaTime, true);
-			break;
-		case Direction::Up | Direction::Backward:
-			move_forward(deltaTime, false);
-			move_up(deltaTime, true);
-			break;
-		case Direction::Up | Direction::Left:
-			move_right(deltaTime, false);
-			move_up(deltaTime, true);
-			break;
-		case Direction::Up | Direction::Right:
-			move_right(deltaTime, true);
-			move_up(deltaTime, true);
-			break;
-		case Direction::Down | Direction::Left:
-			move_right(deltaTime, false);
-			move_up(deltaTime, false);
-			break;
-		case Direction::Down | Direction::Right:
-			move_right(deltaTime, true);
-			move_up(deltaTime, false);
-			break;
-		case Direction::Backward | Direction::Left:
-			move_right(deltaTime, false);
-			move_forward(deltaTime, false);
-			break;
-		case Direction::Backward | Direction::Right:
-			move_forward(deltaTime, false);
-			move_right(deltaTime, true);
-			break;
-		case Direction::Forward | Direction::Left:
-			move_right(deltaTime, false);
-			move_forward(deltaTime, true);
-			break;
-		case Direction::Forward | Direction::Right:
-			move_right(deltaTime, true);
-			move_forward(deltaTime, true);
-			break;
-		case Direction::None:
-			break;
 		}
-	}
-
-	void CameraT::move_and_turn_dir(Direction dir, double pitch, double yaw, double deltaTime)
-	{
-		switch (dir)
+		else if (BOOL(dir & Direction::Backward))
 		{
-		case Direction::Forward | Direction::TurnUp:
-			move_forward(deltaTime, true);
-			_rotation.x += pitch * _turnSpeed * deltaTime;
-			break;
-		case Direction::Forward | Direction::TurnDown:
-			move_forward(deltaTime, true);
-			_rotation.x -= pitch * _turnSpeed * deltaTime;
-			break;
-		case Direction::Forward | Direction::TurnLeft:
-			move_forward(deltaTime, true);
-			_rotation.y -= yaw * _turnSpeed * deltaTime;
-			break;
-		case Direction::Forward | Direction::TurnRight:
-			move_forward(deltaTime, true);
-			_rotation.y += yaw * _turnSpeed * deltaTime;
-			break;
-		case Direction::Backward | Direction::TurnUp:
 			move_forward(deltaTime, false);
-			_rotation.x += pitch * _turnSpeed * deltaTime;
-			break;
-		case Direction::Backward | Direction::TurnDown:
-			move_forward(deltaTime, false);
-			_rotation.x -= pitch * _turnSpeed * deltaTime;
-			break;
-		case Direction::Backward | Direction::TurnLeft:
-			move_forward(deltaTime, false);
-			_rotation.y -= yaw * _turnSpeed * deltaTime;
-			break;
-		case Direction::Backward | Direction::TurnRight:
-			move_forward(deltaTime, false);
-			_rotation.y += yaw * _turnSpeed * deltaTime;
-			break;
-		case Direction::Left | Direction::TurnUp:
-			move_right(deltaTime, false);
-			_rotation.x += pitch * _turnSpeed * deltaTime;
-			break;
-		case Direction::Left | Direction::TurnDown:
-			move_right(deltaTime, false);
-			_rotation.x -= pitch * _turnSpeed * deltaTime;
-			break;
-		case Direction::Left | Direction::TurnLeft:
-			move_right(deltaTime, false);
-			_rotation.y -= yaw * _turnSpeed * deltaTime;
-			break;
-		case Direction::Left | Direction::TurnRight:
-			move_right(deltaTime, false);
-			_rotation.y += yaw * _turnSpeed * deltaTime;
-			break;
-		case Direction::Right | Direction::TurnUp:
-			move_right(deltaTime, true);
-			_rotation.x += pitch * _turnSpeed * deltaTime;
-			break;
-		case Direction::Right | Direction::TurnDown:
-			move_right(deltaTime, true);
-			_rotation.x -= pitch * _turnSpeed * deltaTime;
-			break;
-		case Direction::Right | Direction::TurnLeft:
-			move_right(deltaTime, true);
-			_rotation.y -= yaw * _turnSpeed * deltaTime;
-			break;
-		case Direction::Right | Direction::TurnRight:
-			move_right(deltaTime, true);
-			_rotation.y += yaw * _turnSpeed * deltaTime;
-			break;
 		}
-	}
 
-	void CameraT::turn_dir(Direction dir, double pitch, double yaw, double deltaTime)
-	{
-		switch (dir)
+		if (BOOL(dir & Direction::Left))
 		{
-		case Direction::TurnUp:
-			_rotation.x += pitch * _turnSpeed * deltaTime;
-			break;
-		case Direction::TurnDown:
-			_rotation.x -= pitch * _turnSpeed * deltaTime;
-			break;
-		case Direction::TurnLeft:
-			_rotation.y -= yaw * _turnSpeed * deltaTime;
-			break;
-		case Direction::TurnRight:
-			_rotation.y += yaw * _turnSpeed * deltaTime;
-			break;
+			move_right(deltaTime, false);
+		}
+		else if (BOOL(dir & Direction::Right))
+		{
+			move_right(deltaTime, true);
+		}
+
+		if (BOOL(dir & Direction::Up))
+		{
+			move_up(deltaTime, true);
+		}
+		else if (BOOL(dir & Direction::Down))
+		{
+			move_up(deltaTime, false);
+		}
+
+		if (BOOL(dir & Direction::TurnUp))
+		{
+			pitch(deltaTime, true);
+			rotate = true;
+		}
+		else if (BOOL(dir & Direction::TurnDown))
+		{
+			pitch(deltaTime, false);
+			rotate = true;
+		}
+
+		if (BOOL(dir & Direction::TurnLeft))
+		{
+			yaw(deltaTime, false);
+			rotate = true;
+		}
+		else if (BOOL(dir & Direction::TurnRight))
+		{
+			yaw(deltaTime, true);
+			rotate = true;
+		}
+
+		if (rotate)
+		{
+			rotate_calc();
 		}
 	}
 
 	bool CameraT::is_moving()
 	{
-		bool positionChanged = glm::length(_position - _prevPosition) > 0.0001f; // Use a threshold for small movements
-		bool rotationChanged = glm::dot(_rotation, _prevRotation) < 0.9999f; // Use a threshold for rotation change
+		bool positionChanged = glm::length(_position - _prevPosition) > 0.0001f; 
+		bool rotationChanged = glm::dot(_rotation, _prevRotation) < 0.9999f; 
 
 		_prevPosition = _position;
 		_prevRotation = _rotation;

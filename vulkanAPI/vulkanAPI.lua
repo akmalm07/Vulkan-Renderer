@@ -16,8 +16,10 @@ project "VulkanAPI"
         "%{IncludeDir.JSON}",
         "global",            
         "include",           
+        "shaders",
         "vulkan",
-        "src",
+        "json",
+        "src"
     }
 
     -- Files
@@ -36,6 +38,10 @@ project "VulkanAPI"
         "vulkan/vkUtil/include/**.inl",
         "global/**.h",
         "global/**.cpp"
+        "json/**.json"
+        "shaders/**.vert"
+        "shaders/**.frag"
+        "shaders/**.spv"
     }
 
     -- Library directories

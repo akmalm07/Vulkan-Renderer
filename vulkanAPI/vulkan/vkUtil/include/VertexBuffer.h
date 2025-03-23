@@ -14,7 +14,7 @@
 
 
 
-class VertexBufferT : private BufferFather  
+class VertexBufferT : public BufferFather  
 {	
 public:
 	
@@ -24,6 +24,9 @@ public:
 
 
 	void initalize(const std::vector<vkType::Vertex>& data, bool debug);
+
+	template<size_t S>
+	void initalize(const std::array<vkType::Vertex, S>& data, bool debug);
 
 
 	size_t vertex_count() const;
@@ -43,5 +46,14 @@ private:
 
 
 
+namespace vkType
+{
+	using VertexBuffer = VertexBufferT;
+}
 
-using VertexBuffer = VertexBufferT; 
+template<size_t S>
+inline void VertexBufferT::initalize(const std::array<vkType::Vertex, S>& data, bool debug)
+{
+	createBuffer<vkType::Vertex, S>(data, bufferMemory, vk::BufferUsageFlagBits::eVertexBuffer, debug);
+	vertexCount = S / vkType::Vert::count();
+}

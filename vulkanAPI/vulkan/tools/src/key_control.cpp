@@ -46,7 +46,7 @@ namespace tools
 
 			if (ky.first == key && ky.second == mod.value_or(Mods::None))
 			{
-				thekeys.push_back(val.key);
+				thekeys.push_back(val);
 			}
 
 		}
@@ -65,7 +65,7 @@ namespace tools
 			{
 				if (ky.first == key && ky.second == mod.value_or(Mods::None))
 				{
-					thekeys.push_back(val.key);
+					thekeys.push_back(val);
 				}
 			}
 		}
@@ -92,7 +92,6 @@ namespace tools
 	}
 
 
-
 	size_t KeyControl::NumOfKeysInListPoly(const std::array<Keys, KEY_MAX>& key, std::optional<Mods> mod)
 	{
 		size_t value = 0;
@@ -116,7 +115,7 @@ namespace tools
 
 			if (it != keys.end())
 			{
-				return it->second.key;
+				return it->second;
 			}
 		}
 		return nullptr;
@@ -125,7 +124,7 @@ namespace tools
 
 	std::shared_ptr<KeyCombB> KeyControl::FindKeyComb(Action action, Keys key, std::optional<Mods> mod)
 	{
-		return _keyCombs[SIZET(action)][std::make_pair(key, mod.value_or(Mods::None))].key;
+		return _keyCombs[SIZET(action)][std::make_pair(key, mod.value_or(Mods::None))];
 	}
 
 
@@ -136,14 +135,14 @@ namespace tools
 			auto& [ky, val] = keys;
 			if (ky.first == key && ky.second == mod.value_or(Mods::None))
 			{
-				return val.key;
+				return val;
 			}
 		}
 		return nullptr;
 	}
 
 
-	void KeyControl::AddFuncParamUpdaterKeys(Keys key, std::function<bool()> func, std::optional<Mods> mod)
+	void KeyControl::SetFuncParamUpdaterKeys(Keys key, std::function<bool()> func, std::optional<Mods> mod)
 	{
 		bool ran = false;
 		for (auto& keys : _keyCombs)
@@ -151,7 +150,7 @@ namespace tools
 			auto it = keys.find(std::make_pair(key, mod.value_or(Mods::None)));
 			if (it != keys.end())
 			{
-				it->second.updater = std::move(func);
+				it->second->set_updater(std::move(func));
 				ran = true;
 				break;
 			}
@@ -160,11 +159,10 @@ namespace tools
 		{
 			throw std::runtime_error("No such item exists!");
 		}
-
 	}
 
 
-	void KeyControl::AddFuncParamUpdaterKeysPoly(const std::array<Keys, KEY_MAX>& key, std::function<bool()> func, std::optional<Mods> mod)
+	void KeyControl::SetFuncParamUpdaterKeysPoly(const std::array<Keys, KEY_MAX>& key, std::function<bool()> func, std::optional<Mods> mod)
 	{
 		bool ran = false;
 
@@ -173,7 +171,7 @@ namespace tools
 			auto& [ky, val] = keys;
 			if (ky.first == key && ky.second == mod.value_or(Mods::None))
 			{
-				val.updater = std::move(func);
+				val->set_updater(std::move(func));
 				ran = true;
 				break;
 			}
@@ -183,18 +181,6 @@ namespace tools
 		{
 			throw std::runtime_error("No such item exists!");
 		}
-	}
-
-
-	void KeyControl::ChangeFuncParamUpdaterKeys(Keys key, std::function<bool()> func, std::optional<Mods> mod)
-	{
-		AddFuncParamUpdaterKeys(key, std::move(func), mod.value_or(Mods::None));
-	}
-
-
-	void KeyControl::ChangeFuncParamUpdaterKeysPoly(const std::array<Keys, KEY_MAX>& key, std::function<bool()> func, std::optional<Mods> mod)
-	{
-		_keyCombsPoly[std::make_pair(key, mod.value_or(Mods::None))].updater = std::move(func);
 	}
 
 	double KeyControl::GetKeyMoveX(Keys key, double val)

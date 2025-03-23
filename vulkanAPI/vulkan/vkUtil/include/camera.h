@@ -27,13 +27,9 @@ namespace tools
 
 		CameraT(CameraBundleOrthographic bundle);
 
-		void update(const glm::vec3& position);
+		void rotate_calc();
 		
 		void update(Direction dir, double deltaTime);
-		
-		void update(double xMove, double yMove, double deltaTime);
-		
-		void update(Direction dir, double xMove, double yMove, double deltaTime);
 		
 		void set_speed(float speed);
 		float get_speed() const;
@@ -46,11 +42,7 @@ namespace tools
 
 		void set_commands_to_window(tools::WindowT& window);
 
-		void move_dir(Direction dir, double deltaTime);
-		
-		void move_and_turn_dir(Direction dir, double pitch, double yaw, double deltaTime);
-
-		void turn_dir(Direction dir, double pitch, double yaw, double deltaTime);
+		void move_and_turn_dir(Direction dir, double deltaTime);
 
 		bool is_moving();
 
@@ -84,8 +76,16 @@ namespace tools
 		void move_up(double deltaTime, bool upOrDown);
 		void move_right(double deltaTime, bool rightOrLeft);
 
+		void pitch(double deltaTime, bool forwardOrBack);
+		void yaw(double deltaTime, bool upOrDown);
+		void roll(double deltaTime, bool rightOrLeft);
+
+		void pitch(double deltaTime, float intentsity, bool forwardOrBack);
+		void yaw(double deltaTime, float intentsity, bool upOrDown);
+		void roll(double deltaTime, float intentsity, bool rightOrLeft);
+
 		bool event_key(Direction dir, double deltaTime);
-		bool event_key(double xMove, double yMove, double deltaTime);
+		bool event_key(double deltaTime, float xMove, float yMove);
 
 		//void debug_position();
 	};

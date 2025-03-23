@@ -35,7 +35,7 @@ namespace tools
 			auto it = item.find(name);
 			if (it != item.end())
 			{
-				it->second.updater = std::move(function);
+				it->second->set_updater(std::move(function));
 				return;
 			}
 		}
@@ -58,7 +58,7 @@ namespace tools
 			{
 				if (key == name)
 				{
-					return val.button;
+					return val;
 				}
 			}
 		}

@@ -161,9 +161,9 @@ namespace vkInit
 
 		rastInfo.lineWidth = 1.0f;
 
-		rastInfo.cullMode = vk::CullModeFlagBits::eBack; // ::eBack 
+		rastInfo.cullMode = spesifications.cullMode; 
 
-		rastInfo.frontFace = vk::FrontFace::eClockwise;
+		rastInfo.frontFace = spesifications.frontFace;
 
 		rastInfo.depthBiasEnable = VK_FALSE;
 
