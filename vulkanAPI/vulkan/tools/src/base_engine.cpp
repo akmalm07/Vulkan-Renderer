@@ -239,7 +239,7 @@ void BaseEngine::build_glfw_window(int width, int height, bool orthoOrPerpective
 
 void BaseEngine::make_instance() {
 
-	_instance = vkInit::make_instance("VK_INIT", {}, {}, _debugMode);
+	_instance = vkInit::make_instance("VK_INIT", {"VK_EXT_debug_utils"}, {}, _debugMode);
 	_dldi = vk::DispatchLoaderDynamic(_instance, vkGetInstanceProcAddr);
 
 	VkSurfaceKHR vkPresentSurface_cStyle;
@@ -418,9 +418,6 @@ void BaseEngine::make_swapchain()
 
 	_maxFramesInFlight = _vkSwapchainFrames.size();
 
-	std::cout << "Frames in flight: " << _maxFramesInFlight << std::endl;
-
-
 	_frameNum = 0;
 
 }
@@ -466,7 +463,7 @@ void BaseEngine::destroy_swapchain()
 		_vkLogicalDevice.destroySemaphore(frame.vkSemaphoreRenderFinished);
 		_vkLogicalDevice.destroyFence(frame.vkFenceInFlight);
 
-		_vkLogicalDevice.freeCommandBuffers(_vkCommandPool, frame.commandBuffer);//freeing the command buffer (unnessesary)
+		_vkLogicalDevice.freeCommandBuffers(_vkCommandPool, frame.commandBuffer);
 	}
 
 	_vkLogicalDevice.destroySwapchainKHR(_vkSwapchain);
@@ -579,6 +576,8 @@ void BaseEngine::make_descriptor_sets()
 
 	_vkDescriptorSetLayouts = out.descriptorSetLayouts;
 
+	_vkUpdateSetsFence = vkInit::make_fence(_vkLogicalDevice, _debugMode);
+
 }
 
 void BaseEngine::make_push_consts()
@@ -606,10 +605,39 @@ void BaseEngine::create_command_pool_and_command_buffers()
 	make_frame_sync_objects();
 
 
-
 }
 
+void BaseEngine::make_framebuffer()
+{
+	vkInit::framebufferInput input;
+	input.logicalDevice = _vkLogicalDevice;
+	input.renderPass = _vkRenderpass;
+	input.swapchainExtent = _vkSwapchainExtent;
 
+	for (size_t i = 0; i < _vkSwapchainFrames.size(); i++)
+	{
+		vk::ImageView attachments[] = {
+			_vkSwapchainFrames[i].imageView
+		};
+
+		vk::FramebufferCreateInfo framebufferInfo = {};
+		framebufferInfo.renderPass = _vkRenderpass;
+		framebufferInfo.attachmentCount = 1;
+		framebufferInfo.pAttachments = attachments;
+		framebufferInfo.width = _vkSwapchainExtent.width;
+		framebufferInfo.height = _vkSwapchainExtent.height;
+		framebufferInfo.layers = 1;
+
+		try
+		{
+			_vkSwapchainFrames[i].framebuffer = _vkLogicalDevice.createFramebuffer(framebufferInfo);
+		}
+		catch (vk::SystemError& err)
+		{
+			throw std::runtime_error("failed to create framebuffer!");
+		}
+	}
+}
 
 
 void BaseEngine::record_draw_commands(vk::CommandBuffer& commandBuffer, uint32_t imageIndex)
@@ -852,36 +880,29 @@ void BaseEngine::camera_init(bool orthoOrPerpective)
 
 
 
+
 void BaseEngine::render()
 {
+	if (_firstCall)
+	{
+		update_sets();
+		_firstCall = false;
+	}
 	_deltaTime = _timer.get_delta_time(false);
 
 	update_FPS();
-	
+
 	_window.pollEvents();
 
 	game_logic(_deltaTime);
 
+	check_vk_result(_vkLogicalDevice.waitForFences(1, &_vkSwapchainFrames[_frameNum].vkFenceInFlight, VK_TRUE, UINT64_MAX));
+
+//dummy here
 
 	uint32_t imageIndex{};
 
-	vk::Result waitResult = _vkLogicalDevice.waitForFences(
-		{ _vkSwapchainFrames[_frameNum].vkFenceInFlight },
-		VK_TRUE,
-		UINT64_MAX
-	);
-
-	if (waitResult != vk::Result::eSuccess) {
-		std::cerr << "Failed to wait for fence!" << std::endl;
-		return;
-	}
-
-	_vkLogicalDevice.resetFences({ _vkSwapchainFrames[_frameNum].vkFenceInFlight });
-
-	if (_shouldUpdateDescSets) {
-		update_sets();
-	}
-	try 
+	try
 	{
 		vk::ResultValue acquire = _vkLogicalDevice.acquireNextImageKHR
 		(
@@ -893,83 +914,83 @@ void BaseEngine::render()
 
 		imageIndex = acquire.value;
 	}
-	catch (vk::OutOfDateKHRError& err) 
+	catch (vk::OutOfDateKHRError& err)
 	{
 		std::cout << "Swapchain OUT OF DATE: " << err.what() << "\n";
 		return;
 	}
-	catch (vk::IncompatibleDisplayKHRError& err) 
+	catch (vk::IncompatibleDisplayKHRError& err)
 	{
 		std::cout << "Remakeing Swapchain: " << err.what() << "\n";
 		remake_swapchain();
 		return;
 	}
-	catch (vk::SystemError& err) 
+	catch (vk::SystemError& err)
 	{
 		std::cout << "Failed to acquire swapchain image: " << err.what() << std::endl;
 	}
 
 
+	if (_shouldUpdateDescSets)
+	{
+		vk::SubmitInfo submitInfo1 = {};
+		_vkGraphicsQueue.submit(submitInfo1, _vkUpdateSetsFence);
+
+		update_sets();
+	}
 
 	vk::CommandBuffer commandBuffer = _vkSwapchainFrames[_frameNum].commandBuffer;
 
 	commandBuffer.reset();
-
+	
 	record_draw_commands(commandBuffer, imageIndex);
 
-
 	vk::SubmitInfo submitInfo = {};
-
 
 	vk::Semaphore waitSemaphores[] = { _vkSwapchainFrames[_frameNum].vkSemaphoreImageAvaiable };
 
 	vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
 
 	submitInfo.waitSemaphoreCount = 1;
-
 	submitInfo.pWaitSemaphores = waitSemaphores;
-
 	submitInfo.pWaitDstStageMask = waitStages;
-
 	submitInfo.commandBufferCount = 1;
-
 	submitInfo.pCommandBuffers = &commandBuffer;
 
 	vk::Semaphore signalSemaphores[] = { _vkSwapchainFrames[_frameNum].vkSemaphoreRenderFinished };
 
 	submitInfo.signalSemaphoreCount = 1;
-
 	submitInfo.pSignalSemaphores = signalSemaphores;
 
-	try 
+
+	_vkLogicalDevice.resetFences(1, &_vkSwapchainFrames[_frameNum].vkFenceInFlight);
+
+
+	try
 	{
-		_vkGraphicsQueue.submit(submitInfo, _vkSwapchainFrames[_frameNum].vkFenceInFlight); 
+		_vkGraphicsQueue.submit(submitInfo, _vkSwapchainFrames[_frameNum].vkFenceInFlight);
 	}
 	catch (vk::SystemError& err) {
 
-		if (_debugMode) 
+		if (_debugMode)
 		{
 			std::cout << "failed to submit draw command buffer!" << std::endl;
 		}
 	}
 
+
 	vk::PresentInfoKHR presentInfo = {};
 
 	presentInfo.waitSemaphoreCount = 1;
-
 	presentInfo.pWaitSemaphores = signalSemaphores;
 
 	vk::SwapchainKHR swapChains[] = { _vkSwapchain };
 
 	presentInfo.swapchainCount = 1;
-
 	presentInfo.pSwapchains = swapChains;
-
 	presentInfo.pImageIndices = &imageIndex;
 
-
 	vk::Result present;
-
 
 	try
 	{
@@ -985,30 +1006,12 @@ void BaseEngine::render()
 		std::cerr << "Error presenting the present queue: " << err.what() << "\n";
 	}
 
-
 	if (present == vk::Result::eErrorOutOfDateKHR || present == vk::Result::eSuboptimalKHR) {
 		remake_swapchain();
 		return;
 	}
 
-
 	_frameNum = (_frameNum + 1) % _maxFramesInFlight;
-
-}
-
-
-void BaseEngine::make_framebuffer()
-{
-	vkInit::framebufferInput input;
-	input.logicalDevice = _vkLogicalDevice;
-	input.renderPass = _vkRenderpass;
-	input.swapchainExtent = _vkSwapchainExtent;
-
-	for (size_t i = 0; i < _vkSwapchainFrames.size(); i++)
-	{
-		_vkSwapchainFrames[i].framebuffer = vkInit::make_framebuffer(input, _vkSwapchainFrames[i].imageView, _debugMode);
-	}
-
 }
 
 
@@ -1090,6 +1093,8 @@ BaseEngine::~BaseEngine()
 	{
 		_vkLogicalDevice.destroyDescriptorSetLayout(layout);
 	}
+
+	_vkLogicalDevice.destroyFence(_vkUpdateSetsFence);
 
 	_vkLogicalDevice.destroyPipeline(_vkPipeline);
 

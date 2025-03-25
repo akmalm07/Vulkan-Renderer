@@ -126,40 +126,21 @@ namespace tools
 		}
 	}
 
-	void CameraT::pitch(double deltaTime, float intentsity, bool forwardOrBack)
+	void CameraT::pitch(double deltaTime, float xMove)
 	{
-		if (forwardOrBack)
-		{
-			_rotation.x += _turnSpeed * intentsity * (float)deltaTime;
-		}
-		else
-		{
-			_rotation.x -= _turnSpeed * intentsity * (float)deltaTime;
-		}
+		_rotation.x += _turnSpeed * xMove * (float)deltaTime;
+		_rotation.x = std::clamp(_rotation.x, -89.0f, 89.0f);
 	}
-	void CameraT::yaw(double deltaTime, float intentsity, bool upOrDown)
+
+	void CameraT::yaw(double deltaTime, float yMove)
 	{
-		if (upOrDown)
-		{
-			_rotation.y += _turnSpeed * intentsity * (float)deltaTime;
-		}
-		else
-		{
-			_rotation.y -= _turnSpeed * intentsity * (float)deltaTime;
-		}
+		_rotation.y += _turnSpeed * yMove * (float)deltaTime;
+		_rotation.y = std::clamp(_rotation.y, -179.0f, 179.0f);
 	}
-	void CameraT::roll(double deltaTime, float intentsity, bool rightOrLeft)
+	
+	void CameraT::roll(double deltaTime, float zMove)
 	{
-		if (rightOrLeft)
-		{
-			_rotation.z += _turnSpeed * intentsity * (float)deltaTime;
-		}
-		else
-		{
-			_rotation.z -= _turnSpeed * intentsity * (float)deltaTime;
-		}
-		_target = _position + _front;
-		rotate_calc();
+		_rotation.z += _turnSpeed * zMove * (float)deltaTime;
 	}
 
 
@@ -172,6 +153,8 @@ namespace tools
 
 		_right = glm::normalize(glm::cross(_front, _worldUp));
 		_up = glm::normalize(glm::cross(_right, _front));
+
+		_target = _position + _front;
 
 		_view = glm::lookAt(_position, _target, _up);
 
@@ -202,8 +185,8 @@ namespace tools
 	bool CameraT::event_key(double deltaTime, float xMove, float yMove)
 	{
 
-		pitch(deltaTime, xMove, xMove > 0.0f);
-		yaw(deltaTime, yMove, yMove > 0.0f);
+		pitch(deltaTime, xMove);
+		yaw(deltaTime, yMove);
 
 		PRINT_VEC3("Rotation: ", _rotation);
 

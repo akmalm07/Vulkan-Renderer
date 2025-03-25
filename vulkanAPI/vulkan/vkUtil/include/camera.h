@@ -80,9 +80,9 @@ namespace tools
 		void yaw(double deltaTime, bool upOrDown);
 		void roll(double deltaTime, bool rightOrLeft);
 
-		void pitch(double deltaTime, float intentsity, bool forwardOrBack);
-		void yaw(double deltaTime, float intentsity, bool upOrDown);
-		void roll(double deltaTime, float intentsity, bool rightOrLeft);
+		void pitch(double deltaTime, float xMove);
+		void yaw(double deltaTime, float yMove);
+		void roll(double deltaTime, float zMove);
 
 		bool event_key(Direction dir, double deltaTime);
 		bool event_key(double deltaTime, float xMove, float yMove);

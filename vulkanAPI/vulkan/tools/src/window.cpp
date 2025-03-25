@@ -23,7 +23,10 @@ namespace tools {
 		_width = 800.0f;
 		_height = 800.0f;
 
-		_aspectRatio = 1.0f;	
+		_aspectRatio = 1.0f;
+
+		_mouseCurrentX = _width / 2;
+		_mouseCurrentY = _height / 2;
 	}
 
 	WindowT::WindowT(float windowWidth, float windowHeight, const std::string& name)
@@ -38,6 +41,9 @@ namespace tools {
 
 		_width = windowWidth;
 		_height = windowHeight;
+	
+		_mouseCurrentX = _width / 2;
+		_mouseCurrentY = _height / 2;
 	}
 
 	WindowT::WindowT(WindowT&& other) noexcept = default;
@@ -508,13 +514,8 @@ namespace tools {
 		_mouseCurrentX = posX;
 		_mouseCurrentY = posY;
 
-		if (_mouseMove)
-		{
-			if (_mouseMove->is_changed(_mouseCurrentX, _mouseCurrentY, _mouseChangeX, _mouseChangeY))
-			{
-				_mouseMove->execute();
-			}
-		}
+		_mouseMove->execute();
+
 	}
 
 	void WindowT::HandleMouseButtons(int mouseButton, int action, int mods)

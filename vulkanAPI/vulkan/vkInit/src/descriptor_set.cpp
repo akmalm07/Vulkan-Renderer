@@ -161,24 +161,24 @@ namespace vkInit
 		static std::vector<vk::DescriptorSetLayoutCreateInfo> check;
 		static std::vector<vk::DescriptorSetLayout> allItems;
 
-		vk::DescriptorSetLayoutBindingFlagsCreateInfo bindingFlagsCreateInfo = {};
+		/*	vk::DescriptorSetLayoutBindingFlagsCreateInfo bindingFlagsCreateInfo = {};
 		
-		/*	bindingFlagsCreateInfo.bindingCount = layoutBindings.size();
+		bindingFlagsCreateInfo.bindingCount = layoutBindings.size();
 		
 		std::vector<vk::DescriptorBindingFlags> nextValues(layoutBindings.size());
 		for (size_t i = 0; i < layoutBindings.size(); i++)
 		{
 			nextValues[i] = vk::DescriptorBindingFlagBits::eUpdateAfterBind;
-		}*/
+		}
 
-		bindingFlagsCreateInfo.pBindingFlags = nullptr;//nextValues.data();
-
+		bindingFlagsCreateInfo.pBindingFlags = nextValues.data();
+		*/
 
 		vk::DescriptorSetLayoutCreateInfo layoutInfo;
-		layoutInfo.flags = vk::DescriptorSetLayoutCreateFlagBits();
+		layoutInfo.flags = vk::DescriptorSetLayoutCreateFlags();//vk::DescriptorSetLayoutCreateFlagBits::eUpdateAfterBindPool;
 		layoutInfo.bindingCount = layoutBindings.size();
 		layoutInfo.pBindings = layoutBindings.data();
-		layoutInfo.pNext = &bindingFlagsCreateInfo;
+		layoutInfo.pNext = nullptr; //&bindingFlagsCreateInfo;
 
 		for (const auto& [i, checkLayout] : check | std::views::enumerate)
 		{
@@ -219,7 +219,7 @@ namespace vkInit
 
 
 		vk::DescriptorPoolCreateInfo poolInfo; 
-		poolInfo.flags = vk::DescriptorPoolCreateFlags();// vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind; 
+		poolInfo.flags = vk::DescriptorPoolCreateFlags();//vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind;
 		poolInfo.maxSets = maxSets; 
 		poolInfo.poolSizeCount = UINT32(poolSizes.size());
 		poolInfo.pPoolSizes = poolSizes.data(); 

@@ -2,7 +2,7 @@
 
 #include "vkUtil\include\framebuffer.h"
 
-vk::Framebuffer vkInit::make_framebuffer(framebufferInput& input,vk::ImageView& imageView, bool debug)
+vk::Framebuffer vkInit::create_framebuffer(framebufferInput& input,vk::ImageView& imageView, bool debug)
 {
 	if (debug)
 	{

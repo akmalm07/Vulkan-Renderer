@@ -18,6 +18,6 @@ namespace vkInit {
 	};
 
 
-	vk::Framebuffer make_framebuffer(framebufferInput& input, vk::ImageView& imageView, bool debug);
+	vk::Framebuffer create_framebuffer(framebufferInput& input, vk::ImageView& imageView, bool debug);
 
 }

@@ -45,7 +45,7 @@ namespace UserInput
 	constexpr char push_const_json_path[] = "..\\json\\push_const.json";
 
 
-	constexpr vk::ClearValue clear_color = { std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f} };
+	constexpr vk::ClearValue clear_color = { std::array<float, 4>{0.0f, 1.0f, 0.0f, 1.0f} };
 
 
 } // namespace UserInput

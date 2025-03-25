@@ -204,7 +204,7 @@ protected:
 
 
 	//Syncronization variubles
-	vk::Semaphore _vkCanUpdate;
+	vk::Fence _vkUpdateSetsFence;
 	size_t _maxFramesInFlight, _frameNum;
 	
 	mutable std::unique_ptr<VertexBufferT> _vertexLineBuffer;
@@ -219,6 +219,8 @@ protected:
 	} _MVPMats;
 
 	VertexBufferT _lineBuffer;
+
+	bool _firstCall = true;
 
 	protected:
 

@@ -211,6 +211,7 @@ void Engine::update_sets()
 
 	std::vector<vk::WriteDescriptorSet> writeDescriptorSets;
 
+
 	for (const auto& [i, set] : _vkDescriptorSets.updated | std::views::enumerate)
 	{
 		for (const auto& [j, updated] : set | std::views::enumerate)
@@ -239,9 +240,16 @@ void Engine::update_sets()
 		}
 	}
 	
-	_vkLogicalDevice.updateDescriptorSets(writeDescriptorSets.size(), writeDescriptorSets.data(), 0, nullptr);
+	if (!writeDescriptorSets.empty())
+	{
+		_vkLogicalDevice.waitForFences(1, &_vkUpdateSetsFence, VK_TRUE, UINT64_MAX);
+		_vkLogicalDevice.resetFences(1, &_vkUpdateSetsFence);
+
+		_vkLogicalDevice.updateDescriptorSets(writeDescriptorSets.size(), writeDescriptorSets.data(), 0, nullptr);
+	}
 	_shouldUpdateDescSets = false;
 }
+
 
 
 void Engine::call_push_consts() const
@@ -277,6 +285,7 @@ void Engine::camera_logic()
 	_window.SetMouseChangeUpdater([this, mouseMove = _window.GetMouseMove()]() -> bool
 		{
 			mouseMove->change_parameters(_deltaTime, _window.GetMouseChangeXf(), _window.GetMouseChangeYf());
+			std::cout << "Change X: " << _window.GetMouseChangeXf() << " Change Y: " << _window.GetMouseChangeYf() << std::endl;
 			change_desc_set(Sets::Set1, Bindings::Binding1);
 			return true;
 		}
