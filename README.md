@@ -40,5 +40,5 @@ This project is open to contributions. If you'd like to contribute, please fork 
 This project is open-source and free to use and modify. Please feel free to contribute or adapt it for your needs.
 
 ## Future Extentions
-- The goal is to add further extentions and testibility. I currently have a problem setting up a pch, so that would be a big bonus.
+- The goal is to add further extentions and testibility, such as more features like a compute shader
 - Also, a texture feature is currently being developed
